@@ -16,6 +16,9 @@ export function useGsapReveal(options = {}) {
     if (!el) return;
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clearAnimatedProps = () => {
+      gsap.set(el, { clearProps: 'opacity,transform,filter' });
+    };
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -31,6 +34,8 @@ export function useGsapReveal(options = {}) {
           filter: 'blur(0px)',
           duration: prefersReduced ? 0.3 : 0.8,
           ease: 'power3.out',
+          immediateRender: false,
+          clearProps: 'opacity,transform,filter',
           scrollTrigger: {
             trigger: el,
             start: 'top 88%',
@@ -41,7 +46,10 @@ export function useGsapReveal(options = {}) {
       );
     });
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      clearAnimatedProps();
+    };
   }, []);
 
   return ref;
@@ -62,6 +70,9 @@ export function useGsapStagger(childSelector = '*', options = {}) {
     const children = el.querySelectorAll(childSelector);
     if (!children.length) return;
     const { blur = false, ...animationOptions } = options;
+    const clearAnimatedProps = () => {
+      gsap.set(children, { clearProps: 'opacity,transform,filter' });
+    };
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -78,12 +89,17 @@ export function useGsapStagger(childSelector = '*', options = {}) {
           duration: prefersReduced ? 0.2 : 0.6,
           ease: 'power3.out',
           stagger: prefersReduced ? 0 : 0.1,
+          immediateRender: false,
+          clearProps: 'opacity,transform,filter',
           ...animationOptions,
         }
       );
     });
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      clearAnimatedProps();
+    };
   }, [childSelector]);
 
   return ref;

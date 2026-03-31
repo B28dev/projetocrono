@@ -6,6 +6,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
         surface: {
@@ -14,6 +16,13 @@ export default {
           2: '#18181b',
           3: '#27272a',
           4: '#3f3f46',
+        },
+        cyberpunk: {
+          bg: '#08080f',
+          pink: '#ff3ea5',
+          cyan: '#00e8ff',
+          surface1: '#0d0d1a',
+          surface2: '#12122b',
         },
       },
       keyframes: {
@@ -42,5 +51,9 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addVariant }) {
+      addVariant('cyberpunk', '.theme-cyberpunk &');
+    },
+  ],
 };

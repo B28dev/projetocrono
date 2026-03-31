@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
+import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
+import SystemNotice from '../components/SystemNotice';
 
 const FEATURES = [
   { icon: '🗓', label: 'Cronograma', desc: 'Plano diario ate a prova' },
@@ -16,6 +18,7 @@ export default function Landing() {
   const subRef = useRef(null);
   const ctaRef = useRef(null);
   const featRef = useRef(null);
+  const magneticRef = useGsapMagnetic('[data-magnetic]');
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -41,36 +44,40 @@ export default function Landing() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-24 relative overflow-hidden transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
+    <main
+      ref={magneticRef}
+      className="cyber-shell cyber-scrollbar min-h-screen flex flex-col items-center justify-center px-4 py-24 relative overflow-hidden transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900"
+    >
       <div
-        className="pointer-events-none absolute inset-0 opacity-30"
+        className="pointer-events-none absolute inset-0 opacity-30 cyberpunk:opacity-100"
         style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 20%, rgba(59,130,246,0.15), transparent)' }}
       />
 
       <div className="relative z-10 max-w-2xl w-full text-center flex flex-col items-center gap-6">
         <div ref={heroRef} className="opacity-0">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+          <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
             Engenharia de Software · 2026/1
           </span>
         </div>
 
-        <h1 ref={titleRef} className="text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950">
-          {['Painel', 'da', 'Turma', '-', 'Engenharia', 'de', 'Software'].map((word, i) => (
+        <h1 ref={titleRef} className="text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white cyberpunk:[text-shadow:0_0_32px_rgba(255,62,165,0.12)]">
+          {['Painel', 'da', 'Turma', 'Engenharia', 'de', 'Software'].map((word, i) => (
             <span key={i} className="inline-block overflow-hidden mr-[0.25em] last:mr-0">
               <span className="word inline-block">{word}</span>
             </span>
           ))}
         </h1>
 
-        <p ref={subRef} className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-lg opacity-0 dark:text-stone-600">
+        <p ref={subRef} className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-lg opacity-0 dark:text-stone-600 cyberpunk:text-white/70">
           Cronograma de estudos, videos selecionados e banco de questoes em um unico painel para a turma.
         </p>
 
         <div ref={ctaRef} className="opacity-0">
           <button
             onClick={() => navigate('/dashboard')}
-            className="group relative overflow-hidden inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-500/20"
+            data-magnetic
+            className="group cyber-button relative overflow-hidden inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-500/20 cyberpunk:border cyberpunk:border-white/15 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.2))] cyberpunk:font-mono cyberpunk:uppercase cyberpunk:tracking-[0.16em]"
           >
             <span className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
             <span className="relative">Entrar no painel</span>
@@ -84,14 +91,17 @@ export default function Landing() {
           {FEATURES.map((f) => (
             <div
               key={f.label}
-              className="feat-card opacity-0 rounded-xl border border-zinc-800 bg-surface-1 px-3 py-4 flex flex-col items-center gap-1.5 text-center dark:border-stone-300 dark:bg-white/70"
+              data-magnetic
+              className="feat-card cyber-glass opacity-0 rounded-xl border border-zinc-800 bg-surface-1 px-3 py-4 flex flex-col items-center gap-1.5 text-center dark:border-stone-300 dark:bg-white/70 cyberpunk:border-white/10 cyberpunk:bg-transparent"
             >
               <span className="text-xl">{f.icon}</span>
-              <span className="text-xs font-semibold text-zinc-200 dark:text-stone-900">{f.label}</span>
-              <span className="text-[11px] text-zinc-600 dark:text-stone-600">{f.desc}</span>
+              <span className="text-xs font-semibold text-zinc-200 dark:text-stone-900 cyberpunk:text-white">{f.label}</span>
+              <span className="text-[11px] text-zinc-600 dark:text-stone-600 cyberpunk:text-white/65">{f.desc}</span>
             </div>
           ))}
         </div>
+
+        <SystemNotice />
       </div>
     </main>
   );
