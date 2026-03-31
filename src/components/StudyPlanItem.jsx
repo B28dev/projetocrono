@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import YoutubeEmbed from './YoutubeEmbed';
 
-export default function StudyPlanItem({ item, isToday, isPast }) {
-  const [checked, setChecked] = useState({});
+export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onToggleTask }) {
   const [videosOpen, setVideosOpen] = useState(false);
 
-  const toggle = (i) => setChecked(prev => ({ ...prev, [i]: !prev[i] }));
+  const toggle = (i) => onToggleTask?.(item.storageDate || item.date, i);
   const allDone = item.tasks.length > 0 && item.tasks.every((_, i) => checked[i]);
 
   const borderColor = item.isExamDay
@@ -47,7 +46,14 @@ export default function StudyPlanItem({ item, isToday, isPast }) {
                 </span>
               )}
             </div>
-            <p className="text-sm font-semibold text-zinc-100 mt-0.5 dark:text-stone-900">{item.topic}</p>
+            <p className="text-sm font-semibold text-zinc-100 mt-0.5 dark:text-stone-900">
+              {item.topic}
+              {item.isOverdue && (
+                <span className="ml-2 inline-flex rounded-full bg-red-50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-red-800 border border-red-100 dark:bg-red-500/10 dark:text-red-700 dark:border-red-500/20">
+                  ATRASADO
+                </span>
+              )}
+            </p>
           </div>
           {allDone && (
             <span className="flex-shrink-0 text-[10px] font-semibold text-green-400 bg-green-500/10 border border-green-500/30 rounded-full px-2 py-0.5 dark:text-green-700 dark:bg-green-500/10 dark:border-green-500/20">

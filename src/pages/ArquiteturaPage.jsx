@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { topics, studyPlan, summaries } from '../data/arquitetura';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
@@ -7,6 +8,7 @@ import StudyPlanItem from '../components/StudyPlanItem';
 import SummaryAccordion from '../components/SummaryAccordion';
 
 const TODAY = new Date().toISOString().slice(0, 10);
+const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress';
 
 function Section({ title, subtitle, children }) {
   const ref = useGsapReveal();
@@ -28,6 +30,77 @@ export default function ArquiteturaPage() {
   const topicsRef = useGsapStagger('.topic-chip', { blur: true, stagger: 0.08, delay: 0.15 });
   const studyPlanRef = useGsapStagger('.study-plan-card', { blur: true, stagger: 0.1, delay: 0.2 });
   const summariesRef = useGsapStagger('.summary-item', { blur: true, stagger: 0.08, delay: 0.2 });
+  const [taskProgress, setTaskProgress] = useState(() => {
+    if (typeof window === 'undefined') return {};
+
+    try {
+      const stored = window.localStorage.getItem(STUDY_PLAN_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(STUDY_PLAN_STORAGE_KEY, JSON.stringify(taskProgress));
+  }, [taskProgress]);
+
+  const toggleTask = (storageDate, taskIndex) => {
+    setTaskProgress((current) => ({
+      ...current,
+      [storageDate]: {
+        ...current[storageDate],
+        [taskIndex]: !current[storageDate]?.[taskIndex],
+      },
+    }));
+  };
+
+  const displayStudyPlan = studyPlan.reduce(
+    (groups, item) => {
+      const checkedTasks = taskProgress[item.date] || {};
+      const isDone = item.tasks.length > 0 && item.tasks.every((_, index) => checkedTasks[index]);
+
+      if (item.date < TODAY && !isDone) {
+        groups.overdue.push({
+          ...item,
+          storageDate: item.date,
+          renderKey: `${item.date}-overdue`,
+          isOverdue: true,
+        });
+        return groups;
+      }
+
+      if (item.date === TODAY) {
+        groups.today.push({
+          ...item,
+          storageDate: item.date,
+          renderKey: item.date,
+          isOverdue: false,
+        });
+        return groups;
+      }
+
+      if (item.date < TODAY) {
+        groups.past.push({
+          ...item,
+          storageDate: item.date,
+          renderKey: item.date,
+          isOverdue: false,
+        });
+        return groups;
+      }
+
+      groups.future.push({
+        ...item,
+        storageDate: item.date,
+        renderKey: item.date,
+        isOverdue: false,
+      });
+      return groups;
+    },
+    { past: [], today: [], overdue: [], future: [] },
+  );
 
   return (
     <div className="min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:bg-[radial-gradient(circle_at_top,_rgba(204,255,0,0.16),_transparent_28%),linear-gradient(180deg,_#F5F5F4_0%,_#EAEAE5_100%)] dark:text-stone-900">
@@ -88,12 +161,19 @@ export default function ArquiteturaPage() {
             subtitle="Um topico por dia com videos selecionados. Marque as tarefas a medida que concluir."
           >
             <div ref={studyPlanRef}>
-              {studyPlan.map((item) => {
-                const isToday = item.date === TODAY;
-                const isPast = item.date < TODAY;
+              {[...displayStudyPlan.past, ...displayStudyPlan.today, ...displayStudyPlan.overdue, ...displayStudyPlan.future].map((item) => {
+                const isToday = item.date === TODAY || item.isOverdue;
+                const isPast = item.date < TODAY && !item.isOverdue;
 
                 return (
-                  <StudyPlanItem key={item.date} item={item} isToday={isToday} isPast={isPast} />
+                  <StudyPlanItem
+                    key={item.renderKey}
+                    item={item}
+                    isToday={isToday}
+                    isPast={isPast}
+                    checked={taskProgress[item.storageDate] || {}}
+                    onToggleTask={toggleTask}
+                  />
                 );
               })}
             </div>
