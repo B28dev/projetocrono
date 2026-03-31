@@ -1,6 +1,6 @@
 export default function YoutubeEmbed({ url, title }) {
   return (
-    <div className="relative w-full rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800" style={{ aspectRatio: '16/9' }}>
+    <div className="relative w-full rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 dark:bg-white dark:border-stone-300" style={{ aspectRatio: '16/9' }}>
       <iframe
         src={`${url}?rel=0&modestbranding=1`}
         title={title}

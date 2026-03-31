@@ -36,14 +36,14 @@ function AccordionItem({ summary, isOpen, onToggle }) {
   }, [isOpen]);
 
   return (
-    <div className={`rounded-xl border transition-colors ${isOpen ? 'border-zinc-600 bg-surface-2' : 'border-zinc-800 bg-surface-1 hover:border-zinc-700'}`}>
+    <div className={`summary-item rounded-xl border transition-colors dark:shadow-sm ${isOpen ? 'border-zinc-600 bg-surface-2 dark:border-stone-300 dark:bg-white/80' : 'border-zinc-800 bg-surface-1 hover:border-zinc-700 dark:border-stone-300 dark:bg-stone-50/80 dark:hover:border-stone-400'}`}>
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
       >
-        <span className="text-sm font-semibold text-zinc-100">{summary.title}</span>
+        <span className="text-sm font-semibold text-zinc-100 dark:text-stone-900">{summary.title}</span>
         <svg
-          className={`w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-zinc-500 dark:text-stone-500 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none" viewBox="0 0 16 16"
         >
           <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -54,8 +54,8 @@ function AccordionItem({ summary, isOpen, onToggle }) {
       <div ref={bodyRef} className="overflow-hidden" style={{ height: 0, opacity: 0 }}>
         <ul className="px-4 pb-4 space-y-2">
           {summary.bullets.map((bullet, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-zinc-400 leading-relaxed">
-              <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 flex-shrink-0" />
+            <li key={i} className="flex items-start gap-2 text-sm text-zinc-400 dark:text-stone-700 leading-relaxed">
+              <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 dark:bg-stone-400 flex-shrink-0" />
               <span>{bullet}</span>
             </li>
           ))}

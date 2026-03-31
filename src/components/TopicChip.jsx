@@ -22,12 +22,13 @@ export default function TopicChip({ topic, onClick }) {
   return (
     <button
       onClick={() => onClick?.(topic)}
-      className={`group flex items-center gap-2 px-3.5 py-2 rounded-lg border text-left
+      className={`topic-chip group flex items-center gap-2 px-3.5 py-2 rounded-lg border text-left
         transition-all duration-150 cursor-pointer hover:scale-105 hover:-translate-y-0.5
+        dark:shadow-sm dark:shadow-black/5
         ${styles.chip}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${styles.dot}`} />
-      <span className="text-sm font-medium text-zinc-200">{topic.name}</span>
+      <span className="text-sm font-medium text-zinc-200 dark:text-stone-800">{topic.name}</span>
       <span className={`ml-auto text-[11px] font-semibold ${styles.tag}`}>{topic.frequency}</span>
     </button>
   );

@@ -61,6 +61,7 @@ export function useGsapStagger(childSelector = '*', options = {}) {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const children = el.querySelectorAll(childSelector);
     if (!children.length) return;
+    const { blur = false, ...animationOptions } = options;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -68,14 +69,16 @@ export function useGsapStagger(childSelector = '*', options = {}) {
         {
           opacity: 0,
           y: prefersReduced ? 0 : 24,
+          filter: prefersReduced || !blur ? 'none' : 'blur(10px)',
         },
         {
           opacity: 1,
           y: 0,
+          filter: 'blur(0px)',
           duration: prefersReduced ? 0.2 : 0.6,
           ease: 'power3.out',
           stagger: prefersReduced ? 0 : 0.1,
-          ...options,
+          ...animationOptions,
         }
       );
     });
