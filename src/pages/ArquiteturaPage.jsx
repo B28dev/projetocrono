@@ -29,9 +29,9 @@ function Section({ title, subtitle, children }) {
 export default function ArquiteturaPage() {
   const navigate = useNavigate();
   const headerRef = useGsapReveal();
-  const topicsRef = useGsapStagger('.topic-chip', { blur: true, stagger: 0.08, delay: 0.15 });
-  const studyPlanRef = useGsapStagger('.study-plan-card', { blur: true, stagger: 0.1, delay: 0.2 });
-  const summariesRef = useGsapStagger('.summary-item', { blur: true, stagger: 0.08, delay: 0.2 });
+  const topicsRef = useGsapStagger('.topic-chip-content', { blur: true, stagger: 0.08, delay: 0.15 });
+  const studyPlanRef = useGsapStagger('.study-plan-card-content', { blur: true, stagger: 0.1, delay: 0.2 });
+  const summariesRef = useGsapStagger('.summary-item-content', { blur: true, stagger: 0.08, delay: 0.2 });
   const magneticRef = useGsapMagnetic('[data-magnetic]');
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
   const [taskProgress, setTaskProgress] = useState(() => {
@@ -181,7 +181,8 @@ export default function ArquiteturaPage() {
 
               {displayStudyPlan.overdue.length > 0 && (
                 <div className="study-plan-card cyber-glass mb-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-4 dark:border-red-500/20 dark:bg-red-500/5 cyberpunk:border-[#ff3ea5]/20 cyberpunk:bg-transparent">
-                  <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="study-plan-card-content">
+                    <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex rounded-full border border-red-100 bg-red-50 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-red-800 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-700 cyberpunk:border-[#ff3ea5]/25 cyberpunk:bg-[#ff3ea5]/10 cyberpunk:text-[#ff8dcb]">
                         ⚠ materias atrasadas
@@ -203,28 +204,29 @@ export default function ArquiteturaPage() {
                       </svg>
                       {isOverdueCollapsed ? 'Mostrar' : 'Minimizar'}
                     </button>
+                    </div>
+
+                    {!isOverdueCollapsed && (
+                      <div>
+                        {displayStudyPlan.overdue.map((item) => (
+                          <StudyPlanItem
+                            key={item.renderKey}
+                            item={item}
+                            isToday={false}
+                            isPast={false}
+                            checked={taskProgress[item.storageDate] || {}}
+                            onToggleTask={toggleTask}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {isOverdueCollapsed && (
+                      <div className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                        {displayStudyPlan.overdue.length} materia{displayStudyPlan.overdue.length > 1 ? 's' : ''} atrasada{displayStudyPlan.overdue.length > 1 ? 's' : ''}.
+                      </div>
+                    )}
                   </div>
-
-                  {!isOverdueCollapsed && (
-                    <div>
-                      {displayStudyPlan.overdue.map((item) => (
-                        <StudyPlanItem
-                          key={item.renderKey}
-                          item={item}
-                          isToday={false}
-                          isPast={false}
-                          checked={taskProgress[item.storageDate] || {}}
-                          onToggleTask={toggleTask}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {isOverdueCollapsed && (
-                    <div className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
-                      {displayStudyPlan.overdue.length} materia{displayStudyPlan.overdue.length > 1 ? 's' : ''} atrasada{displayStudyPlan.overdue.length > 1 ? 's' : ''}.
-                    </div>
-                  )}
                 </div>
               )}
 

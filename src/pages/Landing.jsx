@@ -18,6 +18,7 @@ export default function Landing() {
   const subRef = useRef(null);
   const ctaRef = useRef(null);
   const featRef = useRef(null);
+  const noticeRef = useRef(null);
   const magneticRef = useGsapMagnetic('[data-magnetic]');
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function Landing() {
       { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
       '-=0.1',
     );
+    tl.fromTo(noticeRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.1');
   }, []);
 
   return (
@@ -101,7 +103,9 @@ export default function Landing() {
           ))}
         </div>
 
-        <SystemNotice />
+        <div ref={noticeRef} className="opacity-0 w-full">
+          <SystemNotice />
+        </div>
       </div>
     </main>
   );

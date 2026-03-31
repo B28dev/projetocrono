@@ -25,9 +25,11 @@ export default function TopicChip({ topic, onClick }) {
       data-magnetic
       className={`topic-chip cyber-glass group flex items-center gap-2 px-3.5 py-2 rounded-lg border text-left transition-all duration-150 cursor-pointer hover:scale-105 hover:-translate-y-0.5 dark:shadow-sm dark:shadow-black/5 cyberpunk:border-white/10 cyberpunk:bg-transparent ${styles.chip}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${styles.dot}`} />
-      <span className="text-sm font-medium text-zinc-200 dark:text-stone-800 cyberpunk:text-white">{topic.name}</span>
-      <span className={`ml-auto text-[11px] font-semibold cyberpunk:font-mono ${styles.tag}`}>{topic.frequency}</span>
+      <div className="topic-chip-content flex w-full min-w-0 items-center gap-2">
+        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${styles.dot}`} />
+        <span className="min-w-0 text-sm font-medium text-zinc-200 dark:text-stone-800 cyberpunk:text-white">{topic.name}</span>
+        <span className={`ml-auto flex-shrink-0 text-[11px] font-semibold cyberpunk:font-mono ${styles.tag}`}>{topic.frequency}</span>
+      </div>
     </button>
   );
 }

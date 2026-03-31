@@ -46,7 +46,11 @@ export function useGsapReveal(options = {}) {
       );
     });
 
+    // Recalcula posições do ScrollTrigger após navegação SPA
+    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+
     return () => {
+      cancelAnimationFrame(rafId);
       ctx.revert();
       clearAnimatedProps();
     };
@@ -69,7 +73,7 @@ export function useGsapStagger(childSelector = '*', options = {}) {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const children = el.querySelectorAll(childSelector);
     if (!children.length) return;
-    const { blur = false, ...animationOptions } = options;
+    const { blur = false, scrollStart = 'top 88%', ...animationOptions } = options;
     const clearAnimatedProps = () => {
       gsap.set(children, { clearProps: 'opacity,transform,filter' });
     };
@@ -91,12 +95,21 @@ export function useGsapStagger(childSelector = '*', options = {}) {
           stagger: prefersReduced ? 0 : 0.1,
           immediateRender: false,
           clearProps: 'opacity,transform,filter',
+          scrollTrigger: {
+            trigger: el,
+            start: scrollStart,
+            once: true,
+          },
           ...animationOptions,
+          onComplete: () => gsap.set(children, { clearProps: 'opacity,transform,filter' }),
         }
       );
     });
 
+    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+
     return () => {
+      cancelAnimationFrame(rafId);
       ctx.revert();
       clearAnimatedProps();
     };
