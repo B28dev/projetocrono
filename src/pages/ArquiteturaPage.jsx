@@ -29,9 +29,9 @@ function Section({ title, subtitle, children }) {
 export default function ArquiteturaPage() {
   const navigate = useNavigate();
   const headerRef = useGsapReveal();
-  const topicsRef = useGsapStagger('.topic-chip-content', { blur: true, stagger: 0.08, delay: 0.15 });
-  const studyPlanRef = useGsapStagger('.study-plan-card-content', { blur: true, stagger: 0.1, delay: 0.2 });
-  const summariesRef = useGsapStagger('.summary-item-content', { blur: true, stagger: 0.08, delay: 0.2 });
+  const topicsRef = useGsapStagger('.topic-chip-content', { stagger: 0.08, delay: 0.15 });
+  const studyPlanRef = useGsapStagger('.study-plan-card-content', { stagger: 0.1, delay: 0.2 });
+  const summariesRef = useGsapStagger('.summary-item-content', { stagger: 0.08, delay: 0.2 });
   const magneticRef = useGsapMagnetic('[data-magnetic]');
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
   const [taskProgress, setTaskProgress] = useState(() => {

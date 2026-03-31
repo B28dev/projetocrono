@@ -10,9 +10,9 @@ const THEME_STORAGE_KEY = 'site-theme';
 
 export default function App() {
   const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
+    if (typeof window === 'undefined') return 'cyberpunk';
     const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return saved === 'light' || saved === 'cyberpunk' || saved === 'dark' ? saved : 'dark';
+    return saved === 'light' || saved === 'cyberpunk' || saved === 'dark' ? saved : 'cyberpunk';
   });
 
   useEffect(() => {
@@ -34,21 +34,12 @@ export default function App() {
     <div className={themeClass} data-theme={theme}>
       <BrowserRouter>
         <div className="min-h-screen flex flex-col">
+          <Navbar theme={theme} onToggleTheme={cycleTheme} />
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route
-                path="/*"
-                element={
-                  <>
-                    <Navbar theme={theme} onToggleTheme={cycleTheme} />
-                    <Routes>
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/materia/arquitetura" element={<ArquiteturaPage />} />
-                    </Routes>
-                  </>
-                }
-              />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/materia/arquitetura" element={<ArquiteturaPage />} />
             </Routes>
           </div>
           <SystemNotice compact />

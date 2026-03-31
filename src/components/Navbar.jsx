@@ -25,7 +25,7 @@ export default function Navbar({ theme, onToggleTheme }) {
           <span className="flex h-6 w-6 items-center justify-center rounded bg-blue-500 text-xs font-bold text-white dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.24))]">
             P
           </span>
-          Painel da Turma
+          Painel
         </Link>
 
         <nav className="flex items-center gap-2">
@@ -44,11 +44,10 @@ function NavLink({ to, active, children }) {
     <Link
       to={to}
       data-magnetic
-      className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-        active
-          ? 'bg-zinc-800 text-zinc-100 dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-[#00e8ff]/30 cyberpunk:bg-white/[0.08] cyberpunk:text-white'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 dark:text-stone-600 dark:hover:text-stone-900 dark:hover:bg-stone-200/80 cyberpunk:border cyberpunk:border-transparent cyberpunk:text-white/70 cyberpunk:hover:border-white/10 cyberpunk:hover:bg-white/[0.05] cyberpunk:hover:text-[#00e8ff]'
-      }`}
+      className={`px-3 py-1.5 rounded-md text-sm transition-colors ${active
+        ? 'bg-zinc-800 text-zinc-100 dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-[#00e8ff]/30 cyberpunk:bg-white/[0.08] cyberpunk:text-white'
+        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 dark:text-stone-600 dark:hover:text-stone-900 dark:hover:bg-stone-200/80 cyberpunk:border cyberpunk:border-transparent cyberpunk:text-white/70 cyberpunk:hover:border-white/10 cyberpunk:hover:bg-white/[0.05] cyberpunk:hover:text-[#00e8ff]'
+        }`}
     >
       {children}
     </Link>
