@@ -3,6 +3,7 @@ import YoutubeEmbed from './YoutubeEmbed';
 
 export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onToggleTask }) {
   const [videosOpen, setVideosOpen] = useState(false);
+  const resources = item.resources || [];
 
   const toggle = (i) => onToggleTask?.(item.storageDate || item.date, i);
   const allDone = item.tasks.length > 0 && item.tasks.every((_, i) => checked[i]);
@@ -108,7 +109,7 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
             ))}
           </ul>
 
-          {item.videos.length > 0 && (
+          {resources.length > 0 && (
             <div className="mt-3">
               <button
                 type="button"
@@ -119,19 +120,49 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
                 <svg className={`h-3.5 w-3.5 transition-transform ${videosOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 6 10">
                   <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                {videosOpen ? 'Ocultar videos' : `${item.videos.length} video${item.videos.length > 1 ? 's' : ''}`}
+                {videosOpen ? 'Ocultar recursos' : `${resources.length} recurso${resources.length > 1 ? 's' : ''}`}
               </button>
 
               {videosOpen && (
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  {item.videos.map((v, i) => (
+                  {resources.map((resource, i) => (
                     <div key={i}>
-                      <p className="mb-1.5 truncate text-[11px] text-zinc-500 dark:text-stone-500 cyberpunk:text-white/50">{v.title}</p>
-                      <YoutubeEmbed url={v.url} title={v.title} />
+                      <p className="mb-1.5 truncate text-[11px] text-zinc-500 dark:text-stone-500 cyberpunk:text-white/50">{resource.title}</p>
+                      {resource.kind === 'youtube' ? (
+                        <YoutubeEmbed url={resource.url} title={resource.title} />
+                      ) : (
+                        <a
+                          href={resource.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="cyber-glass flex h-full min-h-24 items-center justify-between rounded-lg border border-zinc-800 bg-surface-1 px-4 py-3 text-sm text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 dark:border-stone-300 dark:bg-white/80 dark:text-stone-700 dark:hover:border-stone-400 dark:hover:text-stone-900 cyberpunk:border-white/10 cyberpunk:bg-transparent cyberpunk:text-white/75 cyberpunk:hover:border-[#00e8ff]/25 cyberpunk:hover:text-white"
+                        >
+                          <span>Abrir recurso externo</span>
+                          <span className="text-xs font-mono text-zinc-500 dark:text-stone-500 cyberpunk:text-[#00e8ff]">PDF</span>
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {item.notes?.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {item.notes.map((note, index) => (
+                <div
+                  key={`${item.date}-note-${index}`}
+                  className={`rounded-lg border-l-2 px-3 py-2 text-xs leading-relaxed ${
+                    note.variant === 'coach'
+                      ? 'border-amber-500/50 bg-amber-500/8 text-zinc-300 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-stone-700 cyberpunk:border-[#ff3ea5]/30 cyberpunk:bg-[#ff3ea5]/8 cyberpunk:text-white/72'
+                      : 'border-zinc-700 bg-zinc-900/40 text-zinc-400 dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 cyberpunk:border-[#00e8ff]/25 cyberpunk:bg-white/[0.04] cyberpunk:text-white/68'
+                  }`}
+                >
+                  <span className="mr-1 font-semibold text-zinc-200 dark:text-stone-900 cyberpunk:text-white">{note.title}:</span>
+                  <span>{note.content}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -66,7 +66,7 @@ export default function Dashboard() {
         <div>
           <h2 className="text-lg font-semibold text-zinc-100 dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Materias</h2>
           <p className="text-sm text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">
-            Apenas Arquitetura de Computadores esta disponivel nesta versao.
+            Arquitetura ja esta disponivel. As demais materias aparecem com contagem e serao liberadas em breve.
           </p>
         </div>
 

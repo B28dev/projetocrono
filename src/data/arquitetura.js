@@ -1,232 +1,549 @@
-// All structured data extracted from CRONOGRAMA_ARQT_COMP2.html
+export const examDate = new Date('2026-04-13T08:00:00');
 
-export const examDate = new Date('2026-04-07T08:00:00');
+export const referencePlaylists = [
+  {
+    id: 'marcelo-rios',
+    title: 'Prof. Marcelo Rios - Arquitetura de Computadores',
+    description: 'Playlist base para geracoes, numeracao e memoria.',
+    url: 'https://www.youtube.com/playlist?list=PL866_LrQxNVipiEgWtJMK5Fcgc6IBfVvc',
+  },
+  {
+    id: 'santiago-2020',
+    title: 'Prof. Santiago - Arquitetura de Computadores 2020/1',
+    description: 'Playlist de apoio para cache, pipeline, paralelismo e RISC/CISC.',
+    url: 'https://www.youtube.com/playlist?list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD',
+  },
+];
 
 export const topics = [
-  { id: 'risc-cisc',   name: 'RISC vs CISC',          frequency: '3/3 provas', level: 'muito-frequente' },
-  { id: 'cache',       name: 'Memória Cache',           frequency: '3/3 provas', level: 'muito-frequente' },
-  { id: 'geracoes',    name: 'Gerações (V/F)',          frequency: '3/3 provas', level: 'muito-frequente' },
-  { id: 'org-memoria', name: 'Organização de Memória',  frequency: '2/3 provas', level: 'frequente'       },
-  { id: 'paralela',    name: 'Arq. Paralela',           frequency: '2/3 provas', level: 'frequente'       },
-  { id: 'pipeline',    name: 'Pipeline',                frequency: '1/3 provas', level: 'apareceu'        },
-  { id: 'ula',         name: 'ULA',                     frequency: '1/3 provas', level: 'apareceu'        },
-  { id: 'ram-rom',     name: 'RAM / ROM',               frequency: '1/3 provas', level: 'apareceu'        },
+  { id: 'risc-cisc', name: 'RISC vs CISC', frequency: '3/3 provas', level: 'muito-frequente' },
+  { id: 'cache', name: 'Memoria Cache', frequency: '3/3 provas', level: 'muito-frequente' },
+  { id: 'geracoes', name: 'Geracoes (V/F)', frequency: '3/3 provas', level: 'muito-frequente' },
+  { id: 'operacoes-binarias', name: 'Operacoes Binarias', frequency: '2/3 provas', level: 'frequente' },
+  { id: 'pipeline', name: 'Pipeline', frequency: '2/3 provas', level: 'frequente' },
+  { id: 'ula', name: 'ULA', frequency: '1/3 provas', level: 'apareceu' },
+  { id: 'ram-rom', name: 'Memoria RAM/ROM', frequency: '1/3 provas', level: 'apareceu' },
+  { id: 'paralela', name: 'Arq. Paralela', frequency: '1/3 provas', level: 'apareceu' },
 ];
 
 export const studyPlan = [
   {
-    date: '2026-03-28', label: 'Sáb 28/03', topic: 'Introdução + Gerações',
+    date: '2026-03-31',
+    label: 'Ter 31/03',
+    topic: 'Introducao + Geracoes',
     tasks: [
-      'Assistir: Evolução dos Computadores (Marcel Rios)',
-      'Assistir: Componentes do Computador (Marcel Rios)',
-      'Responder questões V/F e justificar os FALSOS por escrito',
+      'Marcel Rios - Aula 1: Evolucao dos computadores.',
+      'Marcel Rios - Aula 2: Componentes do computador.',
+      'Responder V/F do simulado (blocos 1-3) e justificar os itens falsos por escrito.',
     ],
-    videos: [
-      { title: 'Marcel Rios – Evolução dos Computadores', url: 'https://www.youtube.com/embed/jNRxV5DPeTc' },
-      { title: 'Marcel Rios – Componentes do Computador', url: 'https://www.youtube.com/embed/69PulYNXpzM' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Evolucao dos Computadores',
+        url: 'https://www.youtube.com/watch?v=jNRxV5DPeTc&list=PL866_LrQxNVipiEgWtJMK5Fcgc6IBfVvc&index=2',
+      },
+      {
+        kind: 'youtube',
+        title: 'Componentes do Computador',
+        url: 'https://www.youtube.com/watch?v=69PulYNXpzM',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Conteudo',
+        content: '1a = valvulas, 2a = transistores, 3a = CI, 4a = microprocessadores, 5a = IA.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Nas provas de 2023 e 2024, as questoes V/F pediram justificativa dos itens falsos. Os erros mais comuns estao na 1a geracao e na 5a geracao.',
+      },
     ],
   },
   {
-    date: '2026-03-29', label: 'Dom 29/03', topic: 'Sistemas de Numeração e Conversões',
+    date: '2026-04-01',
+    label: 'Qua 01/04',
+    topic: 'Sistemas de numeracao e conversoes',
     tasks: [
-      'Assistir: Representação de Dados (Marcel Rios)',
-      'Assistir: Aprenda Números Binários (Ewerton Salvador)',
-      'Praticar conversões: decimal ↔ binário ↔ hex (10 de cada)',
+      'Marcel Rios - Representacao de Dados (binario, decimal e hexadecimal).',
+      'Ewerton Salvador - Aprenda numeros binarios.',
+      'Praticar conversoes: decimal <-> binario <-> hexadecimal (10 numeros de cada sentido).',
     ],
-    videos: [
-      { title: 'Marcel Rios – Representação de Dados',  url: 'https://www.youtube.com/embed/m13GwTUw3BI' },
-      { title: 'Ewerton Salvador – Números Binários',   url: 'https://www.youtube.com/embed/oSWaCuNoc6U' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Representacao de Dados',
+        url: 'https://www.youtube.com/watch?v=m13GwTUw3BI',
+      },
+      {
+        kind: 'youtube',
+        title: 'Aprenda Numeros Binarios',
+        url: 'https://www.youtube.com/watch?v=oSWaCuNoc6U',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Foco',
+        content: 'O caminho hexadecimal -> decimal -> binario e o mais cobrado nos itens f-j das provas.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Na prova de 2023, as operacoes encadeadas davam credito parcial se a conversao estivesse certa. Mostre o raciocinio.',
+      },
     ],
   },
   {
-    date: '2026-03-30', label: 'Seg 30/03', topic: 'Operações Binárias (+, −, ×, ÷)',
+    date: '2026-04-02',
+    label: 'Qui 02/04',
+    topic: 'Operacoes binarias: +, -, x e /',
     tasks: [
-      'Assistir: Operações Binárias Completas',
-      'Assistir: Sistemas de Numeração (Marcel Rios)',
-      'Resolver questões com operações encadeadas',
+      'Codigo Binario - operacoes completas e revisao de sistemas de numeracao.',
+      'Resolver os itens a-e das questoes 15, 16 e 17 do simulado.',
+      'Resolver os itens f-j encadeados: converter, operar e converter o resultado.',
     ],
-    videos: [
-      { title: 'Código Binário – Operações Completas', url: 'https://www.youtube.com/embed/uFh7E_dMisk' },
-      { title: 'Marcel Rios – Sistemas de Numeração',  url: 'https://www.youtube.com/embed/OOxWr3aNIFw' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Codigo Binario - Operacoes Completas',
+        url: 'https://www.youtube.com/watch?v=uFh7E_dMisk',
+      },
+      {
+        kind: 'youtube',
+        title: 'Sistemas de Numeracao',
+        url: 'https://www.youtube.com/watch?v=OOxWr3aNIFw&list=PL866_LrQxNVipiEgWtJMK5Fcgc6IBfVvc&index=4',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Regra',
+        content: 'Sempre converta tudo para binario antes de operar. Nao opere direto em hexadecimal.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Na P1/2023, um erro classico foi errar a conversao antes de multiplicar. Confira as potencias de 2 antes de operar.',
+      },
     ],
   },
   {
-    date: '2026-03-31', label: 'Ter 31/03', topic: 'Memória RAM, ROM e Hierarquia',
+    date: '2026-04-03',
+    label: 'Sex 03/04',
+    topic: 'Memoria RAM, ROM e hierarquia',
     tasks: [
-      'Assistir: Memória e Tipos (Marcel Rios)',
-      'Assistir: Tipos de Barramento (Prof. Santiago)',
-      'Assistir: Hierarquia de Memória (Prof. Santiago)',
-      'Escrever parágrafo comparando RAM vs ROM com exemplos reais',
+      'Marcel Rios - memoria e tipos (RAM, ROM e memoria secundaria).',
+      'Prof. Santiago - organizacao da memoria, barramentos e hierarquia.',
+      'Redigir um paragrafo comparando RAM e ROM com exemplos reais.',
     ],
-    videos: [
-      { title: 'Marcel Rios – Memória e Tipos',          url: 'https://www.youtube.com/embed/kPPcJsMKb4g' },
-      { title: 'Prof. Santiago – Tipos de Barramento',   url: 'https://www.youtube.com/embed/AAidPCXPZ2A' },
-      { title: 'Prof. Santiago – Hierarquia de Memória', url: 'https://www.youtube.com/embed/WcHX6Ukm15E' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Tipos de Memoria',
+        url: 'https://www.youtube.com/watch?v=kPPcJsMKb4g&list=PL866_LrQxNVipiEgWtJMK5Fcgc6IBfVvc&index=7&pp=iAQB',
+      },
+      {
+        kind: 'youtube',
+        title: 'Tipos de Barramento',
+        url: 'https://www.youtube.com/watch?v=AAidPCXPZ2A',
+      },
+      {
+        kind: 'youtube',
+        title: 'Hierarquia de Memoria',
+        url: 'https://www.youtube.com/watch?v=WcHX6Ukm15E&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=12&pp=iAQB',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Piramide',
+        content: 'Registradores -> cache -> RAM -> disco, do mais rapido para o mais lento.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Na P1/2024-B, a questao pediu exemplos de uso. Para RAM, cite programas em execucao. Para ROM, cite BIOS e firmware.',
+      },
     ],
   },
   {
-    date: '2026-04-01', label: 'Qua 01/04', topic: 'Memória Cache (L1, L2, L3)',
+    date: '2026-04-04',
+    label: 'Sab 04/04',
+    topic: 'Memoria cache - L1, L2 e L3',
     tasks: [
-      'Assistir: 3 aulas de Prof. Santiago sobre Cache',
-      'Ler material ICMC/USP sobre Cache',
-      'Escrever sobre: conceito, otimização e diferenças L1/L2/L3',
+      'Prof. Santiago - hierarquia e memoria cache (L1, L2 e L3).',
+      'Material ICMC/USP - organizacao da memoria cache.',
+      'Redigir respostas das questoes 8, 9 e 10 do simulado.',
     ],
-    videos: [
-      { title: 'Prof. Santiago – Hierarquia de Memória', url: 'https://www.youtube.com/embed/WcHX6Ukm15E' },
-      { title: 'Prof. Santiago – Memória Cache',         url: 'https://www.youtube.com/embed/pNUUHlWj27Y' },
-      { title: 'Prof. Santiago – Otimização de Cache',   url: 'https://www.youtube.com/embed/QmsLiYVQoXE' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Hierarquia de Memoria',
+        url: 'https://www.youtube.com/watch?v=WcHX6Ukm15E&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=12&pp=iAQB',
+      },
+      {
+        kind: 'youtube',
+        title: 'Memoria Cache',
+        url: 'https://www.youtube.com/watch?v=pNUUHlWj27Y&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=13&pp=iAQB',
+      },
+      {
+        kind: 'youtube',
+        title: 'Memoria Cache - Mapeamento',
+        url: 'https://www.youtube.com/watch?v=pNUUHlWj27Y&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=13&pp=iAQB',
+      },
+      {
+        kind: 'youtube',
+        title: 'Memoria Cache - Otimizacao',
+        url: 'https://www.youtube.com/watch?v=QmsLiYVQoXE&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=15&pp=iAQB0gcJCdkKAYcqIYzv',
+      },
+      {
+        kind: 'link',
+        title: 'PDF ICMC/USP - Organizacao da Memoria Cache',
+        url: 'http://wiki.icmc.usp.br/images/c/c6/SSC0510-Aula09.pdf',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Regra',
+        content: 'L1 e a menor e mais rapida dentro do core. L3 e a maior e mais lenta, compartilhada entre nucleos.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Cache caiu nas 3 provas com enfoques diferentes. Prepare uma resposta que cubra conceito, desempenho e diferencas entre os niveis.',
+      },
     ],
   },
   {
-    date: '2026-04-02', label: 'Qui 02/04', topic: 'Cálculo de Memória (T, N, M, E)',
+    date: '2026-04-05',
+    label: 'Dom 05/04',
+    topic: 'Calculo de memoria - T, N, M e E',
     tasks: [
-      'Assistir: vídeos de Organização de Memória (3 vídeos)',
-      'Refazer 4 exemplos da Aula 07 sem consultar a solução',
-      'Resolver 10 exercícios de cálculo de memória',
+      'Como calcular barramento de enderecos em bits.',
+      'Organizacao da memoria e espaco de enderecamento.',
+      'Refazer os 4 exemplos da Aula 07 sem olhar a solucao.',
+      'Resolver os 10 exercicios de calculo de memoria.',
     ],
-    videos: [
-      { title: 'Largura do Barramento de Endereço',             url: 'https://www.youtube.com/embed/1VHeS6ABQrk' },
-      { title: 'Organização de Memória – Espaço de Endereçamento', url: 'https://www.youtube.com/embed/ypRu1BQ0z18' },
-      { title: 'Material Complementar de Memória',              url: 'https://www.youtube.com/embed/GVcQpKFNd1Q' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Barramento de Enderecos em Bits',
+        url: 'https://www.youtube.com/watch?v=1VHeS6ABQrk',
+      },
+      {
+        kind: 'youtube',
+        title: 'Organizacao da Memoria',
+        url: 'https://www.youtube.com/watch?v=ypRu1BQ0z18',
+      },
+      {
+        kind: 'youtube',
+        title: 'Complementar de Memoria',
+        url: 'https://www.youtube.com/watch?v=GVcQpKFNd1Q',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Formulas',
+        content: 'T = N x M, N = 2^E, E = log2(N) e 8K = 2^13.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Mesmo errando o resultado final, mostrar as potencias e o desenvolvimento costuma garantir parte da pontuacao.',
+      },
     ],
   },
   {
-    date: '2026-04-03', label: 'Sex 03/04', topic: 'RISC vs CISC (Tema mais cobrado)',
+    date: '2026-04-06',
+    label: 'Seg 06/04',
+    topic: 'RISC vs CISC - tema mais cobrado',
     tasks: [
-      'Assistir: Instruction Set & Addressing (Prof. Santiago)',
-      'Assistir: RISC vs CISC – Explicação',
-      'Assistir: RISC-V na Prática',
-      'Escrever no papel: diferenças RISC/CISC (instruções, hardware, compilador, desempenho)',
+      'Prof. Santiago - conjunto de instrucoes e enderecamento.',
+      'Video explicativo de RISC vs CISC.',
+      'Filosofia RISC-V na pratica.',
+      'Ler os slides do Luciani da Aula 02.',
+      'Redigir no papel as respostas das questoes 4, 5, 6 e 7 do simulado.',
     ],
-    videos: [
-      { title: 'Prof. Santiago – Instruction Set & Addressing', url: 'https://www.youtube.com/embed/LfGdcjG_xTI' },
-      { title: 'RISC vs CISC – Explicação',                    url: 'https://www.youtube.com/embed/CUJg6d1DDy0' },
-      { title: 'RISC-V na Prática',                            url: 'https://www.youtube.com/embed/kA5QCiqhNv0' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Conjunto de Instrucoes: Caracteristicas e Funcoes',
+        url: 'https://www.youtube.com/watch?v=LfGdcjG_xTI&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=4',
+      },
+      {
+        kind: 'youtube',
+        title: 'Conjunto de Instrucoes: Modos de Enderecamento e Formatos',
+        url: 'https://www.youtube.com/watch?v=CUJg6d1DDy0',
+      },
+      {
+        kind: 'youtube',
+        title: 'RISC-V na Pratica',
+        url: 'https://www.youtube.com/watch?v=kA5QCiqhNv0',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Resumo',
+        content: 'RISC = poucas instrucoes simples e geralmente 1 ciclo. CISC = mais instrucoes complexas e codigo mais compacto.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Tema presente nas 3 provas. Sempre mencione numero de instrucoes, complexidade do hardware, papel do compilador e impacto no desempenho.',
+      },
     ],
   },
   {
-    date: '2026-04-04', label: 'Sáb 04/04', topic: 'Pipeline, ULA e Arquitetura Paralela',
+    date: '2026-04-07',
+    label: 'Ter 07/04',
+    topic: 'Pipeline, ULA e arquitetura paralela',
     tasks: [
-      'Assistir: Pipelining – Aula 14 (Prof. Santiago)',
-      'Assistir: Paralelismo – Aula 21 (Prof. Santiago)',
-      'Assistir: Data Path & ALU (Prof. Santiago)',
-      'Escrever: Pipeline (estágios + hazards), Paralela (2+ tipos), ULA (funções)',
+      'Prof. Santiago - Aula 14: Pipelining.',
+      'Prof. Santiago - Aula 21: Paralelismo e arquitetura paralela.',
+      'Prof. Santiago - CPU, caminho de dados e ULA.',
+      'Redigir respostas das questoes 11, 12 e 14 do simulado.',
     ],
-    videos: [
-      { title: 'Prof. Santiago – Pipelining',    url: 'https://www.youtube.com/embed/FvI5Kk8jmZQ' },
-      { title: 'Prof. Santiago – Paralelismo',   url: 'https://www.youtube.com/embed/NV4P_P_ZNLA' },
-      { title: 'Prof. Santiago – Data Path/ALU', url: 'https://www.youtube.com/embed/4b9fsI_3FG8' },
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Pipelining - Visao Geral',
+        url: 'https://www.youtube.com/watch?v=FvI5Kk8jmZQ',
+      },
+      {
+        kind: 'youtube',
+        title: 'Paralelismo de Instrucoes',
+        url: 'https://www.youtube.com/watch?v=NV4P_P_ZNLA',
+      },
+      {
+        kind: 'youtube',
+        title: 'Caminho de Dados',
+        url: 'https://www.youtube.com/watch?v=4b9fsI_3FG8&list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD&index=9',
+      },
+    ],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Pipeline',
+        content: 'IF -> ID -> EX -> MEM -> WB. Hazard acontece quando uma etapa depende de resultado anterior e trava a linha.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Ao explicar pipeline, cite definicao, ganho de desempenho e os tres tipos de hazard: dados, controle e estrutural.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra 2',
+        content: 'Para arquitetura paralela, tenha pelo menos dois exemplos prontos: multiprocessadores e SIMD.',
+      },
     ],
   },
   {
-    date: '2026-04-05', label: 'Dom 05/04', topic: 'Simulado Completo',
+    date: '2026-04-08',
+    label: 'Qua 08/04',
+    topic: 'Simulado completo cronometrado',
     tasks: [
-      'Fazer simulado completo cronometrado – 1h40',
-      'Comparar respostas e anotar pontos fracos',
-      'Refazer operações binárias das provas P1/2023 e P1/2024',
+      'Resolver o simulado completo do zero em 1h40.',
+      'Comparar as respostas e marcar os pontos fracos.',
+      'Refazer as operacoes binarias das provas P1/2023 e P1/2024.',
     ],
-    videos: [],
+    resources: [],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Objetivo',
+        content: 'Simular a pressao da prova real. O que errar aqui define o foco do dia seguinte.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'A prova tem 5 questoes dissertativas, caneta azul ou preta e desconto por erros de portugues. Escreva com frases completas.',
+      },
+    ],
   },
   {
-    date: '2026-04-06', label: 'Seg 06/04', topic: 'Reforço nos Pontos Fracos',
+    date: '2026-04-09',
+    label: 'Qui 09/04',
+    topic: 'Reforco nos pontos fracos',
     tasks: [
-      'Revisar os tópicos errados no simulado',
-      'Escrever respostas dissertativas no papel (como na prova real)',
-      'Fazer 5 operações binárias aleatórias para manter velocidade',
+      'Rever os temas errados no simulado do dia 08.',
+      'Escrever as respostas dissertativas no papel, como sera na prova real.',
+      'Fazer 5 operacoes binarias aleatorias para manter o ritmo.',
     ],
-    videos: [],
+    resources: [],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Por que escrever no papel',
+        content: 'A prova e manuscrita. Treinar a escrita ajuda a organizar ideias e evita branco na hora.',
+      },
+      {
+        variant: 'coach',
+        title: 'Dica Extra',
+        content: 'Use uma estrutura simples: definicao, desenvolvimento e conclusao com impacto ou exemplo. Tres paragrafos bastam.',
+      },
+    ],
   },
   {
-    date: '2026-04-07', label: 'Ter 07/04 — PROVA', topic: 'Dia da Prova',
+    date: '2026-04-10',
+    label: 'Sex 10/04',
+    topic: 'Vespera - revisao leve e descanso',
     tasks: [
-      'Reler resumos: RISC/CISC, Cache, Pipeline, Gerações',
-      'Revisar tabela de gerações e fórmulas T=N×M e E=log₂(N)',
-      'Dormir bem — não estudar até tarde!',
+      'Reler os resumos de RISC/CISC, cache, pipeline e geracoes.',
+      'Revisar a tabela de geracoes e as formulas T = N x M e E = log2(N).',
+      'Dormir bem e evitar madrugada estudando.',
     ],
-    videos: [],
+    resources: [],
+    notes: [
+      {
+        variant: 'base',
+        title: 'Ritmo',
+        content: 'Revisao leve e suficiente. O sono ajuda a consolidar a memoria antes da prova.',
+      },
+    ],
+  },
+  {
+    date: '2026-04-13',
+    label: 'Seg 13/04',
+    topic: 'Dia da Prova',
+    tasks: [
+      'Levar caneta azul ou preta.',
+      'Ler todas as questoes antes de comecar a responder.',
+      'Comecar pelas questoes que voce domina para garantir a pontuacao base.',
+      'Nas operacoes binarias, conferir cada passo com as potencias de 2.',
+    ],
+    resources: [],
+    notes: [
+      {
+        variant: 'coach',
+        title: 'Regras',
+        content: 'Tempo minimo para sair: 30 min. Tempo total: 1h40. Erros de portugues sao descontados.',
+      },
+    ],
     isExamDay: true,
   },
 ];
 
-export const summaries = [
+export const modelSummaries = [
   {
     id: 'geracoes',
-    title: 'Gerações dos Computadores',
+    title: 'Geracoes dos Computadores',
     bullets: [
-      '1ª (1940–50): Válvulas eletrônicas — enormes, lentas, alto consumo. Ex: ENIAC',
-      '2ª (1950–60): Transistores — menores, mais rápidos, mais confiáveis',
-      '3ª (1960–70): Circuitos Integrados (CIs) — múltiplos transistores em um chip',
-      '4ª (1970–hoje): Microprocessadores — CPU inteira em um único chip; surge o PC',
-      '5ª (em desenvolvimento): IA — sistemas capazes de aprender e raciocinar',
-      '⚠ Erro clássico: a 5ª geração NÃO está consolidada — evite afirmações absolutas sobre ela (V/F)',
+      '1a (1940-50): valvulas eletronicas, maquinas enormes, lentas e com alto consumo. Exemplo: ENIAC.',
+      '2a (1950-60): transistores, menores, mais rapidos e mais confiaveis.',
+      '3a (1960-70): circuitos integrados, varios transistores em um unico chip.',
+      '4a (1970-hoje): microprocessadores, CPU inteira em um unico chip e popularizacao do PC.',
+      '5a (em desenvolvimento): IA e sistemas capazes de aprender e raciocinar.',
+      'Erro classico de prova: a 5a geracao ainda nao e algo consolidado. Evite afirmar isso como fato fechado em V/F.',
     ],
   },
   {
     id: 'risc-cisc',
     title: 'RISC vs CISC',
     bullets: [
-      'RISC: poucas instruções simples, tamanho fixo, 1 ciclo cada. Compilador faz a combinação. Hardware simples. Ex: ARM, RISC-V',
-      'CISC: muitas instruções complexas, pode fazer várias operações por instrução, múltiplos ciclos. Hardware complexo. Código compacto. Ex: x86 (Intel/AMD)',
-      'RISC: favorece alta frequência de clock e pipeline eficiente',
-      'CISC: favorece compatibilidade e densidade de código',
-      'Modos de endereçamento: RISC usa poucos (registrador, imediato); CISC suporta muitos (indireto, indexado)',
-      'Mencionar sempre: nº de instruções, complexidade de hardware, papel do compilador, impacto no desempenho',
+      'RISC: poucas instrucoes simples, tamanho fixo e tendencia a 1 ciclo por instrucao. Hardware mais simples. Ex: ARM e RISC-V.',
+      'CISC: muitas instrucoes complexas, varias operacoes por instrucao e multiplos ciclos. Hardware mais complexo. Ex: x86.',
+      'RISC favorece clock alto e pipeline eficiente.',
+      'CISC favorece compatibilidade e maior densidade de codigo.',
+      'RISC usa poucos modos de enderecamento; CISC costuma suportar muitos.',
+      'Resposta forte em prova: numero de instrucoes, complexidade de hardware, papel do compilador e impacto no desempenho.',
     ],
   },
   {
     id: 'cache',
-    title: 'Memória Cache',
+    title: 'Memoria Cache',
     bullets: [
-      'Definição: memória de alta velocidade entre processador e RAM, armazena dados/instruções de uso frequente',
-      'Melhoria de desempenho: mantém dados mais usados perto do processador, evita acesso lento à RAM, reduz latência',
-      'L1: dentro do núcleo, menor (8–64 KB), mais rápida (1–4 ciclos)',
-      'L2: ainda no chip, maior (256 KB–1 MB), ligeiramente mais lenta',
-      'L3: compartilhada entre núcleos, maior (4–32 MB), mais lenta que L1/L2 mas muito mais rápida que RAM',
-      'Regra geral: mais perto do processador = menor e mais rápida. Mais longe = maior e mais lenta',
+      'Memoria de alta velocidade entre processador e RAM, usada para manter dados e instrucoes de acesso frequente.',
+      'Melhora desempenho reduzindo latencia e evitando acessos lentos a RAM.',
+      'L1: menor e mais rapida, dentro do nucleo.',
+      'L2: maior que L1 e um pouco mais lenta, ainda no chip.',
+      'L3: maior, compartilhada entre nucleos e mais lenta que L1/L2, mas muito mais rapida que a RAM.',
+      'Regra de ouro: quanto mais perto do processador, menor e mais rapida; quanto mais longe, maior e mais lenta.',
     ],
   },
   {
     id: 'pipeline',
     title: 'Pipeline',
     bullets: [
-      'Definição: divide a execução de instruções em estágios independentes, permitindo que múltiplas instruções sejam processadas simultaneamente',
-      'Estágios clássicos: IF (busca) → ID (decodifica) → EX (executa) → MEM (memória) → WB (escrita)',
-      'Melhoria de desempenho: aumenta o throughput (instruções por unidade de tempo)',
-      'Hazard de Dados: instrução depende de resultado ainda não pronto → mitigado com forwarding ou stall',
-      'Hazard de Controle: desvios condicionais interrompem o fluxo → mitigado com predição de desvio',
-      'Hazard Estrutural: dois estágios precisam do mesmo recurso → mitigado com duplicação de hardware',
+      'Pipeline divide a execucao em estagios independentes para permitir varias instrucoes em paralelo.',
+      'Estagios classicos: IF -> ID -> EX -> MEM -> WB.',
+      'Melhora desempenho aumentando throughput.',
+      'Hazard de dados: uma instrucao depende de resultado ainda nao pronto; mitigacao com forwarding ou stall.',
+      'Hazard de controle: desvios condicionais interrompem o fluxo; mitigacao com predicao de desvio.',
+      'Hazard estrutural: dois estagios disputam o mesmo recurso; mitigacao com duplicacao de hardware.',
     ],
   },
   {
     id: 'ula',
-    title: 'ULA (Unidade Lógica e Aritmética)',
+    title: 'ULA (Unidade Logica e Aritmetica)',
     bullets: [
-      'Definição: componente do processador responsável por todos os cálculos numéricos e operações lógicas',
-      'Operações aritméticas: adição, subtração, multiplicação, divisão, comparação de valores',
-      'Operações lógicas: AND, OR, NOT, XOR — usadas em condições, mascaramento de bits, controle de fluxo',
-      'Funcionamento: recebe dois operandos dos registradores, executa a operação indicada pelo opcode, retorna o resultado para registrador ou memória',
+      'Componente do processador responsavel pelos calculos numericos e operacoes logicas.',
+      'Operacoes aritmeticas: adicao, subtracao, multiplicacao, divisao e comparacao.',
+      'Operacoes logicas: AND, OR, NOT e XOR.',
+      'Recebe operandos dos registradores, executa a operacao indicada pelo opcode e devolve o resultado para registrador ou memoria.',
     ],
   },
   {
     id: 'ram-rom',
     title: 'RAM e ROM',
     bullets: [
-      'RAM (volátil): perde dados ao desligar. Rápida, armazena programas e dados em execução. Ex: navegador aberto, editor de texto',
-      'ROM (não-volátil): retém dados sem energia. Armazena informações permanentes. Ex: BIOS/UEFI, firmware de dispositivos',
-      'Analogia: RAM = mesa de trabalho (rápida, temporária). ROM = livro impresso (permanente, não apaga)',
-      'Hierarquia completa: registradores → cache → RAM → disco (do mais rápido ao mais lento)',
-      'Dica: seja específico nos exemplos — exemplos genéricos perdem pontos na prova',
+      'RAM e volatil: perde os dados ao desligar. Guarda programas e dados em execucao.',
+      'ROM e nao volatil: mantem dados sem energia. Guarda BIOS, UEFI e firmware.',
+      'Analogia util: RAM = mesa de trabalho; ROM = livro impresso.',
+      'Hierarquia completa: registradores -> cache -> RAM -> disco.',
+      'Em prova, exemplos concretos valem mais que definicoes genericas.',
     ],
   },
   {
     id: 'paralela',
     title: 'Arquitetura Paralela',
     bullets: [
-      'Definição: organização de sistemas que permite execução simultânea de tarefas/instruções para aumentar o desempenho',
-      'Tipo 1 – Multiprocessadores: múltiplos processadores independentes compartilhando memória. Ex: servidores com múltiplas CPUs',
-      'Tipo 2 – SIMD (Single Instruction, Multiple Data): uma instrução aplicada a múltiplos dados simultaneamente. Ex: SSE/AVX em Intel',
-      'Princípio geral: dividir o trabalho entre múltiplas unidades de processamento reduz o tempo total de execução',
-      'Foco na prova (2024-B): conhecer ao menos 2 tipos diferentes com explicação',
+      'Organizacao de sistemas que permite execucao simultanea de tarefas para elevar desempenho.',
+      'Multiprocessadores: varias CPUs independentes compartilhando memoria.',
+      'SIMD: uma instrucao aplicada a varios dados ao mesmo tempo.',
+      'Principio central: dividir o trabalho entre varias unidades reduz o tempo total.',
+      'Na prova, tenha ao menos dois tipos diferentes prontos para explicar com exemplo.',
+    ],
+  },
+];
+
+export const examCoverage = [
+  {
+    id: 'p1-2023',
+    title: 'P1 - Abr/2023',
+    bullets: [
+      'RISC/CISC: diferencas, desempenho e complexidade.',
+      'Cache: conceito, niveis, tamanho e velocidade.',
+      'Pipeline: conceito, desafios e mitigacao.',
+      'Operacoes binarias com conversoes hexadecimal/decimal.',
+      'Geracoes: V/F sobre evolucao dos computadores.',
+    ],
+  },
+  {
+    id: 'p1-2024-a',
+    title: 'P1 - Abr/2024 (Turma A)',
+    bullets: [
+      'RISC/CISC: modos de enderecamento e eficiencia.',
+      'Cache: hierarquia e organizacao dos niveis.',
+      'RISC/CISC: complexidade do conjunto de instrucoes.',
+      'ULA: operacoes matematicas e logicas.',
+      'Geracoes: V/F sobre valvulas, transistores e microprocessadores.',
+    ],
+  },
+  {
+    id: 'p1-2024-b',
+    title: 'P1 - Abr/2024 (Turma B)',
+    bullets: [
+      'Cache: papel na otimizacao, niveis e acesso.',
+      'Arquitetura paralela: pelo menos dois tipos.',
+      'RISC/CISC: execucao eficiente de instrucoes.',
+      'RAM/ROM: volatil vs nao volatil com exemplos.',
+      'Geracoes: V/F sobre circuitos integrados, internet e IA.',
     ],
   },
 ];

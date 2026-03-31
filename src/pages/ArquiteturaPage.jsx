@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { topics, studyPlan, summaries } from '../data/arquitetura';
+import { examCoverage, modelSummaries, referencePlaylists, topics, studyPlan } from '../data/arquitetura';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
 import { CountdownFull } from '../components/Countdown';
@@ -10,7 +10,7 @@ import SummaryAccordion from '../components/SummaryAccordion';
 import LevelUpModal from '../components/LevelUpModal';
 
 const TODAY = new Date().toISOString().slice(0, 10);
-const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress';
+const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress-v2';
 
 function Section({ title, subtitle, children }) {
   const ref = useGsapReveal();
@@ -30,8 +30,10 @@ export default function ArquiteturaPage() {
   const navigate = useNavigate();
   const headerRef = useGsapReveal();
   const topicsRef = useGsapStagger('.topic-chip-content', { stagger: 0.08, delay: 0.15 });
+  const playlistsRef = useGsapStagger('.playlist-card', { stagger: 0.08, delay: 0.15 });
   const studyPlanRef = useGsapStagger('.study-plan-card-content', { stagger: 0.1, delay: 0.2 });
-  const summariesRef = useGsapStagger('.summary-item-content', { stagger: 0.08, delay: 0.2 });
+  const modelSummariesRef = useGsapStagger('.summary-item', { stagger: 0.08, delay: 0.2 });
+  const summariesRef = useGsapStagger('.summary-item', { stagger: 0.08, delay: 0.2 });
   const magneticRef = useGsapMagnetic('[data-magnetic]');
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
   const [taskProgress, setTaskProgress] = useState(() => {
@@ -135,7 +137,7 @@ export default function ArquiteturaPage() {
                   Arquitetura de Computadores
                 </h1>
                 <p className="text-sm text-zinc-500 mt-1 dark:text-stone-600 cyberpunk:text-white/65">
-                  Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">07/04/2026</span> - 5 questoes dissertativas - 1h40
+                  Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">13/04/2026</span> - 5 questoes dissertativas - 1h40
                 </p>
               </div>
 
@@ -164,8 +166,40 @@ export default function ArquiteturaPage() {
           </Section>
 
           <Section
+            title="Playlists de referencia"
+            subtitle="Fontes-base para acompanhar o cronograma revisado."
+          >
+            <div ref={playlistsRef} className="grid gap-3 sm:grid-cols-2">
+              {referencePlaylists.map((playlist) => (
+                <a
+                  key={playlist.id}
+                  href={playlist.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-magnetic
+                  className="playlist-card cyber-glass rounded-xl border border-zinc-800 bg-surface-1 p-4 transition-colors hover:border-zinc-700 dark:border-stone-300 dark:bg-white/80 dark:hover:border-stone-400 cyberpunk:border-white/10 cyberpunk:bg-transparent cyberpunk:hover:border-[#00e8ff]/20"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">
+                        {playlist.title}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/62">
+                        {playlist.description}
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:border-stone-300 dark:text-stone-600 cyberpunk:border-white/10 cyberpunk:text-[#00e8ff]">
+                      playlist
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </Section>
+
+          <Section
             title="Plano ate a prova"
-            subtitle="Um topico por dia com videos selecionados. Marque as tarefas a medida que concluir."
+            subtitle="Um topico por dia com tarefas, recursos externos e revisoes."
           >
             <div ref={studyPlanRef}>
               {displayStudyPlan.completedPast.map((item) => (
@@ -255,11 +289,20 @@ export default function ArquiteturaPage() {
           </Section>
 
           <Section
-            title="Resumos modelo"
-            subtitle="Conteudo estruturado para revisao rapida antes da prova."
+            title="Resumos modelo para a prova"
+            subtitle="Base consolidada dos temas centrais para revisao rapida antes da prova."
+          >
+            <div ref={modelSummariesRef}>
+              <SummaryAccordion summaries={modelSummaries} />
+            </div>
+          </Section>
+
+          <Section
+            title="O que cada prova cobrou"
+            subtitle="Resumo das cobrancas de P1/2023, P1/2024-A e P1/2024-B."
           >
             <div ref={summariesRef}>
-              <SummaryAccordion summaries={summaries} />
+              <SummaryAccordion summaries={examCoverage} />
             </div>
           </Section>
 

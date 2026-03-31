@@ -1,7 +1,7 @@
 import { useCountdown } from '../hooks/useCountdown';
 
-export function CountdownBadge({ className = '' }) {
-  const { days, hours, isPast } = useCountdown();
+export function CountdownBadge({ className = '', target }) {
+  const { days, hours, isPast } = useCountdown(target);
 
   if (isPast) {
     return (
@@ -27,8 +27,8 @@ export function CountdownBadge({ className = '' }) {
   );
 }
 
-export function CountdownFull({ className = '' }) {
-  const { days, hours, minutes, seconds, isPast } = useCountdown();
+export function CountdownFull({ className = '', target }) {
+  const { days, hours, minutes, seconds, isPast } = useCountdown(target);
 
   if (isPast) {
     return (
