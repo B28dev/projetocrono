@@ -12,7 +12,7 @@ export default function ProgressBar({ value = 0, color = 'blue', className = '' 
   const clamped = Math.min(100, Math.max(0, value));
 
   return (
-    <div className={`h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden ${className}`}>
+    <div className={`h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden dark:bg-stone-300 ${className}`}>
       <div
         className={`h-full rounded-full transition-all duration-700 ease-out ${bar}`}
         style={{ width: `${clamped}%` }}

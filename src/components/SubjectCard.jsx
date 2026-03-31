@@ -34,8 +34,8 @@ export default function SubjectCard({ subject }) {
       onClick={handleClick}
       className={`relative group rounded-xl border p-5 flex flex-col gap-3 transition-all duration-200 select-none
         ${active
-          ? 'border-zinc-700 bg-surface-2 hover:border-zinc-600 hover:bg-surface-3 cursor-pointer hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/30'
-          : 'border-zinc-800 bg-surface-1 opacity-40 cursor-not-allowed'
+          ? 'border-zinc-700 bg-surface-2 hover:border-zinc-600 hover:bg-surface-3 cursor-pointer hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/30 dark:border-stone-300 dark:bg-white/80 dark:hover:border-stone-400 dark:hover:bg-white dark:hover:shadow-black/5'
+          : 'border-zinc-800 bg-surface-1 opacity-40 cursor-not-allowed dark:border-stone-300 dark:bg-stone-100'
         }`}
     >
       {/* Header */}
@@ -44,12 +44,12 @@ export default function SubjectCard({ subject }) {
           {short}
         </div>
         {active && (
-          <span className="text-[10px] font-medium text-zinc-500 bg-zinc-800 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-medium text-zinc-500 bg-zinc-800 rounded-full px-2 py-0.5 dark:bg-stone-900 dark:text-stone-100">
             ativo
           </span>
         )}
         {!active && (
-          <span className="text-[10px] font-medium text-zinc-600 bg-zinc-800/50 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-medium text-zinc-600 bg-zinc-800/50 rounded-full px-2 py-0.5 dark:bg-stone-200 dark:text-stone-600">
             em breve
           </span>
         )}
@@ -57,7 +57,7 @@ export default function SubjectCard({ subject }) {
 
       {/* Title */}
       <div>
-        <p className="text-sm font-semibold text-zinc-100 leading-snug">{name}</p>
+        <p className="text-sm font-semibold text-zinc-100 leading-snug dark:text-stone-900">{name}</p>
         {active && (
           <div className="mt-1">
             <CountdownBadge />
@@ -69,8 +69,8 @@ export default function SubjectCard({ subject }) {
       {active && (
         <div className="mt-auto">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] text-zinc-500">Progresso</span>
-            <span className="text-[11px] font-semibold text-zinc-300">{progress}%</span>
+            <span className="text-[11px] text-zinc-500 dark:text-stone-600">Progresso</span>
+            <span className="text-[11px] font-semibold text-zinc-300 dark:text-stone-800">{progress}%</span>
           </div>
           <ProgressBar value={progress} color={color} />
         </div>
