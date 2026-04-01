@@ -13,7 +13,7 @@ function getLocalDateKey(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-export default function Dashboard({ shift = 'noturno-adele', examDate = new Date('2026-04-13T08:00:00') }) {
+export default function Dashboard({ shift = 'noturno-adele', examDate = new Date('2026-04-13T08:00:00'), userName = '' }) {
   const [taskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
 
@@ -72,10 +72,10 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2.5 mr-auto">
             <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.16),rgba(255,62,165,0.2))]">
-              A
+              {userName ? userName.charAt(0).toUpperCase() : 'A'}
             </div>
             <div>
-              <p className="text-sm font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Ola, Aluno</p>
+              <p className="text-sm font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Ola, {userName || 'Aluno'}</p>
               <p className="text-xs text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">Engenharia de Software · 2026/1</p>
             </div>
           </div>

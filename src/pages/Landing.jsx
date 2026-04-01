@@ -11,7 +11,7 @@ const FEATURES = [
   { icon: '✅', label: 'Banco de Questoes', desc: 'Em breve' },
 ];
 
-export default function Landing({ onOpenDashboard }) {
+export default function Landing({ onOpenDashboard, userName = '' }) {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   const titleRef = useRef(null);
@@ -71,7 +71,13 @@ export default function Landing({ onOpenDashboard }) {
       />
 
       <div className="relative z-10 max-w-2xl w-full text-center flex flex-col items-center gap-6">
-        <div ref={heroRef} className="opacity-0">
+        <div ref={heroRef} className="opacity-0 flex flex-col gap-3">
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight text-zinc-100 dark:text-stone-950 cyberpunk:font-mono cyberpunk:text-white">
+            Ola, Seja bem vindo(a){' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 dark:from-blue-600 dark:to-cyan-500 cyberpunk:from-[#ff3ea5] cyberpunk:to-[#00e8ff]">
+              {userName || 'Operador'}
+            </span>
+          </h1>
           <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
             Engenharia de Software · 2026/1

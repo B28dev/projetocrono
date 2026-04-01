@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
+import NamePromptModal from './components/NamePromptModal';
 import Navbar from './components/Navbar';
 import SystemNotice from './components/SystemNotice';
 import Landing from './pages/Landing';
@@ -72,7 +73,9 @@ export default function App() {
 function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange }) {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState('hero');
+  const [currentView, setCurrentView] = useState('login');
+  const [userName, setUserName] = useState('');
+  const isBlockingOverlayActive = currentView === 'login' || currentView === 'name';
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -80,7 +83,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
     const previousBodyOverflow = document.body.style.overflow;
     const previousHtmlOverflow = document.documentElement.style.overflow;
 
-    if (!isAuthenticated) {
+    if (isBlockingOverlayActive) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
     } else {
@@ -92,10 +95,25 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
-  }, [isAuthenticated]);
+  }, [isBlockingOverlayActive]);
+
+  useEffect(() => {
+    if (!isAuthenticated && currentView !== 'login') {
+      setCurrentView('login');
+    }
+  }, [currentView, isAuthenticated]);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
+    setCurrentView('name');
+    navigate('/', { replace: true });
+  };
+
+  const handleNameSubmit = (inputValue) => {
+    const firstName = String(inputValue || '').trim().split(/\s+/)[0] || '';
+    if (!firstName) return;
+
+    setUserName(firstName);
     setCurrentView('hero');
     navigate('/', { replace: true });
   };
@@ -109,9 +127,9 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
   return (
     <div className="min-h-screen flex flex-col">
       <div
-        className={`min-h-screen flex flex-col ${!isAuthenticated ? 'pointer-events-none select-none' : ''}`}
-        aria-hidden={!isAuthenticated}
-        inert={!isAuthenticated ? '' : undefined}
+        className={`min-h-screen flex flex-col ${isBlockingOverlayActive ? 'pointer-events-none select-none' : ''}`}
+        aria-hidden={isBlockingOverlayActive}
+        inert={isBlockingOverlayActive ? '' : undefined}
       >
         <Navbar
           theme={theme}
@@ -125,16 +143,16 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
             <Route
               path="/"
               element={
-                isAuthenticated && currentView === 'hero'
-                  ? <Landing onOpenDashboard={handleOpenDashboard} />
-                  : <Navigate to={isAuthenticated ? '/dashboard' : '/'} replace />
+                !isAuthenticated || currentView !== 'dashboard'
+                  ? <Landing onOpenDashboard={handleOpenDashboard} userName={userName} />
+                  : <Navigate to="/dashboard" replace />
               }
             />
             <Route
               path="/dashboard"
               element={
                 isAuthenticated && currentView === 'dashboard'
-                  ? <Dashboard shift={shift} examDate={selectedShift.examDate} />
+                  ? <Dashboard shift={shift} examDate={selectedShift.examDate} userName={userName} />
                   : <Navigate to="/" replace />
               }
             />
@@ -159,6 +177,15 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
           closeOnBackdrop={false}
           showCloseButton={false}
           ctaLabel="Acessar Terminal"
+        />
+      ) : null}
+
+      {currentView === 'name' ? (
+        <NamePromptModal
+          open
+          onSubmitName={handleNameSubmit}
+          closeOnBackdrop={false}
+          ctaLabel="Prosseguir"
         />
       ) : null}
     </div>
