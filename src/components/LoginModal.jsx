@@ -65,7 +65,9 @@ export default function LoginModal({
       const userCredential = isRegistering
         ? await createUserWithEmailAndPassword(auth, email, password)
         : await signInWithEmailAndPassword(auth, email, password);
-      onLogin?.(userCredential.user);
+      const user = userCredential.user;
+      const nextView = user?.displayName ? 'hero' : 'name';
+      onLogin?.(nextView);
     } catch (error) {
       setErrorMessage(getFirebaseErrorMessage(error));
     } finally {
@@ -116,7 +118,8 @@ export default function LoginModal({
       provider.setCustomParameters({ hd: 'somosicev.com' });
 
       const result = await signInWithPopup(auth, provider);
-      const userEmail = String(result?.user?.email || '').toLowerCase();
+      const user = result?.user;
+      const userEmail = String(user?.email || '').toLowerCase();
 
       if (!userEmail.endsWith(INSTITUTIONAL_DOMAIN)) {
         await signOut(auth);
@@ -124,7 +127,8 @@ export default function LoginModal({
         return;
       }
 
-      onLogin?.(result.user);
+      const nextView = user?.displayName ? 'hero' : 'name';
+      onLogin?.(nextView);
     } catch (error) {
       const code = String(error?.code || '');
       if (code === 'auth/popup-closed-by-user') {

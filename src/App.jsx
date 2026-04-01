@@ -93,20 +93,17 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
           setUserName('');
           setCurrentView('name');
         }
-
-        navigate('/', { replace: true });
       } else {
         setIsAuthenticated(false);
         setUserName('');
         setCurrentView('login');
-        navigate('/', { replace: true });
       }
 
       setIsAuthLoading(false);
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -134,8 +131,15 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
     }
   }, [currentView, isAuthenticated]);
 
-  const handleLogin = () => {
-    setIsAuthLoading(true);
+  const handleLogin = (viewDestino = 'hero') => {
+    setIsAuthenticated(true);
+    setCurrentView(viewDestino);
+    setIsAuthLoading(false);
+    if (viewDestino === 'dashboard') {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+    navigate('/', { replace: true });
   };
 
   const handleNameSubmit = (firstName) => {
@@ -144,10 +148,16 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
     navigate('/', { replace: true });
   };
 
-  const handleOpenDashboard = () => {
+  const handleNavigate = (view) => {
     if (!isAuthenticated) return;
-    setCurrentView('dashboard');
-    navigate('/dashboard');
+    setCurrentView(view);
+
+    if (view === 'dashboard') {
+      navigate('/dashboard');
+      return;
+    }
+
+    navigate('/', { replace: true });
   };
 
   return (
@@ -162,22 +172,18 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
           onToggleTheme={onToggleTheme}
           shift={shift}
           onShiftChange={onShiftChange}
-          onOpenDashboard={handleOpenDashboard}
+          onNavigate={handleNavigate}
         />
         <div className="flex-1">
           <Routes>
             <Route
               path="/"
-              element={
-                !isAuthenticated || currentView !== 'dashboard'
-                  ? <Landing onOpenDashboard={handleOpenDashboard} userName={userName} />
-                  : <Navigate to="/dashboard" replace />
-              }
+              element={<Landing onNavigate={handleNavigate} userName={userName} />}
             />
             <Route
               path="/dashboard"
               element={
-                isAuthenticated && currentView === 'dashboard'
+                isAuthenticated
                   ? <Dashboard shift={shift} examDate={selectedShift.examDate} userName={userName} />
                   : <Navigate to="/" replace />
               }
@@ -185,7 +191,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
             <Route
               path="/materia/arquitetura"
               element={
-                isAuthenticated && currentView === 'dashboard'
+                isAuthenticated
                   ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
                   : <Navigate to="/" replace />
               }

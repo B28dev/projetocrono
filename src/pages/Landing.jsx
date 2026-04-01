@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import SystemNotice from '../components/SystemNotice';
@@ -11,8 +10,7 @@ const FEATURES = [
   { icon: '✅', label: 'Banco de Questoes', desc: 'Em breve' },
 ];
 
-export default function Landing({ onOpenDashboard, userName = '' }) {
-  const navigate = useNavigate();
+export default function Landing({ onNavigate, userName = '' }) {
   const heroRef = useRef(null);
   const titleRef = useRef(null);
   const subRef = useRef(null);
@@ -71,10 +69,10 @@ export default function Landing({ onOpenDashboard, userName = '' }) {
       />
 
       <div className="relative z-10 max-w-2xl w-full text-center flex flex-col items-center gap-6">
-        <div ref={heroRef} className="opacity-0 flex flex-col gap-3">
-          <h1 className="text-2xl md:text-4xl font-bold leading-[1.2] text-zinc-100 dark:text-stone-950 cyberpunk:font-mono cyberpunk:text-white">
+        <div ref={heroRef} className="opacity-0 flex flex-col gap-2">
+          <h1 className="text-sm md:text-base font-medium leading-relaxed text-zinc-300 dark:text-stone-600 cyberpunk:font-mono cyberpunk:text-white/70">
             Ola, Seja bem vindo(a){' '}
-            <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 dark:from-blue-600 dark:to-cyan-500 cyberpunk:from-[#ff3ea5] cyberpunk:to-[#00e8ff]">
+            <span className="ml-1 font-semibold text-[1.06em]">
               {userName || 'Operador'}
             </span>
           </h1>
@@ -85,9 +83,6 @@ export default function Landing({ onOpenDashboard, userName = '' }) {
           className="hero-title text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white"
         >
           <span className="word-shell inline-block overflow-hidden mr-[0.25em]">
-            <span data-text="Painel" className="word inline-block">
-              Painel
-            </span>
           </span>
 
           <br />
@@ -114,15 +109,16 @@ export default function Landing({ onOpenDashboard, userName = '' }) {
 
         <div ref={ctaRef} className="opacity-0">
           <button
-            onClick={() => {
-              onOpenDashboard?.();
-              if (!onOpenDashboard) navigate('/dashboard');
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigate?.('dashboard');
             }}
             data-magnetic
             className="magnetic-el group cyber-button relative overflow-hidden inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-500/20 cyberpunk:border cyberpunk:border-white/15 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.2))] cyberpunk:font-mono cyberpunk:uppercase cyberpunk:tracking-[0.16em]"
           >
             <span className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
-            <span className="relative">Inicializar Sistema</span>
+            <span className="relative">Acessar Matérias</span>
             <svg className="relative w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 16 16">
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

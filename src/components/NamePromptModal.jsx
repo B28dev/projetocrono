@@ -70,14 +70,14 @@ export default function NamePromptModal({
           </p>
 
           <h1
-            className="mt-2 font-mono text-[clamp(2rem,8vw,4.8rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-transparent"
+            className="mt-2 font-mono text-3xl md:text-4xl font-extrabold uppercase leading-tight tracking-[-0.02em] whitespace-nowrap text-transparent"
             style={{
               WebkitTextStroke: `2.2px ${NEON_PINK}`,
               textShadow: '0 0 32px rgba(255,62,165,0.35), 0 0 70px rgba(0,232,255,0.12)',
             }}
           >
-            <span className="block">IDENTIFIQUE</span>
-            <span className="block">SE</span>
+            <span className="inline">IDENTIFIQUE</span>
+            <span className="inline ml-1">SE</span>
           </h1>
 
           <div className="my-6 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />

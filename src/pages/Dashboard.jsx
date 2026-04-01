@@ -70,19 +70,17 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
     <div ref={magneticRef} className="cyber-shell min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
       <div className="cyber-glass border-b border-zinc-800 bg-surface-1 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/80 cyberpunk:border-white/10 cyberpunk:bg-transparent">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2.5 mr-auto">
-            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.16),rgba(255,62,165,0.2))]">
-              {userName ? userName.charAt(0).toUpperCase() : 'A'}
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
-                {'Ol\u00E1'}, {userName || 'Aluno'} Fico Feliz Que Tenha Voltado
-              </p>
-              <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
-                Engenharia de Software {'\u00B7'} 2026/1
+          <div className="flex flex-col gap-2 mr-auto">
+            <p className="text-base md:text-lg font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-cyan-500">
+                {userName || 'Aluno'}
               </span>
-            </div>
+              {', Vamos L\u00E1?'}
+            </p>
+            <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
+              Engenharia de Software {'\u00B7'} 2026/1
+            </span>
           </div>
 
           <div className="cyber-glass rounded-xl border border-white/10 bg-white/5 px-3 py-2 dark:border-stone-300 dark:bg-stone-100/60 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">

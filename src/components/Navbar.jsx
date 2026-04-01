@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { Link, useLocation } from 'react-router-dom';
 import heroMark from '../assets/hero.png';
+import { auth } from '../firebase';
 
 const THEME_LABELS = {
   dark: 'Ativar tema claro',
@@ -13,13 +15,117 @@ const SHIFT_OPTIONS = [
   { value: 'noturno-adele', label: 'Noturno (Adele)' },
 ];
 
-export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onOpenDashboard }) {
+function getProfileData(user) {
+  return {
+    displayName: String(user?.displayName || '').trim(),
+    email: String(user?.email || '').trim(),
+    photoURL: String(user?.photoURL || '').trim(),
+  };
+}
+
+export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
   const { pathname } = useLocation();
+  const profileHubRef = useRef(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [profileError, setProfileError] = useState('');
+  const [profileData, setProfileData] = useState(() => getProfileData(auth.currentUser));
+
   const brandLinkClass = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 text-zinc-100 hover:text-white hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-950 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:text-white cyberpunk:hover:border-[#ff3ea5]/40';
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const nextProfile = getProfileData(user);
+      setProfileData(nextProfile);
+      setEditNameValue(nextProfile.displayName);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!isProfileOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!profileHubRef.current?.contains(event.target)) {
+        setIsProfileOpen(false);
+        setIsEditingName(false);
+        setProfileError('');
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsProfileOpen(false);
+        setIsEditingName(false);
+        setProfileError('');
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isProfileOpen]);
+
+  const displayName = profileData.displayName || 'Usuario ICEV';
+  const email = profileData.email || 'usuario@somosicev.com';
+  const avatarSeed = profileData.displayName || profileData.email || 'U';
+  const avatarInitial = avatarSeed.charAt(0).toUpperCase();
+
+  const handleToggleProfile = () => {
+    setIsProfileOpen((current) => !current);
+    setIsEditingName(false);
+    setProfileError('');
+    setEditNameValue(profileData.displayName);
+  };
+
+  const handleSaveName = async (event) => {
+    event.preventDefault();
+    if (isSavingName) return;
+
+    const normalizedName = editNameValue.trim().replace(/\s+/g, ' ');
+    if (normalizedName.length < 2) {
+      setProfileError('Digite um nome valido.');
+      return;
+    }
+
+    if (!auth.currentUser) {
+      setProfileError('Sessao invalida. Faca login novamente.');
+      return;
+    }
+
+    setIsSavingName(true);
+    setProfileError('');
+
+    try {
+      await updateProfile(auth.currentUser, { displayName: normalizedName });
+      setProfileData((current) => ({ ...current, displayName: normalizedName }));
+      setIsEditingName(false);
+    } catch {
+      setProfileError('Nao foi possivel atualizar o nome.');
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setIsProfileOpen(false);
+    setIsEditingName(false);
+    setProfileError('');
+  };
 
   return (
     <header
-      className="cyber-glass fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#08080f]/70 backdrop-blur-md transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/85 cyberpunk:border-white/10 cyberpunk:bg-transparent"
+      className="cyber-glass fixed top-0 left-0 right-0 z-[100] border-b border-white/5 bg-[#08080f]/70 backdrop-blur-md transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/85 cyberpunk:border-white/10 cyberpunk:bg-transparent"
     >
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link
@@ -32,33 +138,142 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onO
         </Link>
 
         <nav className="flex items-center gap-2">
-          <NavLink
-            to="/dashboard"
+          <NavButton
             active={pathname.startsWith('/dashboard') || pathname.startsWith('/materia')}
-            onClick={onOpenDashboard}
+            onClick={() => onNavigate?.('dashboard')}
           >
-            Terminal
-          </NavLink>
+            Hub
+          </NavButton>
           <ShiftSelect value={shift} onChange={onShiftChange} />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
+          <div ref={profileHubRef} className="relative">
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={isProfileOpen}
+              onClick={handleToggleProfile}
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-sm font-semibold text-zinc-100 transition-colors duration-200 hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:text-stone-900 dark:hover:border-stone-400 dark:hover:bg-stone-100 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:text-white"
+            >
+              {profileData.photoURL ? (
+                <img
+                  src={profileData.photoURL}
+                  alt="Avatar do usuario"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span>{avatarInitial}</span>
+              )}
+            </button>
+
+            <div
+              role="menu"
+              className={`absolute right-0 top-full mt-3 z-[999] w-72 rounded-2xl border border-white/10 bg-[#08080f]/95 p-4 shadow-2xl backdrop-blur-2xl flex flex-col gap-4 origin-top-right transition-all duration-300 ease-out ${isProfileOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-base font-semibold text-white">
+                  {profileData.photoURL ? (
+                    <img
+                      src={profileData.photoURL}
+                      alt="Avatar do usuario"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span>{avatarInitial}</span>
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{displayName}</p>
+                  <p className="truncate text-xs text-white/50">{email}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditingName((current) => !current);
+                    setProfileError('');
+                    setEditNameValue(profileData.displayName);
+                  }}
+                  className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  Editar Perfil
+                </button>
+
+                {isEditingName ? (
+                  <form onSubmit={handleSaveName} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editNameValue}
+                      onChange={(event) => setEditNameValue(event.target.value)}
+                      disabled={isSavingName}
+                      placeholder="Digite seu nome"
+                      className="h-9 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40 focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_18px_rgba(0,232,255,0.18)] disabled:cursor-not-allowed disabled:opacity-70"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSavingName}
+                      className="h-9 rounded-lg border border-cyan-500/40 bg-cyan-500/15 px-3 text-xs font-semibold uppercase tracking-wide text-cyan-200 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isSavingName ? 'Salvando...' : 'Salvar'}
+                    </button>
+                  </form>
+                ) : null}
+
+                {profileError ? (
+                  <p className="text-xs text-rose-400">{profileError}</p>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => alert('Em breve: Upload de imagem!')}
+                  className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  Alterar Foto
+                </button>
+              </div>
+
+              <hr className="border-white/10 my-1" />
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-rose-500 transition-all duration-200 hover:bg-rose-500/10 hover:shadow-[0_0_15px_rgba(244,63,94,0.2)]"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6 3H4.5A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path d="M10 11.5 13.5 8 10 4.5M13.2 8H7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Sair do Sistema
+              </button>
+            </div>
+          </div>
         </nav>
       </div>
     </header>
   );
 }
 
-function NavLink({ to, active, children, onClick }) {
+function NavButton({ active, children, onClick }) {
+  const className = `px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:hover:border-stone-400 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#ff3ea5]/40 ${active
+    ? 'text-zinc-100 bg-white/10 border-[#00e8ff]/30 dark:bg-stone-300 dark:text-stone-900 cyberpunk:border-[#00e8ff]/40 cyberpunk:text-white'
+    : 'text-zinc-400 hover:text-zinc-100 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/70 cyberpunk:hover:text-white'
+    }`;
+
   return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:hover:border-stone-400 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#ff3ea5]/40 ${active
-        ? 'text-zinc-100 bg-white/10 border-[#00e8ff]/30 dark:bg-stone-300 dark:text-stone-900 cyberpunk:border-[#00e8ff]/40 cyberpunk:text-white'
-        : 'text-zinc-400 hover:text-zinc-100 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/70 cyberpunk:hover:text-white'
-        }`}
+    <button
+      type="button"
+      onClick={(event) => {
+        event.preventDefault();
+        onClick?.(event);
+      }}
+      className={className}
     >
       {children}
-    </Link>
+    </button>
   );
 }
 
@@ -127,11 +342,10 @@ function ShiftSelect({ value, onChange }) {
                     onChange(option.value);
                     setOpen(false);
                   }}
-                  className={`relative flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                    isActive
+                  className={`relative flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors ${isActive
                       ? 'text-zinc-100 bg-white/5 dark:text-stone-900 dark:bg-white/70 cyberpunk:text-white cyberpunk:bg-white/[0.06]'
                       : 'text-zinc-200 hover:text-white dark:text-stone-700 dark:hover:text-stone-900'
-                  } hover:bg-gradient-to-r hover:from-pink-500/40 hover:to-cyan-500/40 dark:hover:from-pink-500/15 dark:hover:to-cyan-500/20`}
+                    } hover:bg-gradient-to-r hover:from-pink-500/40 hover:to-cyan-500/40 dark:hover:from-pink-500/15 dark:hover:to-cyan-500/20`}
                 >
                   <span>{option.label}</span>
                 </button>
