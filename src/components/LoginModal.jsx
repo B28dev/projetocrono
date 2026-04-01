@@ -1,8 +1,16 @@
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import { auth } from '../firebase';
 
 const NEON_PINK = '#ff3ea5';
+const INSTITUTIONAL_DOMAIN = '@somosicev.com';
 
 export default function LoginModal({
   open = true,
@@ -13,8 +21,11 @@ export default function LoginModal({
   ctaLabel = 'Acessar Terminal',
   showCloseButton = true,
 }) {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   if (!asPage && !open) return null;
 
@@ -32,18 +43,95 @@ export default function LoginModal({
     const password = String(formData.get('password') || '');
 
     setErrorMessage('');
+    setSuccessMsg('');
 
     if (!email || !password) {
       setErrorMessage('Informe e-mail e senha para continuar.');
       return;
     }
 
+    if (!email.endsWith(INSTITUTIONAL_DOMAIN)) {
+      setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('A senha deve ter no minimo 6 caracteres.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = isRegistering
+        ? await createUserWithEmailAndPassword(auth, email, password)
+        : await signInWithEmailAndPassword(auth, email, password);
       onLogin?.(userCredential.user);
     } catch (error) {
       setErrorMessage(getFirebaseErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (event) => {
+    event.preventDefault();
+    if (isLoading) return;
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get('email') || '').trim().toLowerCase();
+
+    setErrorMessage('');
+    setSuccessMsg('');
+
+    if (!email) {
+      setErrorMessage('Informe seu e-mail institucional.');
+      return;
+    }
+
+    if (!email.endsWith(INSTITUTIONAL_DOMAIN)) {
+      setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMsg('Link de recuperacao enviado para seu e-mail institucional.');
+    } catch (error) {
+      setErrorMessage(getFirebaseErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (isLoading) return;
+
+    setErrorMessage('');
+    setSuccessMsg('');
+    setIsLoading(true);
+
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ hd: 'somosicev.com' });
+
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = String(result?.user?.email || '').toLowerCase();
+
+      if (!userEmail.endsWith(INSTITUTIONAL_DOMAIN)) {
+        await signOut(auth);
+        setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
+        return;
+      }
+
+      onLogin?.(result.user);
+    } catch (error) {
+      const code = String(error?.code || '');
+      if (code === 'auth/popup-closed-by-user') {
+        setErrorMessage('Autenticacao cancelada.');
+      } else {
+        setErrorMessage(getFirebaseErrorMessage(error));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -92,13 +180,27 @@ export default function LoginModal({
               textShadow: '0 0 32px rgba(255,62,165,0.35), 0 0 70px rgba(0,232,255,0.12)',
             }}
           >
-            <span className="block">INICIAR</span>
-            <span className="block">SESSAO</span>
+            {isResetting ? (
+              <>
+                <span className="block">RECUPERACAO</span>
+                <span className="block">DE ACESSO</span>
+              </>
+            ) : isRegistering ? (
+              <>
+                <span className="block">CRIAR CONTA</span>
+                <span className="block">RESTRITA</span>
+              </>
+            ) : (
+              <>
+                <span className="block">INICIAR</span>
+                <span className="block">SESSAO</span>
+              </>
+            )}
           </h1>
 
           <div className="my-6 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={isResetting ? handlePasswordReset : handleSubmit}>
             <div className="space-y-2">
               <label htmlFor="login-email" className="block font-mono text-[0.68rem] uppercase tracking-[0.16em] text-white/65">
                 E-mail
@@ -115,29 +217,117 @@ export default function LoginModal({
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="login-password" className="block font-mono text-[0.68rem] uppercase tracking-[0.16em] text-white/65">
-                Senha
-              </label>
-              <input
-                id="login-password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
+            {!isResetting ? (
+              <div className="space-y-2">
+                <label htmlFor="login-password" className="block font-mono text-[0.68rem] uppercase tracking-[0.16em] text-white/65">
+                  Senha
+                </label>
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                  placeholder="**********"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
+                />
+              </div>
+            ) : null}
+
+            {!isResetting ? (
+              <button
+                type="button"
                 disabled={isLoading}
-                placeholder="**********"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
-              />
-            </div>
+                onClick={() => {
+                  setErrorMessage('');
+                  setSuccessMsg('');
+                  setIsRegistering(false);
+                  setIsResetting(true);
+                }}
+                className="self-end text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Esqueci minha senha
+              </button>
+            ) : null}
+
+            {successMsg ? (
+              <p className="font-mono text-sm text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.35)]">
+                {successMsg}
+              </p>
+            ) : null}
 
             <button
               type="submit"
               disabled={isLoading}
               className="mt-2 w-full rounded-full border border-transparent bg-gradient-to-r from-[#ff3ea5] to-[#c2006a] px-6 py-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.16em] text-white shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_0_44px_rgba(255,62,165,0.52),0_8px_28px_rgba(255,62,165,0.35)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:hover:shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)]"
             >
-              {isLoading ? 'Autenticando...' : ctaLabel}
+              {isLoading
+                ? 'Autenticando...'
+                : isResetting
+                  ? 'Enviar Link de Recuperacao'
+                  : isRegistering
+                    ? 'Criar Acesso'
+                    : ctaLabel}
             </button>
+
+            {isResetting ? (
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => {
+                    setErrorMessage('');
+                    setSuccessMsg('');
+                    setIsRegistering(false);
+                    setIsResetting(false);
+                  }}
+                  className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Voltar para o Login
+                </button>
+              </div>
+            ) : (
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => {
+                    setErrorMessage('');
+                    setSuccessMsg('');
+                    setIsRegistering((current) => !current);
+                  }}
+                  className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isRegistering ? 'Ja possui acesso? Entrar' : 'Nao tem conta? Criar acesso'}
+                </button>
+              </div>
+            )}
           </form>
+
+          {!isResetting ? (
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-white/45">OU</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+          ) : null}
+
+          {!isResetting ? (
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.12em] text-white transition hover:border-cyan-500/50 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true" focusable="false">
+                <path d="M21.35 11.1H12v2.93h5.33c-.23 1.5-1.08 2.77-2.3 3.62v2.41h3.72c2.18-2 3.45-4.95 3.45-8.11 0-.74-.07-1.46-.2-2.15Z" fill="currentColor" />
+                <path d="M12 22c3.03 0 5.58-1 7.44-2.71l-3.72-2.41c-1.03.69-2.34 1.1-3.72 1.1-2.86 0-5.28-1.93-6.14-4.52H2.02v2.48A10 10 0 0 0 12 22Z" fill="currentColor" />
+                <path d="M5.86 13.46a6 6 0 0 1 0-3.82V7.16H2.02a10 10 0 0 0 0 8.78l3.84-2.48Z" fill="currentColor" />
+                <path d="M12 5.98c1.52 0 2.88.52 3.95 1.54l2.96-2.96A9.9 9.9 0 0 0 12 2a10 10 0 0 0-9.98 5.16l3.84 2.48C6.72 7.91 9.14 5.98 12 5.98Z" fill="currentColor" />
+              </svg>
+              {isLoading ? 'Autenticando...' : 'Continuar com o Google'}
+            </button>
+          ) : null}
 
           <div className="mt-4 min-h-[44px]">
             <p
@@ -162,6 +352,18 @@ function getFirebaseErrorMessage(error) {
 
   if (code === 'auth/invalid-credential') {
     return 'E-mail ou senha incorretos.';
+  }
+
+  if (code === 'auth/user-not-found') {
+    return 'E-mail nao encontrado.';
+  }
+
+  if (code === 'auth/email-already-in-use') {
+    return 'Este e-mail ja possui uma conta.';
+  }
+
+  if (code === 'auth/weak-password') {
+    return 'A senha deve ter no minimo 6 caracteres.';
   }
 
   if (code === 'auth/user-disabled') {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
 import NamePromptModal from './components/NamePromptModal';
@@ -7,6 +8,7 @@ import SystemNotice from './components/SystemNotice';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import ArquiteturaPage from './pages/ArquiteturaPage';
+import { auth } from './firebase';
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
@@ -72,10 +74,39 @@ export default function App() {
 
 function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange }) {
   const navigate = useNavigate();
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('login');
   const [userName, setUserName] = useState('');
-  const isBlockingOverlayActive = currentView === 'login' || currentView === 'name';
+  const isBlockingOverlayActive = isAuthLoading || currentView === 'login' || currentView === 'name';
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+
+        const firstName = String(user.displayName || '').trim().split(/\s+/)[0] || '';
+        if (firstName) {
+          setUserName(firstName);
+          setCurrentView('hero');
+        } else {
+          setUserName('');
+          setCurrentView('name');
+        }
+
+        navigate('/', { replace: true });
+      } else {
+        setIsAuthenticated(false);
+        setUserName('');
+        setCurrentView('login');
+        navigate('/', { replace: true });
+      }
+
+      setIsAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -104,15 +135,10 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
   }, [currentView, isAuthenticated]);
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
-    setCurrentView('name');
-    navigate('/', { replace: true });
+    setIsAuthLoading(true);
   };
 
-  const handleNameSubmit = (inputValue) => {
-    const firstName = String(inputValue || '').trim().split(/\s+/)[0] || '';
-    if (!firstName) return;
-
+  const handleNameSubmit = (firstName) => {
     setUserName(firstName);
     setCurrentView('hero');
     navigate('/', { replace: true });
@@ -170,7 +196,13 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
         <SystemNotice compact />
       </div>
 
-      {!isAuthenticated ? (
+      {isAuthLoading ? (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center bg-[#08080f]/85 backdrop-blur-xl">
+          <div className="h-12 w-12 rounded-full border-2 border-[#00e8ff]/30 border-t-[#ff3ea5] animate-spin" />
+        </div>
+      ) : null}
+
+      {!isAuthLoading && !isAuthenticated ? (
         <LoginModal
           open
           onLogin={handleLogin}
@@ -180,7 +212,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
         />
       ) : null}
 
-      {currentView === 'name' ? (
+      {!isAuthLoading && isAuthenticated && currentView === 'name' ? (
         <NamePromptModal
           open
           onSubmitName={handleNameSubmit}

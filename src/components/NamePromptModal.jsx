@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { updateProfile } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const NEON_PINK = '#ff3ea5';
 
@@ -9,6 +11,7 @@ export default function NamePromptModal({
   ctaLabel = 'Prosseguir',
 }) {
   const [fullName, setFullName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   if (!open) return null;
@@ -18,17 +21,32 @@ export default function NamePromptModal({
     if (event.target === event.currentTarget) event.preventDefault();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const normalizedName = fullName.trim().replace(/\s+/g, ' ');
+    if (isSaving) return;
 
-    if (normalizedName.length < 2) {
+    const normalizedName = fullName.trim().replace(/\s+/g, ' ');
+    const firstName = normalizedName.split(' ')[0] || '';
+
+    if (firstName.length < 2) {
       setErrorMessage('Digite um nome valido.');
       return;
     }
 
+    if (!auth.currentUser) {
+      setErrorMessage('Sessao invalida. Faca login novamente.');
+      return;
+    }
+
     setErrorMessage('');
-    onSubmitName?.(normalizedName);
+    setIsSaving(true);
+    try {
+      await updateProfile(auth.currentUser, { displayName: firstName });
+      onSubmitName?.(firstName);
+    } catch {
+      setErrorMessage('Falha ao salvar nome. Tente novamente.');
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -77,16 +95,18 @@ export default function NamePromptModal({
                 autoFocus
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
+                disabled={isSaving}
                 placeholder="Digite seu nome..."
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)]"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
 
             <button
               type="submit"
-              className="mt-2 w-full rounded-full border border-transparent bg-gradient-to-r from-[#ff3ea5] to-[#c2006a] px-6 py-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.16em] text-white shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_0_44px_rgba(255,62,165,0.52),0_8px_28px_rgba(255,62,165,0.35)]"
+              disabled={isSaving}
+              className="mt-2 w-full rounded-full border border-transparent bg-gradient-to-r from-[#ff3ea5] to-[#c2006a] px-6 py-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.16em] text-white shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_0_44px_rgba(255,62,165,0.52),0_8px_28px_rgba(255,62,165,0.35)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:hover:shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)]"
             >
-              {ctaLabel}
+              {isSaving ? 'Salvando...' : ctaLabel}
             </button>
           </form>
 

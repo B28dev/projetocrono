@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { useGsapStagger } from '../hooks/useGsapReveal';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import SubjectCard, { getSubjects } from '../components/SubjectCard';
@@ -74,9 +74,14 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
             <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.16),rgba(255,62,165,0.2))]">
               {userName ? userName.charAt(0).toUpperCase() : 'A'}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Ola, {userName || 'Aluno'}</p>
-              <p className="text-xs text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">Engenharia de Software · 2026/1</p>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
+                {'Ol\u00E1'}, {userName || 'Aluno'} Fico Feliz Que Tenha Voltado
+              </p>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
+                Engenharia de Software {'\u00B7'} 2026/1
+              </span>
             </div>
           </div>
 

@@ -72,24 +72,27 @@ export default function Landing({ onOpenDashboard, userName = '' }) {
 
       <div className="relative z-10 max-w-2xl w-full text-center flex flex-col items-center gap-6">
         <div ref={heroRef} className="opacity-0 flex flex-col gap-3">
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight text-zinc-100 dark:text-stone-950 cyberpunk:font-mono cyberpunk:text-white">
+          <h1 className="text-2xl md:text-4xl font-bold leading-[1.2] text-zinc-100 dark:text-stone-950 cyberpunk:font-mono cyberpunk:text-white">
             Ola, Seja bem vindo(a){' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 dark:from-blue-600 dark:to-cyan-500 cyberpunk:from-[#ff3ea5] cyberpunk:to-[#00e8ff]">
+            <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 dark:from-blue-600 dark:to-cyan-500 cyberpunk:from-[#ff3ea5] cyberpunk:to-[#00e8ff]">
               {userName || 'Operador'}
             </span>
           </h1>
-          <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
-            Engenharia de Software · 2026/1
-          </span>
         </div>
 
-        <h1 ref={titleRef} className="hero-title text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
+        <h1
+          ref={titleRef}
+          className="hero-title text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white"
+        >
+          <span className="word-shell inline-block overflow-hidden mr-[0.25em]">
+            <span data-text="Painel" className="word inline-block">
+              Painel
+            </span>
+          </span>
+
+          <br />
+
           {[
-            { label: 'Painel' },
-            { label: 'da' },
-            { label: 'Turma' },
-            { label: 'Adele' },
             { label: 'Engenharia', outline: true },
             { label: 'de', outline: true },
             { label: 'Software', outline: true },
