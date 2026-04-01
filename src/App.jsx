@@ -183,7 +183,9 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
             <Route
               path="/dashboard"
               element={
-                isAuthenticated
+                isAuthLoading
+                  ? null
+                  : isAuthenticated
                   ? <Dashboard shift={shift} examDate={selectedShift.examDate} userName={userName} />
                   : <Navigate to="/" replace />
               }
@@ -191,7 +193,9 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
             <Route
               path="/materia/arquitetura"
               element={
-                isAuthenticated
+                isAuthLoading
+                  ? null
+                  : isAuthenticated
                   ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
                   : <Navigate to="/" replace />
               }

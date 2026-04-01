@@ -134,14 +134,13 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
             <div className="mt-3">
               <button
                 type="button"
-                data-magnetic
                 onClick={() => setVideosOpen((value) => !value)}
                 className="flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-zinc-200 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/60 cyberpunk:hover:text-[#00e8ff]"
               >
                 <svg className={`h-3.5 w-3.5 transition-transform ${videosOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 6 10">
                   <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                {videosOpen ? 'Ocultar recursos' : `${resources.length} recurso${resources.length > 1 ? 's' : ''}`}
+                {videosOpen ? 'Ocultar Vídeos/PDFs' : 'Vídeos/PDFs'}
               </button>
 
               {videosOpen && (
