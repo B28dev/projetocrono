@@ -2,62 +2,42 @@ import { useNavigate } from 'react-router-dom';
 import { CountdownBadge } from './Countdown';
 import ProgressBar from './ProgressBar';
 
-const SUBJECTS = [
-  {
-    id: 'arquitetura',
-    name: 'Arquitetura de Computadores',
-    short: 'ARQ',
-    active: true,
-    color: 'blue',
-    progress: 35,
-    examDate: new Date('2026-04-13T08:00:00'),
-  },
-  {
-    id: 'matematica-discreta',
-    name: 'Matematica Discreta',
-    short: 'M.D',
-    active: false,
-    color: 'purple',
-    progress: 0,
-    examDate: new Date('2026-04-14T08:00:00'),
-  },
-  {
-    id: 'algoritmos-programacao',
-    name: 'Algoritmos e Programacao',
-    short: 'ALG',
-    active: false,
-    color: 'amber',
-    progress: 0,
-    examDate: new Date('2026-04-09T08:00:00'),
-  },
-  {
-    id: 'intro-eng-software',
-    name: 'Intro. Engenharia de Software',
-    short: 'IES',
-    active: false,
-    color: 'teal',
-    progress: 0,
-    examDate: new Date('2026-04-08T08:00:00'),
-  },
-  {
-    id: 'eletiva-ingles',
-    name: 'Eletiva I (Ingles)',
-    short: 'ING',
-    active: false,
-    color: 'green',
-    progress: 0,
-    examDate: new Date('2026-04-06T08:00:00'),
-  },
-  {
-    id: 'empreendedorismo',
-    name: 'Empreendedorismo',
-    short: 'EMP',
-    active: false,
-    color: 'rose',
-    progress: 0,
-    examDate: new Date('2026-04-10T08:00:00'),
-  },
+const SUBJECT_BASE = [
+  { id: 'arquitetura', name: 'Arquitetura de Computadores', short: 'ARQ', active: true, color: 'blue', progress: 35 },
+  { id: 'matematica-discreta', name: 'Matematica Discreta', short: 'M.D', active: false, color: 'purple', progress: 0 },
+  { id: 'algoritmos-programacao', name: 'Algoritmos e Programacao', short: 'ALG', active: false, color: 'amber', progress: 0 },
+  { id: 'intro-eng-software', name: 'Intro. Engenharia de Software', short: 'IES', active: false, color: 'teal', progress: 0 },
+  { id: 'eletiva-ingles', name: 'Eletiva I (Ingles)', short: 'ING', active: false, color: 'green', progress: 0 },
+  { id: 'empreendedorismo', name: 'Empreendedorismo', short: 'EMP', active: false, color: 'rose', progress: 0 },
 ];
+
+const SUBJECT_EXAM_DATES = {
+  'noturno-adele': {
+    arquitetura: '2026-04-13T08:00:00',
+    'matematica-discreta': '2026-04-14T08:00:00',
+    'algoritmos-programacao': '2026-04-09T08:00:00',
+    'intro-eng-software': '2026-04-08T08:00:00',
+    'eletiva-ingles': '2026-04-06T08:00:00',
+    empreendedorismo: '2026-04-10T08:00:00',
+  },
+  'vespertino-snyder': {
+    arquitetura: '2026-04-07T08:00:00',
+    'matematica-discreta': '2026-04-14T08:00:00',
+    'algoritmos-programacao': '2026-04-08T08:00:00',
+    'intro-eng-software': '2026-04-13T08:00:00',
+    'eletiva-ingles': '2026-04-06T08:00:00',
+    empreendedorismo: '2026-04-10T08:00:00',
+  },
+};
+
+function getSubjects(shift = 'noturno-adele') {
+  const dates = SUBJECT_EXAM_DATES[shift] || SUBJECT_EXAM_DATES['noturno-adele'];
+
+  return SUBJECT_BASE.map((subject) => ({
+    ...subject,
+    examDate: new Date(dates[subject.id]),
+  }));
+}
 
 const colorMap = {
   blue: { badge: 'bg-blue-500/15 text-blue-400 ring-blue-500/30 cyberpunk:bg-[#00e8ff]/12 cyberpunk:text-[#00e8ff] cyberpunk:ring-[#00e8ff]/25' },
@@ -68,11 +48,12 @@ const colorMap = {
   rose: { badge: 'bg-rose-500/15 text-rose-400 ring-rose-500/30 cyberpunk:bg-rose-500/10 cyberpunk:text-rose-300 cyberpunk:ring-rose-400/25' },
 };
 
-export default function SubjectCard({ subject, metrics = null }) {
+export default function SubjectCard({ subject, metrics = null, shift = 'noturno-adele' }) {
   const navigate = useNavigate();
   const { name, short, active, color, progress, examDate } = subject;
   const colors = colorMap[color] || colorMap.blue;
   const effectiveProgress = active && metrics ? metrics.progressPercent : progress;
+  const countdownKey = `${shift}-${subject.id}-${examDate?.getTime?.() ?? examDate}`;
 
   const handleClick = () => {
     if (active) navigate(`/materia/${subject.id}`);
@@ -107,7 +88,7 @@ export default function SubjectCard({ subject, metrics = null }) {
           {name}
         </p>
         <div className="mt-1">
-          <CountdownBadge target={examDate} />
+          <CountdownBadge key={countdownKey} target={examDate} />
         </div>
       </div>
 
@@ -138,4 +119,4 @@ export default function SubjectCard({ subject, metrics = null }) {
   );
 }
 
-export { SUBJECTS };
+export { getSubjects };

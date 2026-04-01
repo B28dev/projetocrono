@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { examCoverage, modelSummaries, referencePlaylists, topics, studyPlan } from '../data/arquitetura';
+import {
+  examCoverage,
+  getStudyPlanByShift,
+  getStudyPlanTaskStorageKey,
+  modelSummaries,
+  referencePlaylists,
+  topics,
+} from '../data/arquitetura';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
 import { CountdownFull } from '../components/Countdown';
@@ -32,7 +39,18 @@ function Section({ title, subtitle, children }) {
   );
 }
 
-export default function ArquiteturaPage() {
+function formatDatePtBr(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+export default function ArquiteturaPage({
+  shift = 'noturno-adele',
+  shiftLabel = 'Noturno (Adele)',
+  examDate = new Date('2026-04-13T08:00:00'),
+}) {
   const navigate = useNavigate();
   const headerRef = useGsapReveal();
   const topicsRef = useGsapStagger('.topic-chip-content', { stagger: 0.08, delay: 0.15 });
@@ -41,6 +59,7 @@ export default function ArquiteturaPage() {
   const modelSummariesRef = useGsapStagger('.summary-item', { stagger: 0.08, delay: 0.2 });
   const summariesRef = useGsapStagger('.summary-item', { stagger: 0.08, delay: 0.2 });
   const magneticRef = useGsapMagnetic('[data-magnetic]');
+  const examDateText = formatDatePtBr(examDate);
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
   const [taskProgress, setTaskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
@@ -59,25 +78,27 @@ export default function ArquiteturaPage() {
   }, [taskProgress]);
 
   const todayKey = getLocalDateKey();
+  const studyPlan = getStudyPlanByShift(shift);
 
-  const toggleTask = (storageDate, taskIndex) => {
+  const toggleTask = (storageKey, taskIndex) => {
     setTaskProgress((current) => ({
       ...current,
-      [storageDate]: {
-        ...current[storageDate],
-        [taskIndex]: !current[storageDate]?.[taskIndex],
+      [storageKey]: {
+        ...current[storageKey],
+        [taskIndex]: !current[storageKey]?.[taskIndex],
       },
     }));
   };
 
   const displayStudyPlan = studyPlan.reduce(
     (groups, item) => {
-      const checkedTasks = taskProgress[item.date] || {};
+      const storageDate = getStudyPlanTaskStorageKey(shift, item);
+      const checkedTasks = taskProgress[storageDate] || {};
       const isDone = item.tasks.length > 0 && item.tasks.every((_, index) => checkedTasks[index]);
       const preparedItem = {
         ...item,
-        storageDate: item.date,
-        renderKey: item.date,
+        storageDate,
+        renderKey: item.id || item.date,
         isOverdue: false,
       };
 
@@ -89,7 +110,7 @@ export default function ArquiteturaPage() {
       if (item.date < todayKey && !isDone) {
         groups.overdue.push({
           ...preparedItem,
-          renderKey: `${item.date}-overdue`,
+          renderKey: `${item.id || item.date}-overdue`,
           isOverdue: true,
         });
         return groups;
@@ -139,19 +160,21 @@ export default function ArquiteturaPage() {
                   <span className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-50 cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.16),rgba(255,62,165,0.22))] cyberpunk:text-white">
                     ARQ
                   </span>
-                  <span className="text-xs font-medium text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">Engenharia de Software - 2026/1</span>
+                  <span className="text-xs font-medium text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                    Engenharia de Software - 2026/1 - {shiftLabel}
+                  </span>
                 </div>
                 <h1 className="text-2xl font-bold text-zinc-100 tracking-tight dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
                   Arquitetura de Computadores
                 </h1>
                 <p className="text-sm text-zinc-500 mt-1 dark:text-stone-600 cyberpunk:text-white/65">
-                  Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">13/04/2026</span> - 5 questoes dissertativas - 1h40
+                  Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">{examDateText}</span> - 5 questoes dissertativas - 1h40
                 </p>
               </div>
 
               <div className="cyber-glass rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10">
                 <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2 dark:text-stone-500 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">Proxima prova em</p>
-                <CountdownFull />
+                <CountdownFull target={examDate} />
               </div>
             </div>
           </div>

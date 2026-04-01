@@ -6,18 +6,29 @@ import { examDate } from '../data/arquitetura';
  * Updates every second. Returns { days, hours, minutes, seconds, isPast }.
  */
 export function useCountdown(target = examDate) {
-  const [countdown, setCountdown] = useState(calculate(target));
+  const targetMs = toTimestamp(target);
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = setInterval(() => setCountdown(calculate(target)), 1000);
+    const id = setInterval(() => setNowMs(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [target]);
+  }, []);
 
-  return countdown;
+  return calculate(targetMs, nowMs);
 }
 
-function calculate(target) {
-  const diff = target - Date.now();
+function toTimestamp(target) {
+  if (target instanceof Date) return target.getTime();
+  if (typeof target === 'number') return target;
+  return new Date(target).getTime();
+}
+
+function calculate(targetMs, nowMs = Date.now()) {
+  if (!Number.isFinite(targetMs)) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
+  }
+
+  const diff = targetMs - nowMs;
   if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
 
   const totalSeconds = Math.floor(diff / 1000);

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useGsapStagger } from '../hooks/useGsapReveal';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
-import SubjectCard, { SUBJECTS } from '../components/SubjectCard';
-import { examDate, studyPlan } from '../data/arquitetura';
+import SubjectCard, { getSubjects } from '../components/SubjectCard';
+import { getStudyPlanByShift, getStudyPlanTaskStorageKey } from '../data/arquitetura';
 
 const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress-v2';
 
@@ -13,7 +13,7 @@ function getLocalDateKey(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-export default function Dashboard() {
+export default function Dashboard({ shift = 'noturno-adele', examDate = new Date('2026-04-13T08:00:00') }) {
   const [taskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
 
@@ -27,11 +27,13 @@ export default function Dashboard() {
 
   const gridRef = useGsapStagger('.subject-card');
   const magneticRef = useGsapMagnetic('[data-magnetic]');
+  const subjects = useMemo(() => getSubjects(shift), [shift]);
+  const studyPlan = useMemo(() => getStudyPlanByShift(shift), [shift]);
 
   const checklistStats = useMemo(() => {
     const totalTasks = studyPlan.reduce((acc, item) => acc + item.tasks.length, 0);
     const completedTasks = studyPlan.reduce((acc, item) => {
-      const saved = taskProgress[item.date] || {};
+      const saved = taskProgress[getStudyPlanTaskStorageKey(shift, item)] || {};
       const doneInDay = item.tasks.reduce((dayAcc, _, index) => dayAcc + (saved[index] ? 1 : 0), 0);
       return acc + doneInDay;
     }, 0);
@@ -40,11 +42,13 @@ export default function Dashboard() {
     const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     const todayKey = getLocalDateKey();
-    const todayPlan = studyPlan.find((item) => item.date === todayKey);
-    const todayTotal = todayPlan?.tasks.length || 0;
-    const todayDone = todayPlan
-      ? todayPlan.tasks.reduce((acc, _, index) => acc + ((taskProgress[todayKey] || {})[index] ? 1 : 0), 0)
-      : 0;
+    const todayPlans = studyPlan.filter((item) => item.date === todayKey);
+    const todayTotal = todayPlans.reduce((acc, item) => acc + item.tasks.length, 0);
+    const todayDone = todayPlans.reduce((acc, item) => {
+      const saved = taskProgress[getStudyPlanTaskStorageKey(shift, item)] || {};
+      const doneInDay = item.tasks.reduce((dayAcc, _, index) => dayAcc + (saved[index] ? 1 : 0), 0);
+      return acc + doneInDay;
+    }, 0);
 
     const now = new Date();
     const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -60,7 +64,7 @@ export default function Dashboard() {
       todayTotal,
       daysToExam,
     };
-  }, [taskProgress]);
+  }, [examDate, shift, studyPlan, taskProgress]);
 
   return (
     <div ref={magneticRef} className="cyber-shell min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
@@ -99,9 +103,9 @@ export default function Dashboard() {
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SUBJECTS.map((s) => (
-            <div key={s.id} className="subject-card">
-              <SubjectCard subject={s} metrics={s.id === 'arquitetura' ? checklistStats : null} />
+          {subjects.map((s) => (
+            <div key={`${shift}-${s.id}`} className="subject-card">
+              <SubjectCard subject={s} shift={shift} metrics={s.id === 'arquitetura' ? checklistStats : null} />
             </div>
           ))}
         </div>

@@ -1,4 +1,4 @@
-export const examDate = new Date('2026-04-13T08:00:00');
+export const examDate = new Date('2026-04-07T08:00:00');
 
 export const referencePlaylists = [
   {
@@ -26,7 +26,7 @@ export const topics = [
   { id: 'paralela', name: 'Arq. Paralela', frequency: '1/3 provas', level: 'apareceu' },
 ];
 
-export const studyPlan = [
+const studyPlanNoturnoBase = [
   {
     date: '2026-03-31',
     label: 'Ter 31/03',
@@ -428,6 +428,90 @@ export const studyPlan = [
     isExamDay: true,
   },
 ];
+
+const VESPERTINO_CRONO_MAP = [
+  { date: '2026-03-28', label: 'Sab 28/03', topic: 'Introducao + Geracoes' },
+  { date: '2026-03-29', label: 'Dom 29/03', topic: 'Sistemas de numeracao e conversoes' },
+  { date: '2026-03-30', label: 'Seg 30/03', topic: 'Operacoes binarias: +, -, x e /' },
+  { date: '2026-03-31', label: 'Ter 31/03', topic: 'Memoria RAM, ROM e hierarquia' },
+  { date: '2026-04-01', label: 'Qua 01/04', topic: 'Memoria cache - L1, L2 e L3' },
+  { date: '2026-04-02', label: 'Qui 02/04', topic: 'Calculo de memoria - T, N, M e E' },
+  { date: '2026-04-03', label: 'Sex 03/04', topic: 'RISC vs CISC - tema mais cobrado' },
+  { date: '2026-04-04', label: 'Sab 04/04', topic: 'Pipeline, ULA e arquitetura paralela' },
+  { date: '2026-04-05', label: 'Dom 05/04', topic: 'Resolver Questoes (se possivel algum simulado)' },
+  { date: '2026-04-06', label: 'Seg 06/04', topic: 'Reforco nos pontos fracos' },
+  { date: '2026-04-06', label: 'Seg 06/04', topic: 'Vespera - revisao leve e descanso' },
+  { date: '2026-04-07', label: 'Ter 07/04', topic: 'Dia da Prova', isExamDay: true },
+];
+
+function withPlanIds(plan, prefix) {
+  return plan.map((item, index) => ({
+    ...item,
+    id: `${prefix}-${index + 1}`,
+  }));
+}
+
+const studyPlanNoturno = withPlanIds(studyPlanNoturnoBase, 'noturno');
+
+const studyPlanVespertinoBase = withPlanIds(
+  studyPlanNoturnoBase.map((item, index) => {
+    const mapped = VESPERTINO_CRONO_MAP[index];
+
+    if (!mapped) return item;
+
+    return {
+      ...item,
+      date: mapped.date,
+      label: mapped.label,
+      topic: mapped.topic,
+      isExamDay: mapped.isExamDay ?? item.isExamDay,
+    };
+  }),
+  'vespertino',
+);
+
+const studyPlanVespertino = [
+  {
+    id: 'vespertino-0',
+    date: '2026-03-27',
+    label: 'Sex 27/03',
+    topic: 'Playlists Referencia',
+    tasks: [
+      'Playlist base para geracoes, numeracao e memoria.',
+      'Playlist de apoio para cache, pipeline, paralelismo e RISC/CISC.',
+    ],
+    resources: [
+      {
+        kind: 'youtube',
+        title: 'Prof. Marcelo Rios - Arquitetura de Computadores',
+        url: 'https://www.youtube.com/playlist?list=PL866_LrQxNVipiEgWtJMK5Fcgc6IBfVvc',
+      },
+      {
+        kind: 'youtube',
+        title: 'Prof. Santiago - Arquitetura de Computadores 2020/1',
+        url: 'https://www.youtube.com/playlist?list=PLBw9d_OueVJQV_O4qEvC2e5TQ5RZeL9BD',
+      },
+    ],
+    notes: [],
+  },
+  ...studyPlanVespertinoBase,
+];
+
+export const studyPlanByShift = {
+  'noturno-adele': studyPlanNoturno,
+  'vespertino-snyder': studyPlanVespertino,
+};
+
+export function getStudyPlanByShift(shift = 'noturno-adele') {
+  return studyPlanByShift[shift] || studyPlanByShift['noturno-adele'];
+}
+
+export function getStudyPlanTaskStorageKey(shift, item) {
+  const itemKey = item?.id || item?.date || 'unknown';
+  return `${shift}:${itemKey}`;
+}
+
+export const studyPlan = studyPlanByShift['noturno-adele'];
 
 export const modelSummaries = [
   {

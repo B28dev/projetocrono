@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import heroMark from '../assets/hero.png';
 
@@ -7,7 +8,12 @@ const THEME_LABELS = {
   cyberpunk: 'Ativar tema escuro',
 };
 
-export default function Navbar({ theme, onToggleTheme }) {
+const SHIFT_OPTIONS = [
+  { value: 'vespertino-snyder', label: 'Vespertino (Snyder)' },
+  { value: 'noturno-adele', label: 'Noturno (Adele)' },
+];
+
+export default function Navbar({ theme, onToggleTheme, shift, onShiftChange }) {
   const { pathname } = useLocation();
   const brandLinkClass = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 text-zinc-100 hover:text-white hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-950 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:text-white cyberpunk:hover:border-[#ff3ea5]/40';
 
@@ -29,6 +35,7 @@ export default function Navbar({ theme, onToggleTheme }) {
           <NavLink to="/dashboard" active={pathname.startsWith('/dashboard') || pathname.startsWith('/materia')}>
             Dashboard
           </NavLink>
+          <ShiftSelect value={shift} onChange={onShiftChange} />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </nav>
       </div>
@@ -47,6 +54,88 @@ function NavLink({ to, active, children }) {
     >
       {children}
     </Link>
+  );
+}
+
+function ShiftSelect({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const selected = useMemo(
+    () => SHIFT_OPTIONS.find((option) => option.value === value) || SHIFT_OPTIONS[1],
+    [value],
+  );
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!rootRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className="cyber-glass min-w-[220px] text-xs rounded-lg px-3 py-2 border border-white/10 bg-[#08080f]/85 text-zinc-100 transition-colors dark:border-stone-300 dark:bg-stone-100 dark:text-stone-900 cyberpunk:border-[#00e8ff]/30 cyberpunk:text-white"
+      >
+        <span className="flex items-center justify-between gap-3">
+          <span className="truncate">{selected.label}</span>
+          <svg
+            className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 12 8"
+          >
+            <path d="M1 1.5 6 6.5l5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </button>
+
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute right-0 mt-2 w-full overflow-hidden rounded-xl border border-white/10 bg-[#08080f]/95 p-1.5 backdrop-blur-xl shadow-[0_14px_40px_rgba(0,0,0,0.45)] dark:border-stone-300 dark:bg-stone-100 cyberpunk:border-white/10"
+        >
+          {SHIFT_OPTIONS.map((option) => {
+            const isActive = option.value === value;
+            return (
+              <li key={option.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={isActive}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={`relative flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                    isActive
+                      ? 'text-zinc-100 bg-white/5 dark:text-stone-900 dark:bg-white/70 cyberpunk:text-white cyberpunk:bg-white/[0.06]'
+                      : 'text-zinc-200 hover:text-white dark:text-stone-700 dark:hover:text-stone-900'
+                  } hover:bg-gradient-to-r hover:from-pink-500/40 hover:to-cyan-500/40 dark:hover:from-pink-500/15 dark:hover:to-cyan-500/20`}
+                >
+                  <span>{option.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
 
