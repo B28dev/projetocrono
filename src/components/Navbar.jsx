@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Link, useLocation } from 'react-router-dom';
-import heroMark from '../assets/hero.png';
-import { auth } from '../firebase';
+import heroMark from '../../assets/styles/fundoquad.png';
+import { auth, storage } from '../firebase';
 
 const THEME_LABELS = {
   dark: 'Ativar tema claro',
@@ -26,14 +27,16 @@ function getProfileData(user) {
 export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
   const { pathname } = useLocation();
   const profileHubRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [profileError, setProfileError] = useState('');
   const [profileData, setProfileData] = useState(() => getProfileData(auth.currentUser));
 
-  const brandLinkClass = 'flex items-center gap-2 rounded-xl border border-transparent px-4 py-2 text-sm text-zinc-100 transition-colors hover:bg-white/5 dark:text-stone-900 dark:hover:bg-stone-200/50 cyberpunk:text-white';
+  const brandLinkClass = 'flex items-center gap-1.5 rounded-xl border border-transparent px-2.5 py-1.5 text-xs text-zinc-100 transition-colors hover:bg-white/5 md:gap-2 md:px-4 md:py-2 md:text-sm dark:text-stone-900 dark:hover:bg-stone-200/50 cyberpunk:text-white';
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -123,21 +126,63 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
     setProfileError('');
   };
 
+  const handleTriggerFilePicker = () => {
+    if (isUploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setProfileError('Selecione uma imagem valida.');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileError('A imagem deve ter no maximo 2MB.');
+      return;
+    }
+
+    if (!auth.currentUser) {
+      setProfileError('Sessao invalida. Faca login novamente.');
+      return;
+    }
+
+    setProfileError('');
+    setIsUploading(true);
+
+    try {
+      const fileRef = storageRef(storage, `avatars/${auth.currentUser.uid}`);
+      await uploadBytes(fileRef, file);
+      const photoURL = await getDownloadURL(fileRef);
+      await updateProfile(auth.currentUser, { photoURL });
+      setProfileData((current) => ({ ...current, photoURL }));
+    } catch {
+      setProfileError('Falha no upload da imagem. Tente novamente.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <header
       className="sticky top-0 z-[40] border-b border-white/[0.05] bg-[#08080f]/70 shadow-[0_4px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-colors duration-300 dark:border-stone-300/80 dark:bg-stone-50/85 dark:shadow-[0_4px_24px_rgba(120,113,108,0.16)] cyberpunk:border-white/[0.08] cyberpunk:bg-[#08080f]/70"
     >
-      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-3 py-2 md:px-6 md:py-3 flex items-center justify-between">
         <Link
           to="/"
           className={brandLinkClass}
           style={{ transform: 'none' }}
         >
-          <img src={heroMark} alt="" className="h-7 w-7 object-cover drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-          <span className="font-semibold">Painel</span>
+          <img src={heroMark} alt="" className="h-7 w-7 md:h-9 md:w-9 object-cover drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+          <span className="font-semibold">Inicio</span>
         </Link>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1 md:gap-2">
           <NavButton
             active={pathname.startsWith('/dashboard') || pathname.startsWith('/materia')}
             onClick={() => onNavigate?.('dashboard')}
@@ -153,13 +198,13 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
               aria-haspopup="menu"
               aria-expanded={isProfileOpen}
               onClick={handleToggleProfile}
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/5 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:border-cyan-400 hover:bg-white/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.4)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-400 dark:bg-stone-200/60 dark:text-stone-900 dark:hover:border-cyan-500"
+              className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/5 text-xs md:text-sm font-semibold text-zinc-100 transition-all duration-300 hover:border-cyan-400 hover:bg-white/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.4)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-400 dark:bg-stone-200/60 dark:text-stone-900 dark:hover:border-cyan-500"
             >
               {profileData.photoURL ? (
                 <img
                   src={profileData.photoURL}
                   alt="Avatar do usuario"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full rounded-full object-cover"
                 />
               ) : (
                 <span>{avatarInitial}</span>
@@ -168,16 +213,16 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
 
             <div
               role="menu"
-              className={`absolute right-0 top-full mt-3 z-[999] w-72 rounded-2xl border border-white/10 bg-[#08080f]/95 p-4 shadow-2xl backdrop-blur-2xl flex flex-col gap-4 origin-top-right transition-all duration-300 ease-out ${isProfileOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
+              className={`absolute right-0 top-full mt-3 z-[999] w-[min(92vw,18rem)] md:w-72 rounded-2xl border border-white/10 bg-[#08080f]/95 p-4 shadow-2xl backdrop-blur-2xl flex flex-col gap-4 origin-top-right transition-all duration-300 ease-out ${isProfileOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
                 }`}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-base font-semibold text-white">
+                <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-sm md:text-base font-semibold text-white">
                   {profileData.photoURL ? (
                     <img
                       src={profileData.photoURL}
                       alt="Avatar do usuario"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full rounded-full object-cover"
                     />
                   ) : (
                     <span>{avatarInitial}</span>
@@ -227,12 +272,21 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
                   <p className="text-xs text-rose-400">{profileError}</p>
                 ) : null}
 
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+
                 <button
                   type="button"
-                  onClick={() => alert('Em breve: Upload de imagem!')}
-                  className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                  onClick={handleTriggerFilePicker}
+                  disabled={isUploading}
+                  className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Alterar Foto
+                  {isUploading ? 'Enviando imagem...' : 'Alterar Foto'}
                 </button>
               </div>
 
@@ -258,7 +312,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
 }
 
 function NavButton({ active, children, onClick }) {
-  const className = `inline-flex items-center rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 ${active
+  const className = `inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs md:px-4 md:py-2 md:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 ${active
     ? 'border-cyan-400/40 bg-white/10 text-white dark:border-cyan-500/45 dark:bg-stone-200/85 dark:text-stone-900'
     : 'border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10 hover:text-white dark:border-stone-300 dark:bg-stone-200/55 dark:text-stone-700 dark:hover:border-stone-400 dark:hover:bg-stone-100 dark:hover:text-stone-900'
     }`;
@@ -311,7 +365,7 @@ function ShiftSelect({ value, onChange }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className="min-w-[220px] appearance-none rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 transition-all duration-300 hover:border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-stone-800 dark:hover:border-stone-400"
+        className="min-w-[110px] sm:min-w-[150px] md:min-w-[220px] appearance-none rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-xs text-white/80 transition-all duration-300 hover:border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-stone-800 dark:hover:border-stone-400"
       >
         <span className="flex items-center justify-between gap-3">
           <span className="truncate">{selected.label}</span>
@@ -359,7 +413,7 @@ function ShiftSelect({ value, onChange }) {
 }
 
 function ThemeToggle({ theme, onToggle }) {
-  const baseClass = 'group inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-[#00e8ff] transition-all duration-300 hover:border-cyan-300/60 hover:bg-white/10 hover:shadow-[0_0_12px_rgba(0,232,255,0.3)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-cyan-700 dark:hover:border-cyan-500';
+  const baseClass = 'group inline-flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-[#00e8ff] transition-all duration-300 hover:border-cyan-300/60 hover:bg-white/10 hover:shadow-[0_0_12px_rgba(0,232,255,0.3)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-cyan-700 dark:hover:border-cyan-500';
 
   return (
     <button

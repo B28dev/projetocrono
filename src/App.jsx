@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
 import NamePromptModal from './components/NamePromptModal';
 import Navbar from './components/Navbar';
@@ -12,6 +12,7 @@ import { auth } from './firebase';
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
+const LAST_PROTECTED_ROUTE_KEY = 'last-protected-route';
 
 const SHIFT_CONFIG = {
   'vespertino-snyder': {
@@ -73,12 +74,18 @@ export default function App() {
 }
 
 function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange }) {
+  const location = useLocation();
   const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('login');
   const [userName, setUserName] = useState('');
   const isBlockingOverlayActive = isAuthLoading || currentView === 'login' || currentView === 'name';
+
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -87,8 +94,19 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
 
         const firstName = String(user.displayName || '').trim().split(/\s+/)[0] || '';
         if (firstName) {
+          const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+          const savedProtectedPath = typeof window !== 'undefined'
+            ? window.localStorage.getItem(LAST_PROTECTED_ROUTE_KEY) || ''
+            : '';
+          const targetPath = currentPath === '/' && savedProtectedPath ? savedProtectedPath : currentPath;
+          const isDashboardPath = targetPath.startsWith('/dashboard') || targetPath.startsWith('/materia/');
+
           setUserName(firstName);
-          setCurrentView('hero');
+          setCurrentView(isDashboardPath ? 'dashboard' : 'hero');
+
+          if (targetPath !== currentPath) {
+            navigateRef.current(targetPath, { replace: true });
+          }
         } else {
           setUserName('');
           setCurrentView('name');
@@ -104,6 +122,15 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isAuthenticated) return;
+
+    const path = location.pathname;
+    if (path.startsWith('/dashboard') || path.startsWith('/materia/')) {
+      window.localStorage.setItem(LAST_PROTECTED_ROUTE_KEY, path);
+    }
+  }, [isAuthenticated, location.pathname]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
