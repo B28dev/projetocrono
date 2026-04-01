@@ -8,7 +8,9 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
   const toggle = (i) => onToggleTask?.(item.storageDate || item.date, i);
   const allDone = item.tasks.length > 0 && item.tasks.every((_, i) => checked[i]);
 
-  const borderColor = item.isExamDay
+  const borderColor = item.isOverdue
+    ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.14),0_18px_40px_rgba(127,29,29,0.2)] dark:border-orange-400/55 dark:shadow-[0_0_0_1px_rgba(251,146,60,0.14),0_18px_40px_rgba(124,45,18,0.2)] cyberpunk:border-[#ff3ea5]/60 cyberpunk:shadow-[0_0_26px_rgba(255,62,165,0.28),0_0_54px_rgba(244,63,94,0.16)]'
+    : item.isExamDay
     ? 'border-amber-500/60 cyberpunk:border-[#ff3ea5]/35'
     : isToday
     ? 'border-blue-400/55 shadow-[0_0_24px_rgba(59,130,246,0.22),0_0_56px_rgba(59,130,246,0.08)] dark:border-stone-500 dark:shadow-[0_0_0_1px_rgba(41,37,36,0.08),0_16px_36px_rgba(120,113,108,0.18),0_0_24px_rgba(120,113,108,0.12)] cyberpunk:border-[#00e8ff] cyberpunk:shadow-[0_0_20px_rgba(0,232,255,0.35)]'
@@ -16,39 +18,59 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
     ? 'border-white/5 cyberpunk:border-white/5'
     : 'border-white/10 cyberpunk:border-white/10';
 
+  const timelineLineClass = item.isOverdue
+    ? 'bg-gradient-to-b from-red-500/90 via-rose-500/70 to-red-500/20 shadow-[0_0_18px_rgba(239,68,68,0.45)] dark:from-red-600 dark:via-orange-500 dark:to-orange-400/25 dark:shadow-[0_0_16px_rgba(234,88,12,0.28)] cyberpunk:from-[#ff3ea5] cyberpunk:via-rose-400 cyberpunk:to-[#ff3ea5]/15 cyberpunk:shadow-[0_0_22px_rgba(255,62,165,0.65)]'
+    : 'bg-zinc-800 dark:bg-stone-300 cyberpunk:bg-gradient-to-b cyberpunk:from-[#00e8ff]/50 cyberpunk:to-[#ff3ea5]/20';
+
+  const markerClass = item.isOverdue
+    ? 'border-red-500 bg-red-500/20 shadow-[0_0_0_1px_rgba(239,68,68,0.18),0_0_18px_rgba(239,68,68,0.3)] dark:border-orange-500 dark:bg-orange-500/15 dark:shadow-[0_0_16px_rgba(249,115,22,0.2)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5]/18 cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]'
+    : item.isExamDay
+    ? 'border-amber-500 bg-amber-500/20 cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5]/15'
+    : isToday
+    ? 'border-blue-500 bg-blue-500/20 cyberpunk:border-[#00e8ff] cyberpunk:bg-[#00e8ff]/15'
+    : isPast
+    ? 'border-zinc-700 bg-zinc-900 cyberpunk:border-white/20 cyberpunk:bg-white/[0.04]'
+    : 'border-zinc-600 bg-zinc-900 cyberpunk:border-white/20 cyberpunk:bg-white/[0.04]';
+
+  const cardSurfaceClass = item.isOverdue
+    ? 'bg-red-950/10 dark:bg-red-950/5 cyberpunk:bg-[linear-gradient(135deg,rgba(76,5,25,0.72),rgba(127,29,29,0.34))]'
+    : isToday
+    ? 'bg-blue-500/[0.08] dark:bg-stone-50'
+    : 'bg-white/5 dark:bg-stone-100/50';
+
+  const cardHoverClass = item.isOverdue
+    ? 'hover:border-red-500/70 hover:bg-red-900/20 dark:hover:border-orange-500/65 dark:hover:bg-orange-950/10 cyberpunk:hover:border-[#ff3ea5]/65 cyberpunk:hover:bg-[linear-gradient(135deg,rgba(103,8,39,0.82),rgba(127,29,29,0.42))]'
+    : 'hover:border-[#00e8ff]/40 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10';
+
+  const dateTextClass = item.isOverdue
+    ? 'text-red-300 dark:text-red-800 cyberpunk:text-[#ff8dcb]'
+    : item.isExamDay
+    ? 'text-amber-400 dark:text-amber-600 cyberpunk:text-[#ff3ea5]'
+    : isToday
+    ? 'text-blue-400 dark:text-blue-700 cyberpunk:text-[#00e8ff]'
+    : 'text-zinc-500 cyberpunk:text-white/55';
+
+  const overdueTagClass = 'ml-2 inline-flex rounded-full border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] border-red-700 bg-red-900 text-red-50 shadow-[0_0_0_1px_rgba(127,29,29,0.18)] dark:border-orange-500/70 dark:bg-orange-500/12 dark:text-orange-300 dark:shadow-[0_0_16px_rgba(249,115,22,0.12)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5] cyberpunk:text-[#14040f] cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]';
+
   return (
     <div className="study-plan-card relative pl-8 pb-8 last:pb-0">
-      <div className="absolute left-2.5 top-3 bottom-0 w-px bg-zinc-800 dark:bg-stone-300 cyberpunk:bg-gradient-to-b cyberpunk:from-[#00e8ff]/50 cyberpunk:to-[#ff3ea5]/20 last:hidden" />
+      <div className={`absolute left-2.5 top-3 bottom-0 w-px last:hidden ${timelineLineClass}`} />
 
       <div
-        className={`absolute left-0 top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-          item.isExamDay
-            ? 'border-amber-500 bg-amber-500/20 cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5]/15'
-            : isToday
-            ? 'border-blue-500 bg-blue-500/20 cyberpunk:border-[#00e8ff] cyberpunk:bg-[#00e8ff]/15'
-            : isPast
-            ? 'border-zinc-700 bg-zinc-900 cyberpunk:border-white/20 cyberpunk:bg-white/[0.04]'
-            : 'border-zinc-600 bg-zinc-900 cyberpunk:border-white/20 cyberpunk:bg-white/[0.04]'
-        }`}
+        className={`absolute left-0 top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 ${markerClass}`}
       >
         {allDone && <span className="h-2 w-2 rounded-full bg-green-500 cyberpunk:bg-[#00e8ff]" />}
       </div>
 
       <div
-        className={`cyber-glass rounded-xl border backdrop-blur-md p-4 transition-colors duration-300 ${isToday ? 'bg-blue-500/[0.08] dark:bg-stone-50' : 'bg-white/5 dark:bg-stone-100/50'} hover:border-[#00e8ff]/40 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10 ${borderColor}`}
+        className={`cyber-glass rounded-xl border backdrop-blur-md p-4 transition-colors duration-300 ${cardSurfaceClass} ${cardHoverClass} ${borderColor}`}
       >
         <div className="study-plan-card-content">
           <div className="mb-3 flex items-start justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xs font-semibold dark:text-stone-600 cyberpunk:font-mono ${
-                    item.isExamDay
-                      ? 'text-amber-400 dark:text-amber-600 cyberpunk:text-[#ff3ea5]'
-                      : isToday
-                      ? 'text-blue-400 dark:text-blue-700 cyberpunk:text-[#00e8ff]'
-                      : 'text-zinc-500 cyberpunk:text-white/55'
-                  }`}
+                  className={`text-xs font-semibold dark:text-stone-600 cyberpunk:font-mono ${dateTextClass}`}
                 >
                   {item.label}
                 </span>
@@ -66,7 +88,7 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
               <p className="mt-0.5 text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">
                 {item.topic}
                 {item.isOverdue && (
-                  <span className="ml-2 inline-flex rounded-full border border-red-100 bg-red-50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-red-800 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-700 cyberpunk:border-[#ff3ea5]/25 cyberpunk:bg-[#ff3ea5]/10 cyberpunk:text-[#ff8dcb]">
+                  <span className={overdueTagClass}>
                     ATRASADO
                   </span>
                 )}

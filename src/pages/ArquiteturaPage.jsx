@@ -244,20 +244,20 @@ export default function ArquiteturaPage({
               ))}
 
               {displayStudyPlan.overdue.length > 0 && (
-                <div className="study-plan-card cyber-glass mb-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-4 dark:border-red-500/20 dark:bg-red-500/5 cyberpunk:border-[#ff3ea5]/20 cyberpunk:bg-transparent">
+                <div className="study-plan-card cyber-glass mb-6 rounded-2xl border border-red-500/45 bg-[linear-gradient(135deg,rgba(127,29,29,0.14),rgba(153,27,27,0.04))] p-4 shadow-[0_0_0_1px_rgba(239,68,68,0.1),0_22px_48px_rgba(127,29,29,0.14)] dark:border-orange-500/45 dark:bg-[linear-gradient(135deg,rgba(124,45,18,0.1),rgba(120,53,15,0.03))] dark:shadow-[0_0_0_1px_rgba(249,115,22,0.1),0_18px_40px_rgba(124,45,18,0.12)] cyberpunk:border-[#ff3ea5]/60 cyberpunk:bg-[linear-gradient(135deg,rgba(64,6,29,0.9),rgba(127,29,29,0.3))] cyberpunk:shadow-[0_0_26px_rgba(255,62,165,0.24),0_0_60px_rgba(225,29,72,0.12)]">
                   <div className="study-plan-card-content">
                     <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex rounded-full border border-red-100 bg-red-50 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-red-800 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-700 cyberpunk:border-[#ff3ea5]/25 cyberpunk:bg-[#ff3ea5]/10 cyberpunk:text-[#ff8dcb]">
+                      <span className="inline-flex rounded-full border border-red-700 bg-red-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-red-50 shadow-[0_0_0_1px_rgba(127,29,29,0.18)] dark:border-orange-500/75 dark:bg-orange-500/12 dark:text-orange-300 dark:shadow-[0_0_16px_rgba(249,115,22,0.12)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5] cyberpunk:text-[#14040f] cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]">
                         ⚠ materias atrasadas
                       </span>
-                      <span className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">Estude nesta ordem</span>
+                      <span className="text-xs text-red-200 dark:text-stone-700 cyberpunk:text-[#ff8dcb]">Estude nesta ordem</span>
                     </div>
                     <button
                       type="button"
                       data-magnetic
                       onClick={() => setIsOverdueCollapsed((current) => !current)}
-                      className="inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-200 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/60 cyberpunk:hover:text-[#00e8ff]"
+                      className="inline-flex items-center gap-1.5 text-xs text-red-200 transition-colors hover:text-red-50 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-[#ff8dcb] cyberpunk:hover:text-[#ffd2ec]"
                     >
                       <svg
                         className={`h-3.5 w-3.5 transition-transform ${isOverdueCollapsed ? '-rotate-90' : 'rotate-0'}`}
@@ -286,7 +286,7 @@ export default function ArquiteturaPage({
                     )}
 
                     {isOverdueCollapsed && (
-                      <div className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                      <div className="text-xs text-red-200 dark:text-stone-600 cyberpunk:text-[#ff8dcb]">
                         {displayStudyPlan.overdue.length} materia{displayStudyPlan.overdue.length > 1 ? 's' : ''} atrasada{displayStudyPlan.overdue.length > 1 ? 's' : ''}.
                       </div>
                     )}
