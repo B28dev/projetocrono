@@ -74,7 +74,7 @@ export default function Landing() {
         <div ref={heroRef} className="opacity-0">
           <span className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 border border-blue-500/30 bg-blue-500/10 rounded-full px-3 py-1 tracking-wide uppercase dark:text-blue-700 dark:bg-blue-500/10 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse cyberpunk:bg-[#ff3ea5]" />
-            Engenharia de Software · 2026/1
+            Seja bem-vindo, aluno
           </span>
         </div>
 
@@ -87,6 +87,7 @@ export default function Landing() {
             { label: 'Engenharia', outline: true },
             { label: 'de', outline: true },
             { label: 'Software', outline: true },
+            { label: '2026.1' },
           ].map((word, i) => (
             <span key={i} className="word-shell inline-block overflow-hidden mr-[0.25em] last:mr-0">
               <span
