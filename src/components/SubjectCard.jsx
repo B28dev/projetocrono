@@ -6,7 +6,7 @@ const SUBJECT_BASE = [
   { id: 'arquitetura', name: 'Arquitetura de Computadores', short: 'ARQ', active: true, color: 'blue', progress: 35 },
   { id: 'matematica-discreta', name: 'Matematica Discreta', short: 'M.D', active: false, color: 'purple', progress: 0 },
   { id: 'algoritmos-programacao', name: 'Algoritmos e Programacao', short: 'ALG', active: false, color: 'amber', progress: 0 },
-  { id: 'intro-eng-software', name: 'Intro. Engenharia de Software', short: 'IES', active: false, color: 'teal', progress: 0 },
+  { id: 'intro-eng-software', name: 'Intro. Engenharia de Software', short: 'IES', active: true, color: 'teal', progress: 0 },
   { id: 'eletiva-ingles', name: 'Eletiva I (Ingles)', short: 'ING', active: false, color: 'green', progress: 0 },
   { id: 'empreendedorismo', name: 'Empreendedorismo', short: 'EMP', active: false, color: 'rose', progress: 0 },
 ];
@@ -54,17 +54,23 @@ export default function SubjectCard({ subject, metrics = null, shift = 'noturno-
   const colors = colorMap[color] || colorMap.blue;
   const effectiveProgress = active && metrics ? metrics.progressPercent : progress;
   const countdownKey = `${shift}-${subject.id}-${examDate?.getTime?.() ?? examDate}`;
+  const isIntroEngSoftware = subject.id === 'intro-eng-software';
 
   const handleClick = () => {
-    if (active) navigate(`/materia/${subject.id}`);
+    if (!active) return;
+    if (isIntroEngSoftware) {
+      navigate('/materia/engenharia-software');
+      return;
+    }
+    navigate(`/materia/${subject.id}`);
   };
 
-  return (
+  const cardContent = (
     <div
       onClick={handleClick}
       className={`cyber-glass relative group flex select-none flex-col gap-3 rounded-xl border p-5 backdrop-blur-md transition-colors duration-300 ${
         active
-          ? 'cursor-pointer border-white/10 bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#00e8ff]/30 cyberpunk:hover:bg-white/10'
+          ? 'cursor-pointer relative h-full border border-white/10 rounded-2xl bg-gradient-to-br from-[#ff3ea5]/15 via-[#0d0d14] to-[#00e8ff]/15 backdrop-blur-md shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] hover:border-[#00e8ff]/30 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:hover:border-[#00e8ff]/30'
           : 'cursor-not-allowed border-zinc-800/60 bg-zinc-900/30 dark:border-stone-300 dark:bg-stone-100/80 cyberpunk:border-white/5 cyberpunk:bg-white/[0.02]'
       }`}
     >
@@ -73,8 +79,8 @@ export default function SubjectCard({ subject, metrics = null, shift = 'noturno-
           {short}
         </div>
         {active ? (
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-stone-900 dark:text-stone-100 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-white/[0.05] cyberpunk:text-white/75">
-            ativo
+          <span className="rounded-full border border-[#34d399]/20 bg-[#34d399]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#34d399]">
+            ATIVO
           </span>
         ) : (
           <span className="rounded-full bg-zinc-800/50 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-stone-200 dark:text-stone-600 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:text-white/55">
@@ -115,6 +121,20 @@ export default function SubjectCard({ subject, metrics = null, shift = 'noturno-
           <ProgressBar value={effectiveProgress} color={color} />
         </div>
       )}
+    </div>
+  );
+
+  if (!active) {
+    return cardContent;
+  }
+
+  return (
+    <div className="relative overflow-hidden rounded-xl p-[1.5px] shadow-[0_0_20px_rgba(255,62,165,0.28),0_0_26px_rgba(0,232,255,0.24)]">
+      <div className="pointer-events-none absolute -inset-[95%] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(255,62,165,1)_100deg,rgba(0,232,255,1)_220deg,transparent_320deg)] opacity-90 blur-[1px] animate-[spin_6s_linear_infinite]" />
+      <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_20%_20%,rgba(255,62,165,0.35),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(0,232,255,0.32),transparent_46%)] blur-lg" />
+      <div className="relative z-[1]">
+        {cardContent}
+      </div>
     </div>
   );
 }

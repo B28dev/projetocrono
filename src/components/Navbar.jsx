@@ -24,17 +24,23 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     editNameValue,
     isSavingName,
     isUploading,
+    newPassword,
+    isUpdatingPassword,
+    passwordFeedback,
     profileError,
     profileNotice,
     profileData,
     displayName,
     email,
     avatarInitial,
+    isEmailUser,
     maxAvatarSizeMb,
     setEditNameValue,
+    setNewPassword,
     handleToggleProfile,
     handleToggleEditingName,
     handleSaveName,
+    handleUpdatePassword,
     handleLogout,
     handleTriggerFilePicker,
     handleImageChange,
@@ -72,7 +78,7 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
               aria-haspopup="menu"
               aria-expanded={isProfileOpen}
               onClick={handleToggleProfile}
-              className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/5 text-xs md:text-sm font-semibold text-zinc-100 transition-all duration-300 hover:border-cyan-400 hover:bg-white/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.4)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-400 dark:bg-stone-200/60 dark:text-stone-900 dark:hover:border-cyan-500"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/5 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:border-cyan-400 hover:bg-white/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.4)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-400 dark:bg-stone-200/60 dark:text-stone-900 dark:hover:border-cyan-500"
             >
               {profileData.photoURL ? (
                 <img
@@ -172,6 +178,39 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
                 </p>
               </div>
 
+              {isEmailUser ? (
+                <div className="space-y-2">
+                  <p className="text-[11px] uppercase tracking-widest text-white/50 font-mono">
+                    Seguranca
+                  </p>
+
+                  <form onSubmit={handleUpdatePassword} className="space-y-2">
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      disabled={isUpdatingPassword}
+                      placeholder="Nova senha (minimo 6 caracteres)"
+                      className="h-9 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40 focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_18px_rgba(0,232,255,0.18)] disabled:cursor-not-allowed disabled:opacity-70"
+                    />
+
+                    <button
+                      type="submit"
+                      disabled={isUpdatingPassword}
+                      className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/80 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isUpdatingPassword ? 'Atualizando senha...' : 'Alterar Senha'}
+                    </button>
+                  </form>
+
+                  {passwordFeedback ? (
+                    <p className={`text-xs ${passwordFeedback.type === 'success' ? 'text-emerald-400' : 'text-rose-500'}`}>
+                      {passwordFeedback.message}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+
               <hr className="border-white/10 my-1" />
 
               <button
@@ -196,7 +235,7 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
 export default memo(Navbar);
 
 function NavButton({ active, children, onClick }) {
-  const className = `inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs md:px-4 md:py-2 md:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 ${active
+  const className = `inline-flex h-9 items-center rounded-lg border px-2.5 sm:px-4 text-xs sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 ${active
     ? 'border-cyan-400/40 bg-white/10 text-white dark:border-cyan-500/45 dark:bg-stone-200/85 dark:text-stone-900'
     : 'border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10 hover:text-white dark:border-stone-300 dark:bg-stone-200/55 dark:text-stone-700 dark:hover:border-stone-400 dark:hover:bg-stone-100 dark:hover:text-stone-900'
     }`;
@@ -216,7 +255,7 @@ function NavButton({ active, children, onClick }) {
 }
 
 function ShiftSelect({ value, onChange }) {
-  const [open, setOpen] = useState(false);
+  const [isShiftMenuOpen, setIsShiftMenuOpen] = useState(false);
   const rootRef = useRef(null);
   const selected = useMemo(
     () => SHIFT_OPTIONS.find((option) => option.value === value) || SHIFT_OPTIONS[1],
@@ -226,12 +265,12 @@ function ShiftSelect({ value, onChange }) {
   useEffect(() => {
     const handlePointerDown = (event) => {
       if (!rootRef.current?.contains(event.target)) {
-        setOpen(false);
+        setIsShiftMenuOpen(false);
       }
     };
 
     const handleEscape = (event) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') setIsShiftMenuOpen(false);
     };
 
     document.addEventListener('mousedown', handlePointerDown);
@@ -247,14 +286,14 @@ function ShiftSelect({ value, onChange }) {
       <button
         type="button"
         aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-        className="min-w-[110px] sm:min-w-[150px] md:min-w-[220px] appearance-none rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-xs text-white/80 transition-all duration-300 hover:border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-stone-800 dark:hover:border-stone-400"
+        aria-expanded={isShiftMenuOpen}
+        onClick={() => setIsShiftMenuOpen((current) => !current)}
+        className="inline-flex h-9 min-w-[108px] sm:min-w-[172px] md:min-w-[220px] items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 sm:px-3 text-[11px] sm:text-xs text-white/80 transition-all duration-300 hover:border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-stone-800 dark:hover:border-stone-400"
       >
-        <span className="flex items-center justify-between gap-3">
-          <span className="truncate">{selected.label}</span>
+        <span className="truncate max-w-[120px] sm:max-w-none">{selected.label}</span>
+        <span className="flex items-center">
           <svg
-            className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+            className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${isShiftMenuOpen ? 'rotate-180' : ''}`}
             fill="none"
             viewBox="0 0 12 8"
           >
@@ -263,10 +302,10 @@ function ShiftSelect({ value, onChange }) {
         </span>
       </button>
 
-      {open && (
+      {isShiftMenuOpen && (
         <ul
           role="listbox"
-          className="absolute right-0 mt-2 w-full overflow-hidden rounded-xl border border-white/10 bg-[#08080f]/95 p-1.5 backdrop-blur-xl shadow-[0_14px_40px_rgba(0,0,0,0.45)] dark:border-stone-300 dark:bg-stone-100 cyberpunk:border-white/10"
+          className="absolute top-full right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#05050a]/95 p-1.5 shadow-2xl backdrop-blur-xl dark:border-stone-300 dark:bg-stone-100 cyberpunk:border-white/10"
         >
           {SHIFT_OPTIONS.map((option) => {
             const isActive = option.value === value;
@@ -278,7 +317,7 @@ function ShiftSelect({ value, onChange }) {
                   aria-selected={isActive}
                   onClick={() => {
                     onChange(option.value);
-                    setOpen(false);
+                    setIsShiftMenuOpen(false);
                   }}
                   className={`relative flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors ${isActive
                       ? 'text-zinc-100 bg-white/5 dark:text-stone-900 dark:bg-white/70 cyberpunk:text-white cyberpunk:bg-white/[0.06]'
@@ -297,7 +336,7 @@ function ShiftSelect({ value, onChange }) {
 }
 
 function ThemeToggle({ theme, onToggle }) {
-  const baseClass = 'group inline-flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-[#00e8ff] transition-all duration-300 hover:border-cyan-300/60 hover:bg-white/10 hover:shadow-[0_0_12px_rgba(0,232,255,0.3)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-300 dark:bg-stone-100/70 dark:text-cyan-700 dark:hover:border-cyan-500';
+  const baseClass = 'group inline-flex h-9 w-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 p-2 text-[#00e8ff] transition-all duration-300 hover:border-cyan-300/60 hover:bg-white/10 hover:shadow-[0_0_12px_rgba(0,232,255,0.3)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 sm:w-auto sm:rounded-lg sm:px-3 sm:py-2 dark:border-stone-300 dark:bg-stone-100/70 dark:text-cyan-700 dark:hover:border-cyan-500';
 
   return (
     <button
@@ -306,7 +345,7 @@ function ThemeToggle({ theme, onToggle }) {
       aria-label={THEME_LABELS[theme]}
       className={baseClass}
     >
-      <span className="relative block h-4 w-4">
+      <span className="relative block h-4 w-4 shrink-0">
         <svg
           className={`absolute inset-0 h-4 w-4 transition-all duration-300 ${theme === 'dark' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'}`}
           fill="none"
@@ -346,6 +385,9 @@ function ThemeToggle({ theme, onToggle }) {
             strokeLinejoin="round"
           />
         </svg>
+      </span>
+      <span className="hidden text-xs font-medium text-white/80 sm:inline-block dark:text-stone-700">
+        Tema
       </span>
     </button>
   );

@@ -28,6 +28,17 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
   const gridRef = useGsapStagger('.subject-card');
   const magneticRef = useGsapMagnetic('[data-magnetic]');
   const subjects = useMemo(() => getSubjects(shift), [shift]);
+  const orderedSubjects = useMemo(() => {
+    const priority = ['arquitetura', 'intro-eng-software'];
+    return [...subjects].sort((a, b) => {
+      const aIndex = priority.indexOf(a.id);
+      const bIndex = priority.indexOf(b.id);
+      const aPriority = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+      const bPriority = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return 0;
+    });
+  }, [subjects]);
   const studyPlan = useMemo(() => getStudyPlanByShift(shift), [shift]);
 
   const checklistStats = useMemo(() => {
@@ -66,6 +77,23 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
     };
   }, [examDate, shift, studyPlan, taskProgress]);
 
+  const introEngSoftwareMetrics = useMemo(() => {
+    const now = new Date();
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const introExamDate = subjects.find((subject) => subject.id === 'intro-eng-software')?.examDate;
+    const introExamDay = introExamDate
+      ? new Date(introExamDate.getFullYear(), introExamDate.getMonth(), introExamDate.getDate())
+      : todayDate;
+    const daysToExam = Math.max(Math.ceil((introExamDay - todayDate) / 86400000), 0);
+
+    return {
+      todayDone: 0,
+      todayTotal: 3,
+      progressPercent: 0,
+      daysToExam,
+    };
+  }, [subjects]);
+
   return (
     <div ref={magneticRef} className="cyber-shell min-h-screen transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
       <div className="cyber-glass border-b border-zinc-800 bg-surface-1 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/80 cyberpunk:border-white/10 cyberpunk:bg-transparent">
@@ -101,14 +129,24 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
         <div>
           <h2 className="text-lg font-semibold text-zinc-100 dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Materias</h2>
           <p className="text-sm text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">
-            Arquitetura ja esta disponivel. As demais materias aparecem com contagem e serao liberadas em breve.
+            Arquitetura e Intro. Engenharia de Software ja estao disponiveis. As demais materias aparecem com contagem e serao liberadas em breve.
           </p>
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subjects.map((s) => (
+          {orderedSubjects.map((s) => (
             <div key={`${shift}-${s.id}`} className="subject-card">
-              <SubjectCard subject={s} shift={shift} metrics={s.id === 'arquitetura' ? checklistStats : null} />
+              <SubjectCard
+                subject={s}
+                shift={shift}
+                metrics={
+                  s.id === 'arquitetura'
+                    ? checklistStats
+                    : s.id === 'intro-eng-software'
+                    ? introEngSoftwareMetrics
+                    : null
+                }
+              />
             </div>
           ))}
         </div>

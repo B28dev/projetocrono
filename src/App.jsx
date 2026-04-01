@@ -9,6 +9,7 @@ import useAuth from './hooks/useAuth';
 const Navbar = lazy(() => import('./components/Navbar'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ArquiteturaPage = lazy(() => import('./pages/ArquiteturaPage'));
+const EngenhariaSoftwarePage = lazy(() => import('./pages/EngenhariaSoftwarePage'));
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
@@ -163,6 +164,16 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
                     ? null
                     : isAuthenticated
                     ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route
+                path="/materia/engenharia-software"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <EngenhariaSoftwarePage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} userName={userName} />
                     : <Navigate to="/" replace />
                 }
               />

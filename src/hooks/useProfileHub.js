@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import { onAuthStateChanged, signOut, updatePassword, updateProfile } from 'firebase/auth';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
 
@@ -11,6 +11,9 @@ function getProfileData(user) {
     displayName: String(user?.displayName || '').trim(),
     email: String(user?.email || '').trim(),
     photoURL: String(user?.photoURL || '').trim(),
+    providerIds: Array.isArray(user?.providerData)
+      ? user.providerData.map((provider) => provider?.providerId).filter(Boolean)
+      : [],
   };
 }
 
@@ -20,6 +23,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   const [editNameValue, setEditNameValue] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordFeedback, setPasswordFeedback] = useState(null);
   const [profileError, setProfileError] = useState('');
   const [profileNotice, setProfileNotice] = useState('');
   const [profileData, setProfileData] = useState(() => getProfileData(auth.currentUser));
@@ -43,6 +49,8 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
         setIsEditingName(false);
         setProfileError('');
         setProfileNotice('');
+        setPasswordFeedback(null);
+        setNewPassword('');
       }
     };
 
@@ -52,6 +60,8 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
         setIsEditingName(false);
         setProfileError('');
         setProfileNotice('');
+        setPasswordFeedback(null);
+        setNewPassword('');
       }
     };
 
@@ -78,12 +88,18 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     const avatarSeed = profileData.displayName || profileData.email || 'U';
     return avatarSeed.charAt(0).toUpperCase();
   }, [profileData.displayName, profileData.email]);
+  const isEmailUser = useMemo(
+    () => profileData.providerIds.includes('password'),
+    [profileData.providerIds],
+  );
 
   const handleToggleProfile = useCallback(() => {
     setIsProfileOpen((current) => !current);
     setIsEditingName(false);
     setProfileError('');
     setProfileNotice('');
+    setPasswordFeedback(null);
+    setNewPassword('');
     setEditNameValue(profileData.displayName);
   }, [profileData.displayName]);
 
@@ -131,7 +147,60 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     setIsEditingName(false);
     setProfileError('');
     setProfileNotice('');
+    setPasswordFeedback(null);
+    setNewPassword('');
   }, []);
+
+  const handleUpdatePassword = useCallback(
+    async (event) => {
+      event.preventDefault();
+      if (isUpdatingPassword) return;
+
+      const normalizedPassword = newPassword.trim();
+      if (normalizedPassword.length < 6) {
+        setPasswordFeedback({
+          type: 'error',
+          message: 'A nova senha deve ter no minimo 6 caracteres.',
+        });
+        return;
+      }
+
+      if (!auth.currentUser) {
+        setPasswordFeedback({
+          type: 'error',
+          message: 'Sessao invalida. Faca login novamente.',
+        });
+        return;
+      }
+
+      setIsUpdatingPassword(true);
+      setPasswordFeedback(null);
+
+      try {
+        await updatePassword(auth.currentUser, normalizedPassword);
+        setNewPassword('');
+        setPasswordFeedback({
+          type: 'success',
+          message: 'Senha atualizada com sucesso!',
+        });
+      } catch (error) {
+        if (error?.code === 'auth/requires-recent-login') {
+          setPasswordFeedback({
+            type: 'error',
+            message: 'Por seguranca, faca logout e login novamente para trocar sua senha.',
+          });
+        } else {
+          setPasswordFeedback({
+            type: 'error',
+            message: 'Nao foi possivel atualizar a senha.',
+          });
+        }
+      } finally {
+        setIsUpdatingPassword(false);
+      }
+    },
+    [isUpdatingPassword, newPassword],
+  );
 
   const handleTriggerFilePicker = useCallback(() => {
     if (isUploading) return;
@@ -188,17 +257,23 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     editNameValue,
     isSavingName,
     isUploading,
+    newPassword,
+    isUpdatingPassword,
+    passwordFeedback,
     profileError,
     profileNotice,
     profileData,
     displayName,
     email,
     avatarInitial,
+    isEmailUser,
     maxAvatarSizeMb: MAX_AVATAR_SIZE_MB,
     setEditNameValue,
+    setNewPassword,
     handleToggleProfile,
     handleToggleEditingName,
     handleSaveName,
+    handleUpdatePassword,
     handleLogout,
     handleTriggerFilePicker,
     handleImageChange,

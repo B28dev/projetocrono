@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   examCoverage,
@@ -6,8 +6,9 @@ import {
   getStudyPlanTaskStorageKey,
   modelSummaries,
   referencePlaylists,
+  topicVideoSets,
   topics,
-} from '../data/arquitetura';
+} from '../data/engenharia-software';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
 import { CountdownFull } from '../components/Countdown';
@@ -16,7 +17,7 @@ import StudyPlanItem from '../components/StudyPlanItem';
 import SummaryAccordion from '../components/SummaryAccordion';
 import LevelUpModal from '../components/LevelUpModal';
 
-const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress-v2';
+const STUDY_PLAN_STORAGE_KEY = 'engsoftware-study-plan-progress-v2';
 
 function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -39,17 +40,9 @@ function Section({ title, subtitle, children }) {
   );
 }
 
-function formatDatePtBr(date) {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-export default function ArquiteturaPage({
+export default function EngenhariaSoftwarePage({
   shift = 'noturno-adele',
   shiftLabel = 'Noturno (Adele)',
-  examDate = new Date('2026-04-13T08:00:00'),
 }) {
   const navigate = useNavigate();
   const headerRef = useGsapReveal();
@@ -59,8 +52,14 @@ export default function ArquiteturaPage({
   const modelSummariesRef = useGsapStagger('.summary-item', { stagger: 0.08, delay: 0.2 });
   const summariesRef = useGsapStagger('.summary-item', { stagger: 0.08, delay: 0.2 });
   const magneticRef = useGsapMagnetic('[data-magnetic]');
-  const examDateText = formatDatePtBr(examDate);
+  const actualExamDate = useMemo(() => {
+    return shift.includes('noturno')
+      ? new Date('2026-04-08T08:00:00')
+      : new Date('2026-04-13T08:00:00');
+  }, [shift]);
+  const examDateString = shift.includes('noturno') ? '08/04/2026' : '13/04/2026';
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
+  const [isTopicVideosCollapsed, setIsTopicVideosCollapsed] = useState(true);
   const [taskProgress, setTaskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
 
@@ -167,23 +166,23 @@ export default function ArquiteturaPage({
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-50 cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.16),rgba(255,62,165,0.22))] cyberpunk:text-white">
-                    ARQ
+                    IES
                   </span>
                   <span className="text-xs font-medium text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
                     Engenharia de Software - 2026/1 - {shiftLabel}
                   </span>
                 </div>
                 <h1 className="text-2xl font-bold text-zinc-100 tracking-tight dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
-                  Arquitetura de Computadores
+                  Intro. Engenharia de Software
                 </h1>
                 <p className="text-sm text-zinc-500 mt-1 dark:text-stone-600 cyberpunk:text-white/65">
-                  Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">{examDateText}</span>
+                  Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">{examDateString}</span>
                 </p>
               </div>
 
               <div className="cyber-glass rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10">
                 <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2 dark:text-stone-500 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">Proxima prova em</p>
-                <CountdownFull target={examDate} />
+                <CountdownFull target={actualExamDate} />
               </div>
             </div>
           </div>
@@ -207,7 +206,7 @@ export default function ArquiteturaPage({
 
           <Section
             title="Playlists de referencia"
-            subtitle="Fontes-base para acompanhar o cronograma revisado."
+            subtitle="Playlists completas e videos por topico no mesmo painel."
           >
             <div ref={playlistsRef} className="grid gap-3 sm:grid-cols-2">
               {referencePlaylists.map((playlist) => (
@@ -234,6 +233,58 @@ export default function ArquiteturaPage({
                 </a>
               ))}
             </div>
+
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setIsTopicVideosCollapsed((current) => !current)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-xs font-medium uppercase tracking-widest text-zinc-500 shadow-[0_0_12px_rgba(0,232,255,0.08)] transition-colors hover:text-zinc-300 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:font-mono cyberpunk:text-[#00e8ff] cyberpunk:hover:text-[#00e8ff]"
+              >
+                <svg
+                  className={`h-3.5 w-3.5 transition-transform ${isTopicVideosCollapsed ? 'rotate-0' : 'rotate-90'}`}
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Videos por topico
+              </button>
+
+              {!isTopicVideosCollapsed && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {topicVideoSets.map((set) => (
+                    <div
+                      key={set.id}
+                      className="playlist-card cyber-glass rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4 transition-colors hover:border-[#00e8ff]/30 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10"
+                    >
+                      <p className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">
+                        {set.title}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/62">
+                        {set.description}
+                      </p>
+
+                      <div className="mt-3 space-y-2">
+                        {set.videos.map((video, index) => (
+                          <a
+                            key={`${set.id}-${index}`}
+                            href={video.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/30 px-3 py-2 text-xs text-zinc-300 transition-colors hover:border-[#00e8ff]/30 hover:text-zinc-100 dark:border-stone-300 dark:bg-stone-50 dark:text-stone-700 dark:hover:border-stone-400 dark:hover:text-stone-900 cyberpunk:border-white/10 cyberpunk:bg-white/[0.03] cyberpunk:text-white/75 cyberpunk:hover:border-[#00e8ff]/35 cyberpunk:hover:text-white"
+                          >
+                            <span className="truncate">{video.title}</span>
+                            <span className="shrink-0 rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:border-stone-300 dark:text-stone-600 cyberpunk:border-white/10 cyberpunk:text-[#00e8ff]">
+                              video
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </Section>
 
           <Section
@@ -258,7 +309,7 @@ export default function ArquiteturaPage({
                     <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex rounded-full border border-red-700 bg-red-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-red-50 shadow-[0_0_0_1px_rgba(127,29,29,0.18)] dark:border-orange-500/75 dark:bg-orange-500/12 dark:text-orange-300 dark:shadow-[0_0_16px_rgba(249,115,22,0.12)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5] cyberpunk:text-[#14040f] cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]">
-                        ⚠ materias atrasadas
+                        materias atrasadas
                       </span>
                       <span className="text-xs text-red-200 dark:text-stone-700 cyberpunk:text-[#ff8dcb]">Estude nesta ordem</span>
                     </div>
@@ -359,7 +410,7 @@ export default function ArquiteturaPage({
           </Section>
         </div>
       </div>
-      <LevelUpModal level={12} title="Mestre da Arquitetura" message="Você dominou todos os topicos desta fase. Continue avançando." />
+      <LevelUpModal level={12} title="Mestre em Engenharia de Software" message="Voce dominou todos os topicos desta fase. Continue avancando." />
     </>
   );
 }
