@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import LoginModal from './components/LoginModal';
 import Navbar from './components/Navbar';
 import SystemNotice from './components/SystemNotice';
 import Landing from './pages/Landing';
@@ -56,21 +57,110 @@ export default function App() {
   return (
     <div className={themeClass} data-theme={theme}>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col">
-          <Navbar theme={theme} onToggleTheme={cycleTheme} shift={shift} onShiftChange={setShift} />
-          <div className="flex-1">
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/dashboard" element={<Dashboard shift={shift} examDate={selectedShift.examDate} />} />
-              <Route
-                path="/materia/arquitetura"
-                element={<ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />}
-              />
-            </Routes>
-          </div>
-          <SystemNotice compact />
-        </div>
+        <AppShell
+          theme={theme}
+          shift={shift}
+          selectedShift={selectedShift}
+          onToggleTheme={cycleTheme}
+          onShiftChange={setShift}
+        />
       </BrowserRouter>
+    </div>
+  );
+}
+
+function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange }) {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentView, setCurrentView] = useState('hero');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    if (!isAuthenticated) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    }
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [isAuthenticated]);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    setCurrentView('hero');
+    navigate('/', { replace: true });
+  };
+
+  const handleOpenDashboard = () => {
+    if (!isAuthenticated) return;
+    setCurrentView('dashboard');
+    navigate('/dashboard');
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <div
+        className={`min-h-screen flex flex-col ${!isAuthenticated ? 'pointer-events-none select-none' : ''}`}
+        aria-hidden={!isAuthenticated}
+        inert={!isAuthenticated ? '' : undefined}
+      >
+        <Navbar
+          theme={theme}
+          onToggleTheme={onToggleTheme}
+          shift={shift}
+          onShiftChange={onShiftChange}
+          onOpenDashboard={handleOpenDashboard}
+        />
+        <div className="flex-1">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                isAuthenticated && currentView === 'hero'
+                  ? <Landing onOpenDashboard={handleOpenDashboard} />
+                  : <Navigate to={isAuthenticated ? '/dashboard' : '/'} replace />
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                isAuthenticated && currentView === 'dashboard'
+                  ? <Dashboard shift={shift} examDate={selectedShift.examDate} />
+                  : <Navigate to="/" replace />
+              }
+            />
+            <Route
+              path="/materia/arquitetura"
+              element={
+                isAuthenticated && currentView === 'dashboard'
+                  ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
+                  : <Navigate to="/" replace />
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+        <SystemNotice compact />
+      </div>
+
+      {!isAuthenticated ? (
+        <LoginModal
+          open
+          onLogin={handleLogin}
+          closeOnBackdrop={false}
+          showCloseButton={false}
+          ctaLabel="Acessar Terminal"
+        />
+      ) : null}
     </div>
   );
 }

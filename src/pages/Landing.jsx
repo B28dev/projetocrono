@@ -11,7 +11,7 @@ const FEATURES = [
   { icon: '✅', label: 'Banco de Questoes', desc: 'Em breve' },
 ];
 
-export default function Landing() {
+export default function Landing({ onOpenDashboard }) {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   const titleRef = useRef(null);
@@ -105,12 +105,15 @@ export default function Landing() {
 
         <div ref={ctaRef} className="opacity-0">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => {
+              onOpenDashboard?.();
+              if (!onOpenDashboard) navigate('/dashboard');
+            }}
             data-magnetic
             className="magnetic-el group cyber-button relative overflow-hidden inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-500/20 cyberpunk:border cyberpunk:border-white/15 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.2))] cyberpunk:font-mono cyberpunk:uppercase cyberpunk:tracking-[0.16em]"
           >
             <span className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
-            <span className="relative">Hub de Matérias</span>
+            <span className="relative">Inicializar Sistema</span>
             <svg className="relative w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 16 16">
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

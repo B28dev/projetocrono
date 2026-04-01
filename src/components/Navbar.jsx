@@ -13,7 +13,7 @@ const SHIFT_OPTIONS = [
   { value: 'noturno-adele', label: 'Noturno (Adele)' },
 ];
 
-export default function Navbar({ theme, onToggleTheme, shift, onShiftChange }) {
+export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onOpenDashboard }) {
   const { pathname } = useLocation();
   const brandLinkClass = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 text-zinc-100 hover:text-white hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-950 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:text-white cyberpunk:hover:border-[#ff3ea5]/40';
 
@@ -32,8 +32,12 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange }) {
         </Link>
 
         <nav className="flex items-center gap-2">
-          <NavLink to="/dashboard" active={pathname.startsWith('/dashboard') || pathname.startsWith('/materia')}>
-            Dashboard
+          <NavLink
+            to="/dashboard"
+            active={pathname.startsWith('/dashboard') || pathname.startsWith('/materia')}
+            onClick={onOpenDashboard}
+          >
+            Terminal
           </NavLink>
           <ShiftSelect value={shift} onChange={onShiftChange} />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -43,10 +47,11 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange }) {
   );
 }
 
-function NavLink({ to, active, children }) {
+function NavLink({ to, active, children, onClick }) {
   return (
     <Link
       to={to}
+      onClick={onClick}
       className={`px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:hover:border-stone-400 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#ff3ea5]/40 ${active
         ? 'text-zinc-100 bg-white/10 border-[#00e8ff]/30 dark:bg-stone-300 dark:text-stone-900 cyberpunk:border-[#00e8ff]/40 cyberpunk:text-white'
         : 'text-zinc-400 hover:text-zinc-100 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/70 cyberpunk:hover:text-white'
