@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isInstitutional() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.matches('^[^@]+@somosicev\\.com$');
+    }
+
+    match /avatars/{userId} {
+      allow read: if isInstitutional();
+
+      allow create, update: if isInstitutional()
+        && request.auth.uid == userId
+        && request.resource != null
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType != null
+        && request.resource.contentType.matches('^image/.*$');
+
+      allow delete: if isInstitutional()
+        && request.auth.uid == userId;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

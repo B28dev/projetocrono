@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
 import NamePromptModal from './components/NamePromptModal';
 import Navbar from './components/Navbar';
@@ -12,8 +12,6 @@ import { auth } from './firebase';
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
-const LAST_PROTECTED_ROUTE_KEY = 'last-protected-route';
-
 const SHIFT_CONFIG = {
   'vespertino-snyder': {
     label: 'Vespertino (Snyder)',
@@ -74,7 +72,6 @@ export default function App() {
 }
 
 function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange }) {
-  const location = useLocation();
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -88,49 +85,46 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
   }, [navigate]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAuthenticated(true);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        if (!user) {
+          setIsAuthenticated(false);
+          setUserName('');
+          setCurrentView('login');
+          return;
+        }
 
+        const normalizedEmail = String(user.email || '').trim().toLowerCase();
+        if (!normalizedEmail.endsWith('@somosicev.com')) {
+          await signOut(auth);
+          setIsAuthenticated(false);
+          setUserName('');
+          setCurrentView('login');
+          navigateRef.current('/', { replace: true });
+          return;
+        }
+
+        setIsAuthenticated(true);
         const firstName = String(user.displayName || '').trim().split(/\s+/)[0] || '';
+
         if (firstName) {
           const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
-          const savedProtectedPath = typeof window !== 'undefined'
-            ? window.localStorage.getItem(LAST_PROTECTED_ROUTE_KEY) || ''
-            : '';
-          const targetPath = currentPath === '/' && savedProtectedPath ? savedProtectedPath : currentPath;
-          const isDashboardPath = targetPath.startsWith('/dashboard') || targetPath.startsWith('/materia/');
+          const isDashboardPath = currentPath.startsWith('/dashboard') || currentPath.startsWith('/materia/');
 
           setUserName(firstName);
           setCurrentView(isDashboardPath ? 'dashboard' : 'hero');
-
-          if (targetPath !== currentPath) {
-            navigateRef.current(targetPath, { replace: true });
-          }
-        } else {
-          setUserName('');
-          setCurrentView('name');
+          return;
         }
-      } else {
-        setIsAuthenticated(false);
-        setUserName('');
-        setCurrentView('login');
-      }
 
-      setIsAuthLoading(false);
+        setUserName('');
+        setCurrentView('name');
+      } finally {
+        setIsAuthLoading(false);
+      }
     });
 
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !isAuthenticated) return;
-
-    const path = location.pathname;
-    if (path.startsWith('/dashboard') || path.startsWith('/materia/')) {
-      window.localStorage.setItem(LAST_PROTECTED_ROUTE_KEY, path);
-    }
-  }, [isAuthenticated, location.pathname]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -194,18 +188,26 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
         aria-hidden={isBlockingOverlayActive}
         inert={isBlockingOverlayActive ? '' : undefined}
       >
-        <Navbar
-          theme={theme}
-          onToggleTheme={onToggleTheme}
-          shift={shift}
-          onShiftChange={onShiftChange}
-          onNavigate={handleNavigate}
-        />
+        {!isAuthLoading && isAuthenticated ? (
+          <Navbar
+            theme={theme}
+            onToggleTheme={onToggleTheme}
+            shift={shift}
+            onShiftChange={onShiftChange}
+            onNavigate={handleNavigate}
+          />
+        ) : null}
         <div className="flex-1">
           <Routes>
             <Route
               path="/"
-              element={<Landing onNavigate={handleNavigate} userName={userName} />}
+              element={
+                isAuthLoading
+                  ? null
+                  : isAuthenticated
+                  ? <Landing onNavigate={handleNavigate} userName={userName} />
+                  : null
+              }
             />
             <Route
               path="/dashboard"
@@ -230,7 +232,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        <SystemNotice compact />
+        {!isAuthLoading && isAuthenticated ? <SystemNotice compact /> : null}
       </div>
 
       {isAuthLoading ? (

@@ -15,6 +15,8 @@ const SHIFT_OPTIONS = [
   { value: 'vespertino-snyder', label: 'Vespertino (Snyder)' },
   { value: 'noturno-adele', label: 'Noturno (Adele)' },
 ];
+const MAX_AVATAR_SIZE_MB = 2;
+const MAX_AVATAR_SIZE_BYTES = MAX_AVATAR_SIZE_MB * 1024 * 1024;
 
 function getProfileData(user) {
   return {
@@ -34,6 +36,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
   const [isSavingName, setIsSavingName] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [profileError, setProfileError] = useState('');
+  const [profileNotice, setProfileNotice] = useState('');
   const [profileData, setProfileData] = useState(() => getProfileData(auth.currentUser));
 
   const brandLinkClass = 'flex items-center gap-1.5 rounded-xl border border-transparent px-2.5 py-1.5 text-xs text-zinc-100 transition-colors hover:bg-white/5 md:gap-2 md:px-4 md:py-2 md:text-sm dark:text-stone-900 dark:hover:bg-stone-200/50 cyberpunk:text-white';
@@ -56,6 +59,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
         setIsProfileOpen(false);
         setIsEditingName(false);
         setProfileError('');
+        setProfileNotice('');
       }
     };
 
@@ -64,6 +68,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
         setIsProfileOpen(false);
         setIsEditingName(false);
         setProfileError('');
+        setProfileNotice('');
       }
     };
 
@@ -87,6 +92,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
     setIsProfileOpen((current) => !current);
     setIsEditingName(false);
     setProfileError('');
+    setProfileNotice('');
     setEditNameValue(profileData.displayName);
   };
 
@@ -124,10 +130,12 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
     setIsProfileOpen(false);
     setIsEditingName(false);
     setProfileError('');
+    setProfileNotice('');
   };
 
   const handleTriggerFilePicker = () => {
     if (isUploading) return;
+    setProfileNotice('');
     fileInputRef.current?.click();
   };
 
@@ -136,14 +144,15 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
     event.target.value = '';
 
     if (!file) return;
+    setProfileNotice('');
 
     if (!file.type.startsWith('image/')) {
       setProfileError('Selecione uma imagem valida.');
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setProfileError('A imagem deve ter no maximo 2MB.');
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      setProfileError(`A imagem deve ter no maximo ${MAX_AVATAR_SIZE_MB}MB.`);
       return;
     }
 
@@ -153,6 +162,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
     }
 
     setProfileError('');
+    setProfileNotice('');
     setIsUploading(true);
 
     try {
@@ -161,6 +171,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
       const photoURL = await getDownloadURL(fileRef);
       await updateProfile(auth.currentUser, { photoURL });
       setProfileData((current) => ({ ...current, photoURL }));
+      setProfileNotice('Foto atualizada com sucesso.');
     } catch {
       setProfileError('Falha no upload da imagem. Tente novamente.');
     } finally {
@@ -272,6 +283,10 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
                   <p className="text-xs text-rose-400">{profileError}</p>
                 ) : null}
 
+                {profileNotice ? (
+                  <p className="text-xs text-amber-300/90">{profileNotice}</p>
+                ) : null}
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -288,6 +303,10 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
                 >
                   {isUploading ? 'Enviando imagem...' : 'Alterar Foto'}
                 </button>
+
+                <p className="text-[11px] text-white/45">
+                  Limite de upload: {MAX_AVATAR_SIZE_MB}MB por imagem.
+                </p>
               </div>
 
               <hr className="border-white/10 my-1" />

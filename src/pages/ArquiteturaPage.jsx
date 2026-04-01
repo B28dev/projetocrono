@@ -139,7 +139,7 @@ export default function ArquiteturaPage({
     <>
       <div
         ref={magneticRef}
-        className="cyber-shell min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:bg-[radial-gradient(circle_at_top,_rgba(204,255,0,0.16),_transparent_28%),linear-gradient(180deg,_#F5F5F4_0%,_#EAEAE5_100%)] dark:text-stone-900"
+        className="cyber-shell min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900"
       >
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-12">
           <div ref={headerRef} className="space-y-4">
