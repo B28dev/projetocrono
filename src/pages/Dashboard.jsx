@@ -67,7 +67,7 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
   }, [examDate, shift, studyPlan, taskProgress]);
 
   return (
-    <div ref={magneticRef} className="cyber-shell min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
+    <div ref={magneticRef} className="cyber-shell min-h-screen transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
       <div className="cyber-glass border-b border-zinc-800 bg-surface-1 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/80 cyberpunk:border-white/10 cyberpunk:bg-transparent">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center gap-4">
           <div className="flex flex-col gap-2 mr-auto">
