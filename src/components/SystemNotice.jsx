@@ -1,4 +1,4 @@
-const NOTICE_TEXT = 'Projeto independente desenvolvido por um aluno com auxilio de Inteligencia Artificial. Nao possui vinculo oficial com a faculdade ou professores. O conteudo e as verificacoes estao sujeitos a erros de ambas as partes. Este painel serve como um alicerce para construir uma base geral de conhecimento, mas nao garante que o assunto sera cobrado na prova exatamente da forma como esta estruturado aqui.';
+const NOTICE_TEXT = 'Projeto independente desenvolvido por alunos com auxilio de Inteligencia Artificial. Nao possui vinculo oficial com a faculdade ou professores. O conteudo e as verificacoes estao sujeitos a erros de ambas as partes. Este painel serve como um alicerce para construir uma base geral de conhecimento, mas nao garante que o assunto sera cobrado na prova exatamente da forma como esta estruturado aqui.';
 
 function InfoIcon({ compact = false }) {
   return (

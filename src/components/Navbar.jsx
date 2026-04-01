@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
+import heroMark from '../assets/hero.png';
 
 const THEME_LABELS = {
   dark: 'Ativar tema claro',
@@ -9,23 +9,20 @@ const THEME_LABELS = {
 
 export default function Navbar({ theme, onToggleTheme }) {
   const { pathname } = useLocation();
-  const magneticRef = useGsapMagnetic('[data-magnetic]', { strength: 10, scale: 1.03 });
+  const brandLinkClass = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 text-zinc-100 hover:text-white hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-950 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:text-white cyberpunk:hover:border-[#ff3ea5]/40';
 
   return (
     <header
-      ref={magneticRef}
-      className="cyber-glass fixed top-0 left-0 right-0 z-50 border-b border-zinc-800 bg-surface/80 backdrop-blur-md transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/85 cyberpunk:border-white/10 cyberpunk:bg-transparent"
+      className="cyber-glass fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#08080f]/70 backdrop-blur-md transition-colors duration-300 dark:border-stone-300 dark:bg-stone-50/85 cyberpunk:border-white/10 cyberpunk:bg-transparent"
     >
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link
           to="/"
-          data-magnetic
-          className="flex items-center gap-2 text-sm font-semibold text-zinc-100 transition-colors hover:text-white dark:text-stone-900 dark:hover:text-stone-950 cyberpunk:text-white cyberpunk:hover:text-[#00e8ff]"
+          className={brandLinkClass}
+          style={{ transform: 'none' }}
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded bg-blue-500 text-xs font-bold text-white dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.24))]">
-            P
-          </span>
-          Painel
+          <img src={heroMark} alt="" className="h-7 w-7 object-cover" />
+          <span className="font-semibold">Painel</span>
         </Link>
 
         <nav className="flex items-center gap-2">
@@ -43,10 +40,9 @@ function NavLink({ to, active, children }) {
   return (
     <Link
       to={to}
-      data-magnetic
-      className={`px-3 py-1.5 rounded-md text-sm transition-colors ${active
-        ? 'bg-zinc-800 text-zinc-100 dark:bg-stone-900 dark:text-stone-50 cyberpunk:border cyberpunk:border-[#00e8ff]/30 cyberpunk:bg-white/[0.08] cyberpunk:text-white'
-        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 dark:text-stone-600 dark:hover:text-stone-900 dark:hover:bg-stone-200/80 cyberpunk:border cyberpunk:border-transparent cyberpunk:text-white/70 cyberpunk:hover:border-white/10 cyberpunk:hover:bg-white/[0.05] cyberpunk:hover:text-[#00e8ff]'
+      className={`px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 bg-white/5 hover:border-[#00e8ff]/40 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-200/50 dark:hover:border-stone-400 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#ff3ea5]/40 ${active
+        ? 'text-zinc-100 bg-white/10 border-[#00e8ff]/30 dark:bg-stone-300 dark:text-stone-900 cyberpunk:border-[#00e8ff]/40 cyberpunk:text-white'
+        : 'text-zinc-400 hover:text-zinc-100 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/70 cyberpunk:hover:text-white'
         }`}
     >
       {children}
@@ -64,7 +60,6 @@ function ThemeToggle({ theme, onToggle }) {
       type="button"
       onClick={onToggle}
       aria-label={THEME_LABELS[theme]}
-      data-magnetic
       className={`${baseClass} cyber-button cyberpunk:border-white/15 cyberpunk:bg-transparent`}
     >
       <span className="relative block h-4 w-4">

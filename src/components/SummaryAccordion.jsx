@@ -33,14 +33,13 @@ function AccordionItem({ summary, isOpen, onToggle }) {
   }, [isOpen]);
 
   return (
-    <div className={`summary-item cyber-glass rounded-xl border transition-colors dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-transparent ${
+    <div className={`summary-item cyber-glass rounded-xl border backdrop-blur-md transition-colors duration-300 dark:shadow-sm ${
       isOpen
-        ? 'border-zinc-600 bg-surface-2 dark:border-stone-300 dark:bg-white/80'
-        : 'border-zinc-800 bg-surface-1 hover:border-zinc-700 dark:border-stone-300 dark:bg-stone-50/80 dark:hover:border-stone-400 cyberpunk:hover:border-[#00e8ff]/20'
+        ? 'border-white/20 bg-white/10 dark:border-stone-400 dark:bg-stone-50 cyberpunk:border-[#00e8ff]/40 cyberpunk:bg-white/10'
+        : 'border-white/10 bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#00e8ff]/30 cyberpunk:hover:bg-white/10'
     }`}>
       <button
         onClick={onToggle}
-        data-magnetic
         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
       >
         <span className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">{summary.title}</span>

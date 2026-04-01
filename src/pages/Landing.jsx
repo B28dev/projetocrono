@@ -23,9 +23,19 @@ export default function Landing() {
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+    if (prefersReduced) {
+      titleRef.current?.classList.add('title-revealed');
+      return () => {
+        titleRef.current?.classList.remove('title-revealed');
+      };
+    }
 
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const tl = gsap.timeline({
+      defaults: { ease: 'power3.out' },
+      onComplete: () => {
+        titleRef.current?.classList.add('title-revealed');
+      },
+    });
 
     tl.fromTo(heroRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5 });
     tl.fromTo(
@@ -43,6 +53,11 @@ export default function Landing() {
       '-=0.1',
     );
     tl.fromTo(noticeRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.1');
+
+    return () => {
+      titleRef.current?.classList.remove('title-revealed');
+      tl.kill();
+    };
   }, []);
 
   return (
@@ -63,10 +78,23 @@ export default function Landing() {
           </span>
         </div>
 
-        <h1 ref={titleRef} className="text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white cyberpunk:[text-shadow:0_0_32px_rgba(255,62,165,0.12)]">
-          {['Painel', 'da', 'Turma', 'Engenharia', 'de', 'Software'].map((word, i) => (
-            <span key={i} className="inline-block overflow-hidden mr-[0.25em] last:mr-0">
-              <span className="word inline-block">{word}</span>
+        <h1 ref={titleRef} className="hero-title text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
+          {[
+            { label: 'Painel' },
+            { label: 'da' },
+            { label: 'Turma' },
+            { label: 'Adele' },
+            { label: 'Engenharia', outline: true },
+            { label: 'de', outline: true },
+            { label: 'Software', outline: true },
+          ].map((word, i) => (
+            <span key={i} className="word-shell inline-block overflow-hidden mr-[0.25em] last:mr-0">
+              <span
+                data-text={word.label}
+                className={`word inline-block ${word.outline ? 'hero-title-outline' : ''}`}
+              >
+                {word.label}
+              </span>
             </span>
           ))}
         </h1>
@@ -79,10 +107,10 @@ export default function Landing() {
           <button
             onClick={() => navigate('/dashboard')}
             data-magnetic
-            className="group cyber-button relative overflow-hidden inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-500/20 cyberpunk:border cyberpunk:border-white/15 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.2))] cyberpunk:font-mono cyberpunk:uppercase cyberpunk:tracking-[0.16em]"
+            className="magnetic-el group cyber-button relative overflow-hidden inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-500/20 cyberpunk:border cyberpunk:border-white/15 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.18),rgba(255,62,165,0.2))] cyberpunk:font-mono cyberpunk:uppercase cyberpunk:tracking-[0.16em]"
           >
             <span className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
-            <span className="relative">Entrar no painel</span>
+            <span className="relative">Inicializar Sistema</span>
             <svg className="relative w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 16 16">
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -93,7 +121,6 @@ export default function Landing() {
           {FEATURES.map((f) => (
             <div
               key={f.label}
-              data-magnetic
               className="feat-card cyber-glass opacity-0 rounded-xl border border-zinc-800 bg-surface-1 px-3 py-4 flex flex-col items-center gap-1.5 text-center dark:border-stone-300 dark:bg-white/70 cyberpunk:border-white/10 cyberpunk:bg-transparent"
             >
               <span className="text-xl">{f.icon}</span>

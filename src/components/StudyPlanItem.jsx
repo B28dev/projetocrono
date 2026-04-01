@@ -11,10 +11,10 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
   const borderColor = item.isExamDay
     ? 'border-amber-500/60 cyberpunk:border-[#ff3ea5]/35'
     : isToday
-    ? 'border-blue-500/60 cyberpunk:border-[#00e8ff]/35'
+    ? 'border-blue-400/55 shadow-[0_0_24px_rgba(59,130,246,0.22),0_0_56px_rgba(59,130,246,0.08)] dark:border-stone-500 dark:shadow-[0_0_0_1px_rgba(41,37,36,0.08),0_16px_36px_rgba(120,113,108,0.18),0_0_24px_rgba(120,113,108,0.12)] cyberpunk:border-[#00e8ff] cyberpunk:shadow-[0_0_20px_rgba(0,232,255,0.35)]'
     : isPast
-    ? 'border-zinc-800 cyberpunk:border-white/10'
-    : 'border-zinc-700/50 cyberpunk:border-white/10';
+    ? 'border-white/5 cyberpunk:border-white/5'
+    : 'border-white/10 cyberpunk:border-white/10';
 
   return (
     <div className="study-plan-card relative pl-8 pb-8 last:pb-0">
@@ -35,8 +35,7 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
       </div>
 
       <div
-        data-magnetic
-        className={`cyber-glass rounded-xl border bg-surface-2 p-4 dark:border-stone-300 dark:bg-white/80 dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-transparent ${borderColor}`}
+        className={`cyber-glass rounded-xl border backdrop-blur-md p-4 transition-colors duration-300 ${isToday ? 'bg-blue-500/[0.08] dark:bg-stone-50' : 'bg-white/5 dark:bg-stone-100/50'} hover:border-[#00e8ff]/40 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10 ${borderColor}`}
       >
         <div className="study-plan-card-content">
           <div className="mb-3 flex items-start justify-between gap-2">
@@ -54,7 +53,7 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
                   {item.label}
                 </span>
                 {isToday && (
-                  <span className="rounded-full border border-blue-500/30 bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-blue-400 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-700 cyberpunk:border-[#00e8ff]/25 cyberpunk:bg-[#00e8ff]/10 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold border border-blue-400/50 bg-blue-500/10 text-blue-300 shadow-[0_0_16px_rgba(59,130,246,0.16)] dark:border-stone-300 dark:bg-white dark:text-stone-900 dark:shadow-[0_8px_18px_rgba(120,113,108,0.14)] cyberpunk:border-[#00e8ff] cyberpunk:bg-[#00e8ff]/20 cyberpunk:text-[#00e8ff] cyberpunk:font-mono">
                     hoje
                   </span>
                 )}

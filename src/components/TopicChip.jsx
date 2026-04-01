@@ -22,8 +22,7 @@ export default function TopicChip({ topic, onClick }) {
   return (
     <button
       onClick={() => onClick?.(topic)}
-      data-magnetic
-      className={`topic-chip cyber-glass group flex items-center gap-2 px-3.5 py-2 rounded-lg border text-left transition-all duration-150 cursor-pointer hover:scale-105 hover:-translate-y-0.5 dark:shadow-sm dark:shadow-black/5 cyberpunk:border-white/10 cyberpunk:bg-transparent ${styles.chip}`}
+      className={`topic-chip cyber-glass group flex items-center gap-2 px-3.5 py-2 rounded-lg border text-left transition-colors duration-300 cursor-pointer dark:shadow-sm dark:shadow-black/5 cyberpunk:border-white/10 cyberpunk:bg-transparent ${styles.chip}`}
     >
       <div className="topic-chip-content flex w-full min-w-0 items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${styles.dot}`} />

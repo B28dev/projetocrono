@@ -9,8 +9,14 @@ import StudyPlanItem from '../components/StudyPlanItem';
 import SummaryAccordion from '../components/SummaryAccordion';
 import LevelUpModal from '../components/LevelUpModal';
 
-const TODAY = new Date().toISOString().slice(0, 10);
 const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress-v2';
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 function Section({ title, subtitle, children }) {
   const ref = useGsapReveal();
@@ -52,6 +58,8 @@ export default function ArquiteturaPage() {
     window.localStorage.setItem(STUDY_PLAN_STORAGE_KEY, JSON.stringify(taskProgress));
   }, [taskProgress]);
 
+  const todayKey = getLocalDateKey();
+
   const toggleTask = (storageDate, taskIndex) => {
     setTaskProgress((current) => ({
       ...current,
@@ -73,12 +81,12 @@ export default function ArquiteturaPage() {
         isOverdue: false,
       };
 
-      if (item.date < TODAY && isDone) {
+      if (item.date < todayKey && isDone) {
         groups.completedPast.push(preparedItem);
         return groups;
       }
 
-      if (item.date < TODAY && !isDone) {
+      if (item.date < todayKey && !isDone) {
         groups.overdue.push({
           ...preparedItem,
           renderKey: `${item.date}-overdue`,
@@ -87,12 +95,12 @@ export default function ArquiteturaPage() {
         return groups;
       }
 
-      if (item.date === TODAY) {
+      if (item.date === todayKey) {
         groups.today.push(preparedItem);
         return groups;
       }
 
-      if (item.date > TODAY) {
+      if (item.date > todayKey) {
         groups.future.push(preparedItem);
       }
 
@@ -141,7 +149,7 @@ export default function ArquiteturaPage() {
                 </p>
               </div>
 
-              <div data-magnetic className="cyber-glass rounded-xl border border-zinc-700 bg-surface-2 px-4 py-3 transition-colors duration-300 dark:border-stone-300 dark:bg-white/80 dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-transparent">
+              <div className="cyber-glass rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10">
                 <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2 dark:text-stone-500 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">Proxima prova em</p>
                 <CountdownFull />
               </div>
@@ -176,8 +184,7 @@ export default function ArquiteturaPage() {
                   href={playlist.url}
                   target="_blank"
                   rel="noreferrer"
-                  data-magnetic
-                  className="playlist-card cyber-glass rounded-xl border border-zinc-800 bg-surface-1 p-4 transition-colors hover:border-zinc-700 dark:border-stone-300 dark:bg-white/80 dark:hover:border-stone-400 cyberpunk:border-white/10 cyberpunk:bg-transparent cyberpunk:hover:border-[#00e8ff]/20"
+                  className="playlist-card cyber-glass rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4 transition-colors hover:border-[#00e8ff]/30 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -307,7 +314,7 @@ export default function ArquiteturaPage() {
           </Section>
 
           <Section title="Banco de questoes">
-            <div className="cyber-glass rounded-xl border border-dashed border-zinc-700 bg-surface-1 px-6 py-10 flex flex-col items-center gap-3 text-center transition-colors duration-300 dark:border-stone-300 dark:bg-white/70 cyberpunk:border-white/10 cyberpunk:bg-transparent">
+            <div className="cyber-glass rounded-xl border border-dashed border-white/10 bg-white/5 backdrop-blur-md px-6 py-10 flex flex-col items-center gap-3 text-center transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 cyberpunk:border-white/10 cyberpunk:bg-white/5">
               <span className="text-3xl cyberpunk:text-[#00e8ff]">[ ]</span>
               <p className="text-sm font-semibold text-zinc-300 dark:text-stone-800 cyberpunk:font-display cyberpunk:text-white">Banco de questoes</p>
               <p className="text-xs text-zinc-500 max-w-xs dark:text-stone-600 cyberpunk:text-white/65">
