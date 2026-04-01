@@ -139,9 +139,18 @@ export default function ArquiteturaPage({
     <>
       <div
         ref={magneticRef}
-        className="cyber-shell min-h-screen pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900"
+        className="cyber-shell relative min-h-screen bg-surface-1 pt-14 transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900"
       >
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-12">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 hidden cyberpunk:block"
+          style={{
+            background:
+              'radial-gradient(circle at 12% 18%, rgba(255,62,165,0.08), transparent 30%), radial-gradient(circle at 86% 10%, rgba(0,232,255,0.08), transparent 28%), linear-gradient(180deg, rgba(8,8,15,0.72) 0%, rgba(8,8,15,0.82) 42%, rgba(8,8,15,0.9) 100%)',
+          }}
+        />
+
+        <div className="relative max-w-4xl mx-auto px-4 py-8 space-y-12">
           <div ref={headerRef} className="space-y-4">
             <button
               data-magnetic

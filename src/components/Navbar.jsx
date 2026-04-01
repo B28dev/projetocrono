@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import heroMark from '../../assets/styles/fundoquad.png';
-import { auth, storage } from '../firebase';
+import useProfileHub from '../hooks/useProfileHub';
 
 const THEME_LABELS = {
   dark: 'Ativar tema claro',
@@ -15,169 +13,34 @@ const SHIFT_OPTIONS = [
   { value: 'vespertino-snyder', label: 'Vespertino (Snyder)' },
   { value: 'noturno-adele', label: 'Noturno (Adele)' },
 ];
-const MAX_AVATAR_SIZE_MB = 2;
-const MAX_AVATAR_SIZE_BYTES = MAX_AVATAR_SIZE_MB * 1024 * 1024;
 
-function getProfileData(user) {
-  return {
-    displayName: String(user?.displayName || '').trim(),
-    email: String(user?.email || '').trim(),
-    photoURL: String(user?.photoURL || '').trim(),
-  };
-}
-
-export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
+function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
   const { pathname } = useLocation();
   const profileHubRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editNameValue, setEditNameValue] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [profileError, setProfileError] = useState('');
-  const [profileNotice, setProfileNotice] = useState('');
-  const [profileData, setProfileData] = useState(() => getProfileData(auth.currentUser));
+  const {
+    isProfileOpen,
+    isEditingName,
+    editNameValue,
+    isSavingName,
+    isUploading,
+    profileError,
+    profileNotice,
+    profileData,
+    displayName,
+    email,
+    avatarInitial,
+    maxAvatarSizeMb,
+    setEditNameValue,
+    handleToggleProfile,
+    handleToggleEditingName,
+    handleSaveName,
+    handleLogout,
+    handleTriggerFilePicker,
+    handleImageChange,
+  } = useProfileHub({ profileHubRef, fileInputRef });
 
   const brandLinkClass = 'flex items-center gap-1.5 rounded-xl border border-transparent px-2.5 py-1.5 text-xs text-zinc-100 transition-colors hover:bg-white/5 md:gap-2 md:px-4 md:py-2 md:text-sm dark:text-stone-900 dark:hover:bg-stone-200/50 cyberpunk:text-white';
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const nextProfile = getProfileData(user);
-      setProfileData(nextProfile);
-      setEditNameValue(nextProfile.displayName);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!isProfileOpen) return undefined;
-
-    const handlePointerDown = (event) => {
-      if (!profileHubRef.current?.contains(event.target)) {
-        setIsProfileOpen(false);
-        setIsEditingName(false);
-        setProfileError('');
-        setProfileNotice('');
-      }
-    };
-
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        setIsProfileOpen(false);
-        setIsEditingName(false);
-        setProfileError('');
-        setProfileNotice('');
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('touchstart', handlePointerDown);
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('touchstart', handlePointerDown);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isProfileOpen]);
-
-  const displayName = profileData.displayName || 'Usuario ICEV';
-  const email = profileData.email || 'usuario@somosicev.com';
-  const avatarSeed = profileData.displayName || profileData.email || 'U';
-  const avatarInitial = avatarSeed.charAt(0).toUpperCase();
-
-  const handleToggleProfile = () => {
-    setIsProfileOpen((current) => !current);
-    setIsEditingName(false);
-    setProfileError('');
-    setProfileNotice('');
-    setEditNameValue(profileData.displayName);
-  };
-
-  const handleSaveName = async (event) => {
-    event.preventDefault();
-    if (isSavingName) return;
-
-    const normalizedName = editNameValue.trim().replace(/\s+/g, ' ');
-    if (normalizedName.length < 2) {
-      setProfileError('Digite um nome valido.');
-      return;
-    }
-
-    if (!auth.currentUser) {
-      setProfileError('Sessao invalida. Faca login novamente.');
-      return;
-    }
-
-    setIsSavingName(true);
-    setProfileError('');
-
-    try {
-      await updateProfile(auth.currentUser, { displayName: normalizedName });
-      setProfileData((current) => ({ ...current, displayName: normalizedName }));
-      setIsEditingName(false);
-    } catch {
-      setProfileError('Nao foi possivel atualizar o nome.');
-    } finally {
-      setIsSavingName(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    setIsProfileOpen(false);
-    setIsEditingName(false);
-    setProfileError('');
-    setProfileNotice('');
-  };
-
-  const handleTriggerFilePicker = () => {
-    if (isUploading) return;
-    setProfileNotice('');
-    fileInputRef.current?.click();
-  };
-
-  const handleImageChange = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-
-    if (!file) return;
-    setProfileNotice('');
-
-    if (!file.type.startsWith('image/')) {
-      setProfileError('Selecione uma imagem valida.');
-      return;
-    }
-
-    if (file.size > MAX_AVATAR_SIZE_BYTES) {
-      setProfileError(`A imagem deve ter no maximo ${MAX_AVATAR_SIZE_MB}MB.`);
-      return;
-    }
-
-    if (!auth.currentUser) {
-      setProfileError('Sessao invalida. Faca login novamente.');
-      return;
-    }
-
-    setProfileError('');
-    setProfileNotice('');
-    setIsUploading(true);
-
-    try {
-      const fileRef = storageRef(storage, `avatars/${auth.currentUser.uid}`);
-      await uploadBytes(fileRef, file);
-      const photoURL = await getDownloadURL(fileRef);
-      await updateProfile(auth.currentUser, { photoURL });
-      setProfileData((current) => ({ ...current, photoURL }));
-      setProfileNotice('Foto atualizada com sucesso.');
-    } catch {
-      setProfileError('Falha no upload da imagem. Tente novamente.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   return (
     <header
@@ -215,6 +78,8 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
                 <img
                   src={profileData.photoURL}
                   alt="Avatar do usuario"
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full rounded-full object-cover"
                 />
               ) : (
@@ -233,6 +98,8 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
                     <img
                       src={profileData.photoURL}
                       alt="Avatar do usuario"
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full rounded-full object-cover"
                     />
                   ) : (
@@ -249,11 +116,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
               <div className="space-y-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsEditingName((current) => !current);
-                    setProfileError('');
-                    setEditNameValue(profileData.displayName);
-                  }}
+                  onClick={handleToggleEditingName}
                   className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/80 transition-colors hover:bg-white/5 hover:text-white"
                 >
                   Editar Perfil
@@ -305,7 +168,7 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
                 </button>
 
                 <p className="text-[11px] text-white/45">
-                  Limite de upload: {MAX_AVATAR_SIZE_MB}MB por imagem.
+                  Limite de upload: {maxAvatarSizeMb}MB por imagem.
                 </p>
               </div>
 
@@ -329,6 +192,8 @@ export default function Navbar({ theme, onToggleTheme, shift, onShiftChange, onN
     </header>
   );
 }
+
+export default memo(Navbar);
 
 function NavButton({ active, children, onClick }) {
   const className = `inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs md:px-4 md:py-2 md:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 ${active

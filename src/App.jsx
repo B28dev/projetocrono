@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
 import NamePromptModal from './components/NamePromptModal';
-import Navbar from './components/Navbar';
 import SystemNotice from './components/SystemNotice';
 import Landing from './pages/Landing';
-import Dashboard from './pages/Dashboard';
-import ArquiteturaPage from './pages/ArquiteturaPage';
-import { auth } from './firebase';
+import useAuth from './hooks/useAuth';
+
+const Navbar = lazy(() => import('./components/Navbar'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ArquiteturaPage = lazy(() => import('./pages/ArquiteturaPage'));
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
@@ -22,6 +22,14 @@ const SHIFT_CONFIG = {
     examDate: new Date('2026-04-13T08:00:00'),
   },
 };
+
+const SuspenseLoader = memo(function SuspenseLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#05050a]">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 border-opacity-50 shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+    </div>
+  );
+});
 
 export default function App() {
   const [theme, setTheme] = useState(() => {
@@ -45,16 +53,22 @@ export default function App() {
     window.localStorage.setItem(SHIFT_STORAGE_KEY, shift);
   }, [shift]);
 
-  const cycleTheme = () => {
+  const cycleTheme = useCallback(() => {
     setTheme((current) => {
       if (current === 'dark') return 'light';
       if (current === 'light') return 'cyberpunk';
       return 'dark';
     });
-  };
+  }, []);
 
-  const themeClass = theme === 'light' ? 'dark' : theme === 'cyberpunk' ? 'theme-cyberpunk' : '';
-  const selectedShift = SHIFT_CONFIG[shift] || SHIFT_CONFIG['noturno-adele'];
+  const themeClass = useMemo(
+    () => (theme === 'light' ? 'dark' : theme === 'cyberpunk' ? 'theme-cyberpunk' : ''),
+    [theme],
+  );
+  const selectedShift = useMemo(
+    () => SHIFT_CONFIG[shift] || SHIFT_CONFIG['noturno-adele'],
+    [shift],
+  );
 
   return (
     <div className={themeClass} data-theme={theme}>
@@ -72,59 +86,16 @@ export default function App() {
 }
 
 function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange }) {
-  const navigate = useNavigate();
-  const navigateRef = useRef(navigate);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState('login');
-  const [userName, setUserName] = useState('');
-  const isBlockingOverlayActive = isAuthLoading || currentView === 'login' || currentView === 'name';
-
-  useEffect(() => {
-    navigateRef.current = navigate;
-  }, [navigate]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (!user) {
-          setIsAuthenticated(false);
-          setUserName('');
-          setCurrentView('login');
-          return;
-        }
-
-        const normalizedEmail = String(user.email || '').trim().toLowerCase();
-        if (!normalizedEmail.endsWith('@somosicev.com')) {
-          await signOut(auth);
-          setIsAuthenticated(false);
-          setUserName('');
-          setCurrentView('login');
-          navigateRef.current('/', { replace: true });
-          return;
-        }
-
-        setIsAuthenticated(true);
-        const firstName = String(user.displayName || '').trim().split(/\s+/)[0] || '';
-
-        if (firstName) {
-          const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
-          const isDashboardPath = currentPath.startsWith('/dashboard') || currentPath.startsWith('/materia/');
-
-          setUserName(firstName);
-          setCurrentView(isDashboardPath ? 'dashboard' : 'hero');
-          return;
-        }
-
-        setUserName('');
-        setCurrentView('name');
-      } finally {
-        setIsAuthLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const {
+    isAuthLoading,
+    isAuthenticated,
+    currentView,
+    userName,
+    isBlockingOverlayActive,
+    handleLogin,
+    handleNameSubmit,
+    handleNavigate,
+  } = useAuth();
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -146,94 +117,61 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
     };
   }, [isBlockingOverlayActive]);
 
-  useEffect(() => {
-    if (!isAuthenticated && currentView !== 'login') {
-      setCurrentView('login');
-    }
-  }, [currentView, isAuthenticated]);
-
-  const handleLogin = (viewDestino = 'hero') => {
-    setIsAuthenticated(true);
-    setCurrentView(viewDestino);
-    setIsAuthLoading(false);
-    if (viewDestino === 'dashboard') {
-      navigate('/dashboard', { replace: true });
-      return;
-    }
-    navigate('/', { replace: true });
-  };
-
-  const handleNameSubmit = (firstName) => {
-    setUserName(firstName);
-    setCurrentView('hero');
-    navigate('/', { replace: true });
-  };
-
-  const handleNavigate = (view) => {
-    if (!isAuthenticated) return;
-    setCurrentView(view);
-
-    if (view === 'dashboard') {
-      navigate('/dashboard');
-      return;
-    }
-
-    navigate('/', { replace: true });
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
-      <div
-        className={`min-h-screen flex flex-col ${isBlockingOverlayActive ? 'pointer-events-none select-none' : ''}`}
-        aria-hidden={isBlockingOverlayActive}
-        inert={isBlockingOverlayActive ? '' : undefined}
-      >
-        {!isAuthLoading && isAuthenticated ? (
-          <Navbar
-            theme={theme}
-            onToggleTheme={onToggleTheme}
-            shift={shift}
-            onShiftChange={onShiftChange}
-            onNavigate={handleNavigate}
-          />
-        ) : null}
-        <div className="flex-1">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                isAuthLoading
-                  ? null
-                  : isAuthenticated
-                  ? <Landing onNavigate={handleNavigate} userName={userName} />
-                  : null
-              }
+      <Suspense fallback={<SuspenseLoader />}>
+        <div
+          className={`min-h-screen flex flex-col ${isBlockingOverlayActive ? 'pointer-events-none select-none' : ''}`}
+          aria-hidden={isBlockingOverlayActive}
+          inert={isBlockingOverlayActive ? '' : undefined}
+        >
+          {!isAuthLoading && isAuthenticated ? (
+            <Navbar
+              theme={theme}
+              onToggleTheme={onToggleTheme}
+              shift={shift}
+              onShiftChange={onShiftChange}
+              onNavigate={handleNavigate}
             />
-            <Route
-              path="/dashboard"
-              element={
-                isAuthLoading
-                  ? null
-                  : isAuthenticated
-                  ? <Dashboard shift={shift} examDate={selectedShift.examDate} userName={userName} />
-                  : <Navigate to="/" replace />
-              }
-            />
-            <Route
-              path="/materia/arquitetura"
-              element={
-                isAuthLoading
-                  ? null
-                  : isAuthenticated
-                  ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
-                  : <Navigate to="/" replace />
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          ) : null}
+          <div className="flex-1">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <Landing onNavigate={handleNavigate} userName={userName} />
+                    : null
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <Dashboard shift={shift} examDate={selectedShift.examDate} userName={userName} />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route
+                path="/materia/arquitetura"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+          {!isAuthLoading && isAuthenticated ? <SystemNotice compact /> : null}
         </div>
-        {!isAuthLoading && isAuthenticated ? <SystemNotice compact /> : null}
-      </div>
+      </Suspense>
 
       {isAuthLoading ? (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center bg-[#08080f]/85 backdrop-blur-xl">

@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 const NOTICE_TEXT = 'Projeto independente desenvolvido por alunos com auxilio de Inteligencia Artificial. Nao possui vinculo oficial com a faculdade ou professores. O conteudo e as verificacoes estao sujeitos a erros de ambas as partes. Este painel serve como um alicerce para construir uma base geral de conhecimento, mas nao garante que o assunto sera cobrado na prova exatamente da forma como esta estruturado aqui.';
 
 function InfoIcon({ compact = false }) {
@@ -15,7 +17,7 @@ function InfoIcon({ compact = false }) {
   );
 }
 
-export default function SystemNotice({ compact = false }) {
+function SystemNotice({ compact = false }) {
   if (compact) {
     return (
       <footer className="border-t border-white/5 bg-stone-950/70 px-3 py-2 backdrop-blur-sm transition-colors duration-300 dark:border-stone-300/70 dark:bg-stone-100/85 cyberpunk:border-white/10 cyberpunk:bg-[#08080f]/80">
@@ -44,4 +46,5 @@ export default function SystemNotice({ compact = false }) {
   );
 }
 
+export default memo(SystemNotice);
 export { NOTICE_TEXT };

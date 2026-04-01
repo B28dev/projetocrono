@@ -1,16 +1,6 @@
-import { useState } from 'react';
-import {
-  GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-} from 'firebase/auth';
-import { auth } from '../firebase';
+import useLoginAuth from '../hooks/useLoginAuth';
 
 const NEON_PINK = '#ff3ea5';
-const INSTITUTIONAL_DOMAIN = '@somosicev.com';
 
 export default function LoginModal({
   open = true,
@@ -21,124 +11,25 @@ export default function LoginModal({
   ctaLabel = 'Acessar Terminal',
   showCloseButton = true,
 }) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const {
+    isRegistering,
+    isResetting,
+    isLoading,
+    errorMessage,
+    successMsg,
+    handleSubmit,
+    handlePasswordReset,
+    handleGoogleLogin,
+    enterResetMode,
+    backToLoginMode,
+    toggleRegisterMode,
+  } = useLoginAuth(onLogin);
 
   if (!asPage && !open) return null;
 
   const handleBackdropClick = (event) => {
     if (!closeOnBackdrop || !onClose) return;
     if (event.target === event.currentTarget) onClose();
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (isLoading) return;
-
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get('email') || '').trim().toLowerCase();
-    const password = String(formData.get('password') || '');
-
-    setErrorMessage('');
-    setSuccessMsg('');
-
-    if (!email || !password) {
-      setErrorMessage('Informe e-mail e senha para continuar.');
-      return;
-    }
-
-    if (!email.endsWith(INSTITUTIONAL_DOMAIN)) {
-      setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
-      return;
-    }
-
-    if (password.length < 6) {
-      setErrorMessage('A senha deve ter no minimo 6 caracteres.');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const userCredential = isRegistering
-        ? await createUserWithEmailAndPassword(auth, email, password)
-        : await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const nextView = user?.displayName ? 'hero' : 'name';
-      onLogin?.(nextView);
-    } catch (error) {
-      setErrorMessage(getFirebaseErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePasswordReset = async (event) => {
-    event.preventDefault();
-    if (isLoading) return;
-
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get('email') || '').trim().toLowerCase();
-
-    setErrorMessage('');
-    setSuccessMsg('');
-
-    if (!email) {
-      setErrorMessage('Informe seu e-mail institucional.');
-      return;
-    }
-
-    if (!email.endsWith(INSTITUTIONAL_DOMAIN)) {
-      setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setSuccessMsg('Link de recuperacao enviado para seu e-mail institucional.');
-    } catch (error) {
-      setErrorMessage(getFirebaseErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    if (isLoading) return;
-
-    setErrorMessage('');
-    setSuccessMsg('');
-    setIsLoading(true);
-
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ hd: 'somosicev.com' });
-
-      const result = await signInWithPopup(auth, provider);
-      const user = result?.user;
-      const userEmail = String(user?.email || '').toLowerCase();
-
-      if (!userEmail.endsWith(INSTITUTIONAL_DOMAIN)) {
-        await signOut(auth);
-        setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
-        return;
-      }
-
-      const nextView = user?.displayName ? 'hero' : 'name';
-      onLogin?.(nextView);
-    } catch (error) {
-      const code = String(error?.code || '');
-      if (code === 'auth/popup-closed-by-user') {
-        setErrorMessage('Autenticacao cancelada.');
-      } else {
-        setErrorMessage(getFirebaseErrorMessage(error));
-      }
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -242,12 +133,7 @@ export default function LoginModal({
               <button
                 type="button"
                 disabled={isLoading}
-                onClick={() => {
-                  setErrorMessage('');
-                  setSuccessMsg('');
-                  setIsRegistering(false);
-                  setIsResetting(true);
-                }}
+                onClick={enterResetMode}
                 className="self-end text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Esqueci minha senha
@@ -279,12 +165,7 @@ export default function LoginModal({
                 <button
                   type="button"
                   disabled={isLoading}
-                  onClick={() => {
-                    setErrorMessage('');
-                    setSuccessMsg('');
-                    setIsRegistering(false);
-                    setIsResetting(false);
-                  }}
+                  onClick={backToLoginMode}
                   className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Voltar para o Login
@@ -295,11 +176,7 @@ export default function LoginModal({
                 <button
                   type="button"
                   disabled={isLoading}
-                  onClick={() => {
-                    setErrorMessage('');
-                    setSuccessMsg('');
-                    setIsRegistering((current) => !current);
-                  }}
+                  onClick={toggleRegisterMode}
                   className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isRegistering ? 'Ja possui acesso? Entrar' : 'Nao tem conta? Criar acesso'}
@@ -349,42 +226,4 @@ export default function LoginModal({
       </div>
     </section>
   );
-}
-
-function getFirebaseErrorMessage(error) {
-  const code = String(error?.code || '');
-
-  if (code === 'auth/invalid-credential') {
-    return 'E-mail ou senha incorretos.';
-  }
-
-  if (code === 'auth/user-not-found') {
-    return 'E-mail nao encontrado.';
-  }
-
-  if (code === 'auth/email-already-in-use') {
-    return 'Este e-mail ja possui uma conta.';
-  }
-
-  if (code === 'auth/weak-password') {
-    return 'A senha deve ter no minimo 6 caracteres.';
-  }
-
-  if (code === 'auth/user-disabled') {
-    return 'Esta conta foi desativada.';
-  }
-
-  if (code === 'auth/invalid-email') {
-    return 'E-mail invalido.';
-  }
-
-  if (code === 'auth/too-many-requests') {
-    return 'Muitas tentativas. Tente novamente em instantes.';
-  }
-
-  if (code === 'auth/network-request-failed') {
-    return 'Falha de rede. Verifique sua conexao e tente novamente.';
-  }
-
-  return 'Falha na autenticacao. Tente novamente.';
 }
