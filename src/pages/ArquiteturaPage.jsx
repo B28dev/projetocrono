@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   examCoverage,
@@ -11,6 +11,7 @@ import {
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
 import { CountdownFull } from '../components/Countdown';
+import CurrentRhythmCard from '../components/CurrentRhythmCard';
 import OverdueStatusCard from '../components/OverdueStatusCard';
 import ProgressBar from '../components/ProgressBar';
 import TopicChip from '../components/TopicChip';
@@ -159,16 +160,31 @@ export default function ArquiteturaPage({
   displayStudyPlan.today.sort((a, b) => a.date.localeCompare(b.date));
   displayStudyPlan.future.sort((a, b) => a.date.localeCompare(b.date));
 
-  const todayTotal = displayStudyPlan.today.reduce((sum, item) => sum + item.tasks.length, 0);
-  const todayDone = displayStudyPlan.today.reduce((sum, item) => {
+  const conteudosAtrasados = displayStudyPlan.overdue.flatMap((item) => {
     const checkedTasks = taskProgress[item.storageDate] || {};
-    return sum + item.tasks.reduce((taskSum, _, index) => taskSum + (checkedTasks[index] ? 1 : 0), 0);
-  }, 0);
-  const pendingOverdueTasks = displayStudyPlan.overdue.reduce((sum, item) => {
+    return item.tasks
+      .map((task, index) => ({
+        id: `${item.storageDate}-overdue-${index}`,
+        date: item.date,
+        text: task,
+        topic: item.topic,
+        checked: Boolean(checkedTasks[index]),
+      }))
+      .filter((task) => !task.checked);
+  });
+  const tarefasHoje = displayStudyPlan.today.flatMap((item) => {
     const checkedTasks = taskProgress[item.storageDate] || {};
-    return sum + item.tasks.reduce((taskSum, _, index) => taskSum + (checkedTasks[index] ? 0 : 1), 0);
-  }, 0);
-
+    return item.tasks.map((task, index) => ({
+      id: `${item.storageDate}-today-${index}`,
+      text: task,
+      topic: item.topic,
+      checked: Boolean(checkedTasks[index]),
+    }));
+  });
+  const hojePendentes = tarefasHoje.filter((task) => !task.checked);
+  const hojeConcluidas = tarefasHoje.filter((task) => task.checked);
+  const todayTotal = tarefasHoje.length;
+  const todayDone = hojeConcluidas.length;
   return (
     <>
       <div
@@ -215,39 +231,40 @@ export default function ArquiteturaPage({
                 </p>
               </div>
 
-              <div className="cyber-glass rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 dark:shadow-sm cyberpunk:border-white/10 cyberpunk:bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10">
+              <div className="cyber-glass w-full max-w-[18rem] rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-md transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 dark:shadow-sm hover:border-[#00e8ff]/30 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10">
                 <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2 dark:text-stone-500 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">Proxima prova em</p>
                 <CountdownFull target={examDate} />
+                <div className="mt-4 w-full">
+                  <div className="mb-2 flex items-end justify-between">
+                    <div className="flex items-end gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-stone-600 cyberpunk:font-mono cyberpunk:text-white/60">
+                        Progresso Geral
+                      </span>
+                      <span className="text-xs font-mono font-semibold text-zinc-300 dark:text-stone-800 cyberpunk:text-white/70">
+                        {completedTasks}/{totalTasks}
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-blue-400 dark:text-blue-700 cyberpunk:text-[#00e8ff]">
+                      {progress}%
+                    </span>
+                  </div>
+                  <ProgressBar value={progress} color="blue" className="h-2 border border-white/5 bg-white/5 dark:bg-stone-200 cyberpunk:bg-white/10" />
+                </div>
               </div>
             </div>
           </div>
 
           <div className="mb-8 mt-6 max-w-md">
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-lg border border-blue-500/25 bg-blue-500/8 px-2.5 py-2 dark:border-stone-300 dark:bg-white/80 cyberpunk:border-[#00e8ff]/25 cyberpunk:bg-[#00e8ff]/8">
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 dark:text-stone-600 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
-                  Ritmo atual
-                </p>
-                <p className="mt-0.5 text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:text-white">
-                  Hoje {todayDone}/{todayTotal || 0}
-                </p>
-              </div>
-              <OverdueStatusCard theme={theme} pendingCount={pendingOverdueTasks} />
+              <CurrentRhythmCard
+                theme={theme}
+                todayDoneCount={todayDone}
+                todayTotalCount={todayTotal}
+                todayPendingCount={hojePendentes.length}
+                completedTodayTasks={hojeConcluidas}
+              />
+              <OverdueStatusCard theme={theme} overdueContentItems={conteudosAtrasados} todayPendingTasks={hojePendentes} />
             </div>
-            <div className="mb-2 flex items-end justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-stone-600 cyberpunk:font-mono cyberpunk:text-white/60">
-                Progresso Geral
-              </span>
-              <div className="flex items-end gap-2">
-                <span className="text-xs font-mono font-semibold text-zinc-300 dark:text-stone-800 cyberpunk:text-white/70">
-                  {completedTasks}/{totalTasks}
-                </span>
-                <span className="text-sm font-bold text-blue-400 dark:text-blue-700 cyberpunk:text-[#00e8ff]">
-                  {progress}%
-                </span>
-              </div>
-            </div>
-            <ProgressBar value={progress} color="blue" className="h-2 border border-white/5 bg-white/5 dark:bg-stone-200 cyberpunk:bg-white/10" />
           </div>
 
           <Section
@@ -320,7 +337,7 @@ export default function ArquiteturaPage({
                     <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex rounded-full border border-red-700 bg-red-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-red-50 shadow-[0_0_0_1px_rgba(127,29,29,0.18)] dark:border-red-500/85 dark:bg-red-600 dark:text-white dark:shadow-[0_0_14px_rgba(239,68,68,0.28)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5] cyberpunk:text-[#14040f] cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]">
-                        ⚠ materias atrasadas
+                        conteúdos atrasados
                       </span>
                       <span className="text-xs text-red-200 dark:text-red-700 cyberpunk:text-[#ff8dcb]">Estude nesta ordem</span>
                     </div>
@@ -358,7 +375,7 @@ export default function ArquiteturaPage({
 
                     {isOverdueCollapsed && (
                       <div className="text-xs text-red-200 dark:text-stone-600 cyberpunk:text-[#ff8dcb]">
-                        {displayStudyPlan.overdue.length} materia{displayStudyPlan.overdue.length > 1 ? 's' : ''} atrasada{displayStudyPlan.overdue.length > 1 ? 's' : ''}.
+                        {displayStudyPlan.overdue.length} conteúdo{displayStudyPlan.overdue.length > 1 ? 's' : ''} atrasado{displayStudyPlan.overdue.length > 1 ? 's' : ''}.
                       </div>
                     )}
                   </div>
@@ -421,7 +438,9 @@ export default function ArquiteturaPage({
           </Section>
         </div>
       </div>
-      <LevelUpModal level={12} title="Mestre da Arquitetura" message="Você dominou todos os topicos desta fase. Continue avançando." />
+      <LevelUpModal level={12} title="Mestre da Arquitetura" message="VocÃª dominou todos os topicos desta fase. Continue avanÃ§ando." />
     </>
   );
 }
+
+

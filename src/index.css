@@ -264,9 +264,9 @@
 
   .theme-cyberpunk .hero-title:hover .hero-title-outline,
   .theme-cyberpunk .hero-title-outline:hover {
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.72);
     text-shadow:
-      0 0 10px rgba(255, 255, 255, 0.25),
-      0 0 22px rgba(255, 255, 255, 0.14);
+      0 0 6px rgba(255, 255, 255, 0.14),
+      0 0 12px rgba(255, 255, 255, 0.08);
   }
 }
