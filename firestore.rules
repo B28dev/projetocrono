@@ -3,10 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─── Função auxiliar: usuário autenticado com domínio institucional ──────────
-    function isInstitutional() {
+    function isAllowedUser() {
       return request.auth != null
         && request.auth.token.email != null
-        && request.auth.token.email.matches('^[^@]+@somosicev\\.com$');
+        && request.auth.token.email.matches('^[^@]+@(somosicev\\.com|gmail\\.com)$');
     }
 
     // ─── Função auxiliar: o doc pertence ao usuário autenticado ─────────────────
@@ -25,17 +25,17 @@ service cloud.firestore {
     // ═══════════════════════════════════════════════════════════════════════════
     match /users/{userId} {
       // Leitura: apenas o próprio dono do documento
-      allow read: if isInstitutional() && isOwner(userId);
+      allow read: if isAllowedUser() && isOwner(userId);
 
       // Criação: exige campos obrigatórios para evitar documentos malformados
-      allow create: if isInstitutional()
+      allow create: if isAllowedUser()
         && isOwner(userId)
         && hasField(request.resource.data, 'uid')
         && hasField(request.resource.data, 'email')
         && request.resource.data.uid == request.auth.uid;
 
       // Atualização: o dono pode editar, mas NÃO pode alterar uid ou email
-      allow update: if isInstitutional()
+      allow update: if isAllowedUser()
         && isOwner(userId)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email;
@@ -50,20 +50,20 @@ service cloud.firestore {
     // ═══════════════════════════════════════════════════════════════════════════
     match /users/{userId}/progress/{topicId} {
       // Leitura e escrita: apenas o dono do progresso
-      allow read: if isInstitutional() && isOwner(userId);
+      allow read: if isAllowedUser() && isOwner(userId);
 
-      allow create: if isInstitutional()
+      allow create: if isAllowedUser()
         && isOwner(userId)
         && hasField(request.resource.data, 'userId')
         && hasField(request.resource.data, 'topicId')
         && request.resource.data.userId == request.auth.uid;
 
-      allow update: if isInstitutional()
+      allow update: if isAllowedUser()
         && isOwner(userId)
         // Impede alteração do ID do dono após criação (integridade)
         && request.resource.data.userId == resource.data.userId;
 
-      allow delete: if isInstitutional() && isOwner(userId);
+      allow delete: if isAllowedUser() && isOwner(userId);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -71,16 +71,16 @@ service cloud.firestore {
     // Cada documento representa uma sessão de estudo cronometrada.
     // ═══════════════════════════════════════════════════════════════════════════
     match /users/{userId}/studySessions/{sessionId} {
-      allow read: if isInstitutional() && isOwner(userId);
+      allow read: if isAllowedUser() && isOwner(userId);
 
-      allow create: if isInstitutional()
+      allow create: if isAllowedUser()
         && isOwner(userId)
         && hasField(request.resource.data, 'userId')
         && hasField(request.resource.data, 'startedAt')
         && request.resource.data.userId == request.auth.uid;
 
-      allow update: if isInstitutional() && isOwner(userId);
-      allow delete: if isInstitutional() && isOwner(userId);
+      allow update: if isAllowedUser() && isOwner(userId);
+      allow delete: if isAllowedUser() && isOwner(userId);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

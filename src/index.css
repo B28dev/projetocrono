@@ -85,6 +85,21 @@
 }
 
 @layer utilities {
+  .hide-password-native-toggle::-ms-reveal,
+  .hide-password-native-toggle::-ms-clear {
+    display: none;
+  }
+
+  .hide-password-native-toggle::-webkit-credentials-auto-fill-button,
+  .hide-password-native-toggle::-webkit-contacts-auto-fill-button,
+  .hide-password-native-toggle::-webkit-caps-lock-indicator {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -222,51 +237,30 @@
   }
 
   .theme-cyberpunk .hero-title-outline {
-    -webkit-text-stroke: 1.95px rgba(255, 62, 165, 1);
     z-index: 0;
+    color: transparent;
+    background-image: linear-gradient(90deg, #ff3ea5 0%, #ff66ba 34%, #7cecff 72%, #00e8ff 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 0;
+    text-shadow:
+      0 0 10px rgba(255, 62, 165, 0.22),
+      0 0 18px rgba(0, 232, 255, 0.16);
   }
 
   .theme-cyberpunk .hero-title-outline::before {
-    content: attr(data-text);
-    position: absolute;
-    inset: 0;
-    background: transparent;
-    color: transparent;
-    pointer-events: none;
-    z-index: 0;
-    mix-blend-mode: screen;
-    -webkit-text-stroke: 1.65px rgba(0, 232, 255, 0.98);
-    transform: translate(1px, -1px);
-    filter:
-      drop-shadow(0 0 8px rgba(255, 62, 165, 0.28))
-      drop-shadow(0 0 18px rgba(0, 232, 255, 0.38));
+    content: none;
   }
 
   .theme-cyberpunk .hero-title-outline::after {
-    content: attr(data-text);
-    position: absolute;
-    inset: 0;
-    background: transparent;
-    color: transparent;
-    pointer-events: none;
-    z-index: 0;
-    mix-blend-mode: screen;
-    -webkit-text-stroke: 1.95px rgba(255, 62, 165, 1);
-    transform: translate(-0.4px, 0.4px);
-    filter:
-      drop-shadow(0 0 12px rgba(255, 62, 165, 0.44))
-      drop-shadow(0 0 26px rgba(255, 62, 165, 0.28));
-  }
-
-  .theme-cyberpunk .hero-title-outline {
-    transition: color 220ms ease, text-shadow 220ms ease;
+    content: none;
   }
 
   .theme-cyberpunk .hero-title:hover .hero-title-outline,
   .theme-cyberpunk .hero-title-outline:hover {
-    color: rgba(255, 255, 255, 0.72);
     text-shadow:
-      0 0 6px rgba(255, 255, 255, 0.14),
-      0 0 12px rgba(255, 255, 255, 0.08);
+      0 0 12px rgba(255, 62, 165, 0.28),
+      0 0 22px rgba(0, 232, 255, 0.22);
   }
 }

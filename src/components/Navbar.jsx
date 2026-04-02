@@ -21,6 +21,7 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
   const { pathname } = useLocation();
   const profileHubRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [isSecurityOpen, setIsSecurityOpen] = useState(false);
   const {
     isProfileOpen,
     isEditingName,
@@ -31,6 +32,10 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     crop,
     zoom,
     newPassword,
+    confirmPassword,
+    showNewPassword,
+    showConfirmPassword,
+    passwordReady,
     isUpdatingPassword,
     passwordFeedback,
     profileError,
@@ -45,8 +50,11 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     setCrop,
     setZoom,
     setNewPassword,
+    setConfirmPassword,
     handleToggleProfile,
     handleToggleEditingName,
+    handleToggleNewPasswordVisibility,
+    handleToggleConfirmPasswordVisibility,
     handleSaveName,
     handleUpdatePassword,
     handleLogout,
@@ -57,8 +65,47 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     handleImageChange,
   } = useProfileHub({ profileHubRef, fileInputRef });
 
+  const isCyber = theme === 'cyberpunk';
   const brandLinkClass = 'flex items-center gap-1.5 rounded-xl border border-transparent px-2.5 py-1.5 text-xs text-zinc-100 transition-colors hover:bg-white/5 md:gap-2 md:px-4 md:py-2 md:text-sm dark:text-stone-900 dark:hover:bg-stone-200/50 cyberpunk:text-white';
   const avatarSrc = profileData.avatarBase64 || profileData.photoURL;
+  const passwordInputClass = isCyber
+    ? 'hide-password-native-toggle h-9 w-full rounded-lg border border-white/10 bg-white/5 px-3 pr-10 text-sm text-white placeholder:text-white/40 transition focus:border-cyan-400 focus:outline-none focus:shadow-[0_0_10px_rgba(34,211,238,0.3)] disabled:cursor-not-allowed disabled:opacity-70'
+    : 'hide-password-native-toggle h-9 w-full rounded-lg border border-white/10 bg-white/5 px-3 pr-10 text-sm text-white placeholder:text-white/40 transition focus:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70 dark:border-stone-300 dark:bg-stone-100/85 dark:text-stone-900 dark:placeholder:text-stone-500 dark:focus:border-stone-400';
+  const passwordSubmitClass = isCyber
+    ? `w-full rounded-xl border px-3 py-2 text-left text-sm font-medium transition-all duration-300 ${
+        passwordReady
+          ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.28)] hover:bg-emerald-500/20 hover:shadow-[0_0_20px_rgba(16,185,129,0.36)]'
+          : 'border-white/10 bg-white/5 text-white/55'
+      }`
+    : `w-full rounded-xl border px-3 py-2 text-left text-sm font-medium transition-colors ${
+        passwordReady
+          ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/15 dark:border-emerald-300 dark:bg-emerald-500 dark:text-white dark:hover:bg-emerald-600'
+          : 'border-white/10 bg-white/5 text-white/55 dark:border-stone-300 dark:bg-stone-100/85 dark:text-stone-500'
+      }`;
+  const passwordToggleClass = isCyber
+    ? 'absolute inset-y-0 right-0 flex w-10 items-center justify-center text-white/45 transition hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50'
+    : 'absolute inset-y-0 right-0 flex w-10 items-center justify-center text-white/45 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:text-stone-500 dark:hover:text-stone-800';
+
+  function PasswordEyeIcon({ visible }) {
+    if (visible) {
+      return (
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 3l18 18" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+          <path d="M10.6 10.7a2 2 0 0 0 2.8 2.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+          <path d="M9.5 5.4A10.9 10.9 0 0 1 12 5c5.2 0 8.7 4.4 9.7 6-0.4 0.6-1.2 1.8-2.4 3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M6.2 6.3C4.2 7.6 2.8 9.5 2.3 11c1 1.6 4.5 6 9.7 6 1.6 0 3-.4 4.1-1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    }
+
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M2.3 12C3.3 10.4 6.8 6 12 6s8.7 4.4 9.7 6c-1 1.6-4.5 6-9.7 6S3.3 13.6 2.3 12Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
+      </svg>
+    );
+  }
+
   const cropperModal = imageSrc && typeof document !== 'undefined'
     ? createPortal(
       <div className="fixed inset-0 z-[1200] flex items-center justify-center overflow-y-auto bg-[#05050a]/85 p-4 backdrop-blur-xl">
@@ -128,6 +175,12 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
       document.body,
     )
     : null;
+
+  useEffect(() => {
+    if (!isProfileOpen) {
+      setIsSecurityOpen(false);
+    }
+  }, [isProfileOpen]);
 
   return (
     <>
@@ -262,28 +315,92 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
 
               {isEmailUser ? (
                 <div className="space-y-2">
-                  <p className="text-[11px] uppercase tracking-widest text-white/50 font-mono">
-                    Seguranca
-                  </p>
-
-                  <form onSubmit={handleUpdatePassword} className="space-y-2">
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      disabled={isUpdatingPassword}
-                      placeholder="Nova senha (minimo 6 caracteres)"
-                      className="h-9 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40 focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_18px_rgba(0,232,255,0.18)] disabled:cursor-not-allowed disabled:opacity-70"
-                    />
-
-                    <button
-                      type="submit"
-                      disabled={isUpdatingPassword}
-                      className="w-full rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/80 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  <button
+                    type="button"
+                    onClick={() => setIsSecurityOpen((current) => !current)}
+                    className="flex w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left transition-colors hover:bg-white/5"
+                    aria-expanded={isSecurityOpen}
+                  >
+                    <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 dark:text-stone-500">
+                      Seguranca
+                    </span>
+                    <svg
+                      className={`h-4 w-4 text-white/45 transition-transform duration-300 dark:text-stone-500 ${isSecurityOpen ? 'rotate-180' : ''}`}
+                      viewBox="0 0 12 8"
+                      fill="none"
+                      aria-hidden="true"
                     >
-                      {isUpdatingPassword ? 'Atualizando senha...' : 'Alterar Senha'}
-                    </button>
-                  </form>
+                      <path
+                        d="M1 1.5 6 6.5l5-5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isSecurityOpen ? (
+                    <form onSubmit={handleUpdatePassword} className="space-y-2 pt-1">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-mono uppercase tracking-widest text-white/40 dark:text-stone-500">
+                          Nova Senha
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            value={newPassword}
+                            onChange={(event) => setNewPassword(event.target.value)}
+                            disabled={isUpdatingPassword}
+                            placeholder="Nova senha (minimo 6 caracteres)"
+                            className={passwordInputClass}
+                          />
+                          <button
+                            type="button"
+                            aria-label={showNewPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                            disabled={isUpdatingPassword}
+                            onClick={handleToggleNewPasswordVisibility}
+                            className={passwordToggleClass}
+                          >
+                            <PasswordEyeIcon visible={showNewPassword} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-mono uppercase tracking-widest text-white/40 dark:text-stone-500">
+                          Confirmar Nova Senha
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            value={confirmPassword}
+                            onChange={(event) => setConfirmPassword(event.target.value)}
+                            disabled={isUpdatingPassword}
+                            placeholder="Confirme a nova senha"
+                            className={passwordInputClass}
+                          />
+                          <button
+                            type="button"
+                            aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                            disabled={isUpdatingPassword}
+                            onClick={handleToggleConfirmPasswordVisibility}
+                            className={passwordToggleClass}
+                          >
+                            <PasswordEyeIcon visible={showConfirmPassword} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isUpdatingPassword || !passwordReady}
+                        className={passwordSubmitClass}
+                      >
+                        {isUpdatingPassword ? 'Atualizando senha...' : 'Alterar Senha'}
+                      </button>
+                    </form>
+                  ) : null}
 
                   {passwordFeedback ? (
                     <p className={`text-xs ${passwordFeedback.type === 'success' ? 'text-emerald-400' : 'text-rose-500'}`}>

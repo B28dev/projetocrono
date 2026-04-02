@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getRedirectResult, onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
-
-const INSTITUTIONAL_DOMAIN = '@somosicev.com';
+import { hasAllowedEmailDomain } from '../constants/authDomains';
 
 function getFirstName(displayName) {
   return String(displayName || '').trim().split(/\s+/)[0] || '';
@@ -11,7 +10,7 @@ function getFirstName(displayName) {
 
 function isInstitutionalUser(user) {
   const email = String(user?.email || '').trim().toLowerCase();
-  return email.endsWith(INSTITUTIONAL_DOMAIN);
+  return hasAllowedEmailDomain(email);
 }
 
 function getViewFromPath(pathname) {
@@ -34,14 +33,6 @@ export default function useAuth() {
 
   useEffect(() => {
     let isMounted = true;
-    let authResolved = false;
-    let redirectResolved = false;
-
-    const finishLoading = () => {
-      if (isMounted && authResolved && redirectResolved) {
-        setIsAuthLoading(false);
-      }
-    };
 
     const syncAuthenticatedUser = async (user) => {
       if (!user) {
@@ -77,25 +68,11 @@ export default function useAuth() {
       try {
         await syncAuthenticatedUser(user);
       } finally {
-        authResolved = true;
-        finishLoading();
+        if (isMounted) {
+          setIsAuthLoading(false);
+        }
       }
     });
-
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (!isMounted || !result?.user) return;
-        await syncAuthenticatedUser(result.user);
-      } catch (error) {
-        console.error('Erro ao concluir login com redirect:', error);
-      } finally {
-        redirectResolved = true;
-        finishLoading();
-      }
-    };
-
-    handleRedirectResult();
 
     return () => {
       isMounted = false;

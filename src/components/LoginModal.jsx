@@ -1,3 +1,5 @@
+import { useMemo, useState } from 'react';
+import { ALLOWED_EMAIL_DOMAINS_LABEL, hasAllowedEmailDomain } from '../constants/authDomains';
 import useLoginAuth from '../hooks/useLoginAuth';
 
 const NEON_PINK = '#ff3ea5';
@@ -13,19 +15,34 @@ export default function LoginModal({
 }) {
   const {
     isRegistering,
-    isResetting,
     isLoading,
     errorMessage,
-    successMsg,
     handleSubmit,
-    handlePasswordReset,
-    handleGoogleLogin,
-    enterResetMode,
-    backToLoginMode,
     toggleRegisterMode,
   } = useLoginAuth(onLogin);
+  const [emailValue, setEmailValue] = useState('');
+  const [passwordValue, setPasswordValue] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   if (!asPage && !open) return null;
+
+  const emailHasAllowedDomain = useMemo(
+    () => hasAllowedEmailDomain(emailValue),
+    [emailValue],
+  );
+  const submitDisabled = isLoading || (isRegistering && !emailHasAllowedDomain);
+  const titleClassName = isRegistering
+    ? 'mt-1 font-mono text-3xl font-bold uppercase leading-[0.96] tracking-tight text-transparent sm:text-[2.25rem]'
+    : 'mt-2 font-mono text-[clamp(2.8rem,9vw,6rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-transparent';
+  const titleStyle = isRegistering
+    ? {
+        WebkitTextStroke: `1.6px ${NEON_PINK}`,
+        textShadow: '0 0 18px rgba(255,62,165,0.22), 0 0 36px rgba(0,232,255,0.08)',
+      }
+    : {
+        WebkitTextStroke: `2.2px ${NEON_PINK}`,
+        textShadow: '0 0 32px rgba(255,62,165,0.35), 0 0 70px rgba(0,232,255,0.12)',
+      };
 
   const handleBackdropClick = (event) => {
     if (!closeOnBackdrop || !onClose) return;
@@ -36,15 +53,15 @@ export default function LoginModal({
     <section
       className={
         asPage
-          ? 'relative flex min-h-screen w-full items-center justify-center px-4 py-10'
-          : 'fixed inset-0 z-[999] flex items-center justify-center bg-[#08080f]/80 px-4 py-8 backdrop-blur-xl'
+          ? 'relative flex min-h-screen w-full items-start justify-center overflow-hidden px-2 py-2 sm:items-center sm:px-4 sm:py-10'
+          : 'fixed inset-0 z-[999] flex items-start justify-center overflow-hidden bg-[#08080f]/80 px-2 py-2 backdrop-blur-xl sm:items-center sm:px-4 sm:py-8'
       }
       onClick={handleBackdropClick}
       role={!asPage ? 'dialog' : undefined}
       aria-modal={!asPage ? 'true' : undefined}
       aria-label="Tela de login"
     >
-      <div className="relative w-full max-w-[32rem] overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(145deg,rgba(26,26,39,0.82)_0%,rgba(8,8,15,0.9)_100%)] p-7 shadow-[0_0_0_1px_rgba(255,62,165,0.12),0_32px_80px_rgba(0,0,0,0.6),0_0_80px_rgba(255,62,165,0.10),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-2xl sm:p-10">
+      <div className="relative w-full max-w-md origin-top scale-[0.84] overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(145deg,rgba(26,26,39,0.82)_0%,rgba(8,8,15,0.9)_100%)] p-4 shadow-[0_0_0_1px_rgba(255,62,165,0.12),0_32px_80px_rgba(0,0,0,0.6),0_0_80px_rgba(255,62,165,0.10),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-2xl sm:scale-100 sm:p-8">
         <div className="pointer-events-none absolute left-[10%] right-[10%] top-0 h-px bg-gradient-to-r from-transparent via-[#ff3ea5] to-transparent opacity-70" />
         <div className="pointer-events-none absolute left-3 top-3 h-5 w-5 border-l border-t border-[#00e8ff]/70" />
         <div className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 border-b border-r border-[#ff3ea5]/70" />
@@ -57,7 +74,7 @@ export default function LoginModal({
             aria-label="Fechar login"
             onClick={onClose}
             disabled={isLoading}
-            className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/12 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/12 hover:text-white disabled:cursor-not-allowed disabled:opacity-60 sm:right-5 sm:top-5 sm:h-9 sm:w-9"
           >
             x
           </button>
@@ -69,18 +86,10 @@ export default function LoginModal({
           </p>
 
           <h1
-            className="mt-2 font-mono text-[clamp(2.8rem,9vw,6rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-transparent"
-            style={{
-              WebkitTextStroke: `2.2px ${NEON_PINK}`,
-              textShadow: '0 0 32px rgba(255,62,165,0.35), 0 0 70px rgba(0,232,255,0.12)',
-            }}
+            className={titleClassName}
+            style={titleStyle}
           >
-            {isResetting ? (
-              <>
-                <span className="block">RECUPERACAO</span>
-                <span className="block">DE ACESSO</span>
-              </>
-            ) : isRegistering ? (
+            {isRegistering ? (
               <>
                 <span className="block">CRIAR CONTA</span>
                 <span className="block">RESTRITA</span>
@@ -93,9 +102,9 @@ export default function LoginModal({
             )}
           </h1>
 
-          <div className="my-6 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+          <div className="my-2.5 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent sm:my-5" />
 
-          <form className="space-y-4" onSubmit={isResetting ? handlePasswordReset : handleSubmit}>
+          <form className="space-y-2 sm:space-y-3" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label htmlFor="login-email" className="block font-mono text-[0.68rem] uppercase tracking-[0.16em] text-white/65">
                 E-mail
@@ -107,108 +116,101 @@ export default function LoginModal({
                 autoComplete="email"
                 autoFocus
                 disabled={isLoading}
+                value={emailValue}
+                onChange={(event) => setEmailValue(event.target.value)}
                 placeholder="operador@terminal.dev"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:py-3"
               />
             </div>
 
-            {!isResetting ? (
-              <div className="space-y-2">
-                <label htmlFor="login-password" className="block font-mono text-[0.68rem] uppercase tracking-[0.16em] text-white/65">
-                  Senha
-                </label>
+            <div className="space-y-2">
+              <label htmlFor="login-password" className="block font-mono text-[0.68rem] uppercase tracking-[0.16em] text-white/65">
+                Senha
+              </label>
+              <div className="relative">
                 <input
                   id="login-password"
                   name="password"
-                  type="password"
-                  autoComplete="current-password"
+                  type={isPasswordVisible ? 'text' : 'password'}
+                  autoComplete={isRegistering ? 'new-password' : 'current-password'}
                   disabled={isLoading}
+                  value={passwordValue}
+                  onChange={(event) => setPasswordValue(event.target.value)}
                   placeholder="**********"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 pr-12 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:py-3"
                 />
+                <button
+                  type="button"
+                  aria-label={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
+                  disabled={isLoading}
+                  onClick={() => setIsPasswordVisible((current) => !current)}
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-white/45 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isPasswordVisible ? (
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                      <path d="M10.6 10.7a2 2 0 0 0 2.8 2.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                      <path d="M9.5 5.4A10.9 10.9 0 0 1 12 5c5.2 0 8.7 4.4 9.7 6-0.4 0.6-1.2 1.8-2.4 3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M6.2 6.3C4.2 7.6 2.8 9.5 2.3 11c1 1.6 4.5 6 9.7 6 1.6 0 3-.4 4.1-1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M2.3 12C3.3 10.4 6.8 6 12 6s8.7 4.4 9.7 6c-1 1.6-4.5 6-9.7 6S3.3 13.6 2.3 12Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {isRegistering ? (
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-300 dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 cyberpunk:border-amber-500/50 cyberpunk:bg-amber-500/10 cyberpunk:text-amber-400 cyberpunk:drop-shadow-[0_0_12px_rgba(251,191,36,0.18)]">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 text-sm leading-none text-zinc-400 dark:text-stone-500 cyberpunk:text-amber-300 cyberpunk:drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]">
+                    !
+                  </span>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-zinc-100 dark:text-stone-900 cyberpunk:text-amber-200">
+                      Atencao: voce pode usar um e-mail @gmail.com ficticio.
+                    </p>
+                    <p className="text-xs leading-relaxed text-zinc-400 dark:text-stone-600 cyberpunk:text-amber-100/85">
+                      Nao esqueca sua senha. Como a conta pode ser ficticia, nao ha garantia de recuperacao por e-mail.
+                      Memorize sua senha para evitar contas desnecessarias e manter o sistema organizado.
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : null}
 
-            {!isResetting ? (
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={enterResetMode}
-                className="self-end text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Esqueci minha senha
-              </button>
-            ) : null}
-
-            {successMsg ? (
-              <p className="font-mono text-sm text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.35)]">
-                {successMsg}
+            {isRegistering && emailValue && !emailHasAllowedDomain ? (
+              <p className="text-xs text-amber-300 dark:text-amber-700 cyberpunk:text-amber-200">
+                Cadastre-se usando apenas {ALLOWED_EMAIL_DOMAINS_LABEL}.
               </p>
             ) : null}
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="mt-2 w-full rounded-full border border-transparent bg-gradient-to-r from-[#ff3ea5] to-[#c2006a] px-6 py-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.16em] text-white shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_0_44px_rgba(255,62,165,0.52),0_8px_28px_rgba(255,62,165,0.35)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:hover:shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)]"
+              disabled={submitDisabled}
+              className="mt-1 w-full rounded-full border border-transparent bg-gradient-to-r from-[#ff3ea5] to-[#c2006a] px-6 py-2 font-mono text-[0.72rem] font-medium uppercase tracking-[0.16em] text-white shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_0_44px_rgba(255,62,165,0.52),0_8px_28px_rgba(255,62,165,0.35)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:hover:shadow-[0_0_32px_rgba(255,62,165,0.42),0_4px_16px_rgba(255,62,165,0.25)] sm:mt-2 sm:py-3"
             >
               {isLoading
                 ? 'Autenticando...'
-                : isResetting
-                  ? 'Enviar Link de Recuperacao'
-                  : isRegistering
+                : isRegistering
                     ? 'Criar Acesso'
                     : ctaLabel}
             </button>
 
-            {isResetting ? (
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  disabled={isLoading}
-                  onClick={backToLoginMode}
-                  className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Voltar para o Login
-                </button>
-              </div>
-            ) : (
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  disabled={isLoading}
-                  onClick={toggleRegisterMode}
-                  className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isRegistering ? 'Ja possui acesso? Entrar' : 'Nao tem conta? Criar acesso'}
-                </button>
-              </div>
-            )}
-          </form>
-
-          {!isResetting ? (
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/10" />
-              <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-white/45">OU</span>
-              <div className="h-px flex-1 bg-white/10" />
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={toggleRegisterMode}
+                className="text-xs text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isRegistering ? 'Ja possui acesso? Entrar' : 'Nao tem conta? Criar acesso'}
+              </button>
             </div>
-          ) : null}
-
-          {!isResetting ? (
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-              className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.12em] text-white transition hover:border-cyan-500/50 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true" focusable="false">
-                <path d="M21.35 11.1H12v2.93h5.33c-.23 1.5-1.08 2.77-2.3 3.62v2.41h3.72c2.18-2 3.45-4.95 3.45-8.11 0-.74-.07-1.46-.2-2.15Z" fill="currentColor" />
-                <path d="M12 22c3.03 0 5.58-1 7.44-2.71l-3.72-2.41c-1.03.69-2.34 1.1-3.72 1.1-2.86 0-5.28-1.93-6.14-4.52H2.02v2.48A10 10 0 0 0 12 22Z" fill="currentColor" />
-                <path d="M5.86 13.46a6 6 0 0 1 0-3.82V7.16H2.02a10 10 0 0 0 0 8.78l3.84-2.48Z" fill="currentColor" />
-                <path d="M12 5.98c1.52 0 2.88.52 3.95 1.54l2.96-2.96A9.9 9.9 0 0 0 12 2a10 10 0 0 0-9.98 5.16l3.84 2.48C6.72 7.91 9.14 5.98 12 5.98Z" fill="currentColor" />
-              </svg>
-              {isLoading ? 'Autenticando...' : 'Continuar com o Google'}
-            </button>
-          ) : null}
+          </form>
 
           <div className="mt-4 min-h-[44px]">
             <p

@@ -95,7 +95,7 @@ export default function Landing({ onNavigate, userName = '' }) {
             <span key={i} className="word-shell inline-block overflow-hidden mr-[0.25em] last:mr-0">
               <span
                 data-text={word.label}
-                className={`word inline-block ${word.outline ? 'hero-title-outline' : ''}`}
+                className={`word inline-block ${word.outline ? 'hero-title-outline hero-title-gradient' : ''}`}
               >
                 {word.label}
               </span>

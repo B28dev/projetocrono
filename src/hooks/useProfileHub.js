@@ -42,6 +42,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordFeedback, setPasswordFeedback] = useState(null);
   const [profileError, setProfileError] = useState('');
@@ -87,6 +90,18 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   }, []);
 
   useEffect(() => {
+    if (passwordFeedback?.type !== 'success') return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setPasswordFeedback(null);
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [passwordFeedback]);
+
+  useEffect(() => {
     if (!isProfileOpen) return undefined;
 
     const handlePointerDown = (event) => {
@@ -99,6 +114,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
         setProfileNotice('');
         setPasswordFeedback(null);
         setNewPassword('');
+        setConfirmPassword('');
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
       }
     };
 
@@ -120,6 +138,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
         setProfileNotice('');
         setPasswordFeedback(null);
         setNewPassword('');
+        setConfirmPassword('');
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
       }
     };
 
@@ -150,6 +171,15 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     () => profileData.providerIds.includes('password'),
     [profileData.providerIds],
   );
+  const passwordReady = useMemo(() => {
+    const normalizedPassword = newPassword.trim();
+    const normalizedConfirmPassword = confirmPassword.trim();
+    return (
+      normalizedPassword.length >= 6 &&
+      normalizedConfirmPassword.length >= 6 &&
+      normalizedPassword === normalizedConfirmPassword
+    );
+  }, [confirmPassword, newPassword]);
 
   const handleToggleProfile = useCallback(() => {
     setIsProfileOpen((current) => !current);
@@ -158,6 +188,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     setProfileNotice('');
     setPasswordFeedback(null);
     setNewPassword('');
+    setConfirmPassword('');
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
     setEditNameValue(profileData.displayName);
   }, [profileData.displayName]);
 
@@ -207,6 +240,17 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     setProfileNotice('');
     setPasswordFeedback(null);
     setNewPassword('');
+    setConfirmPassword('');
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  }, []);
+
+  const handleToggleNewPasswordVisibility = useCallback(() => {
+    setShowNewPassword((current) => !current);
+  }, []);
+
+  const handleToggleConfirmPasswordVisibility = useCallback(() => {
+    setShowConfirmPassword((current) => !current);
   }, []);
 
   const handleUpdatePassword = useCallback(
@@ -215,10 +259,19 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
       if (isUpdatingPassword) return;
 
       const normalizedPassword = newPassword.trim();
+      const normalizedConfirmPassword = confirmPassword.trim();
       if (normalizedPassword.length < 6) {
         setPasswordFeedback({
           type: 'error',
           message: 'A nova senha deve ter no minimo 6 caracteres.',
+        });
+        return;
+      }
+
+      if (normalizedPassword !== normalizedConfirmPassword) {
+        setPasswordFeedback({
+          type: 'error',
+          message: 'As senhas devem ser iguais.',
         });
         return;
       }
@@ -237,6 +290,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
       try {
         await updatePassword(auth.currentUser, normalizedPassword);
         setNewPassword('');
+        setConfirmPassword('');
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
         setPasswordFeedback({
           type: 'success',
           message: 'Senha atualizada com sucesso!',
@@ -257,7 +313,7 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
         setIsUpdatingPassword(false);
       }
     },
-    [isUpdatingPassword, newPassword],
+    [confirmPassword, isUpdatingPassword, newPassword],
   );
 
   const handleTriggerFilePicker = useCallback(() => {
@@ -392,6 +448,10 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     crop,
     zoom,
     newPassword,
+    confirmPassword,
+    showNewPassword,
+    showConfirmPassword,
+    passwordReady,
     isUpdatingPassword,
     passwordFeedback,
     profileError,
@@ -406,8 +466,11 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     setCrop,
     setZoom,
     setNewPassword,
+    setConfirmPassword,
     handleToggleProfile,
     handleToggleEditingName,
+    handleToggleNewPasswordVisibility,
+    handleToggleConfirmPasswordVisibility,
     handleSaveName,
     handleUpdatePassword,
     handleLogout,

@@ -1,28 +1,11 @@
 import { useCallback, useState } from 'react';
 import {
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithRedirect,
   signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase';
-
-const INSTITUTIONAL_DOMAIN = '@somosicev.com';
-
-function shouldUseRedirectFlow() {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
-
-  const userAgent = navigator.userAgent || '';
-  const isMobileUserAgent =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-  const isCoarsePointer =
-    typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
-
-  return isMobileUserAgent || isCoarsePointer;
-}
+import { ALLOWED_EMAIL_DOMAINS_LABEL, hasAllowedEmailDomain } from '../constants/authDomains';
 
 function getFirebaseErrorMessage(error) {
   const code = String(error?.code || '');
@@ -64,27 +47,12 @@ function getFirebaseErrorMessage(error) {
 
 export default function useLoginAuth(onLogin) {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   const clearMessages = useCallback(() => {
     setErrorMessage('');
-    setSuccessMsg('');
   }, []);
-
-  const enterResetMode = useCallback(() => {
-    clearMessages();
-    setIsRegistering(false);
-    setIsResetting(true);
-  }, [clearMessages]);
-
-  const backToLoginMode = useCallback(() => {
-    clearMessages();
-    setIsRegistering(false);
-    setIsResetting(false);
-  }, [clearMessages]);
 
   const toggleRegisterMode = useCallback(() => {
     clearMessages();
@@ -107,8 +75,8 @@ export default function useLoginAuth(onLogin) {
         return;
       }
 
-      if (!email.endsWith(INSTITUTIONAL_DOMAIN)) {
-        setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
+      if (!hasAllowedEmailDomain(email)) {
+        setErrorMessage(`Use um e-mail ${ALLOWED_EMAIL_DOMAINS_LABEL}.`);
         return;
       }
 
@@ -119,9 +87,17 @@ export default function useLoginAuth(onLogin) {
 
       setIsLoading(true);
       try {
-        const userCredential = isRegistering
-          ? await createUserWithEmailAndPassword(auth, email, password)
-          : await signInWithEmailAndPassword(auth, email, password);
+        let userCredential;
+
+        if (isRegistering) {
+          userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const inferredDisplayName = email.split('@')[0]?.trim() || 'Operador';
+          await updateProfile(userCredential.user, { displayName: inferredDisplayName });
+          onLogin?.('dashboard');
+          return;
+        }
+
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const nextView = user?.displayName ? 'hero' : 'name';
         onLogin?.(nextView);
@@ -134,92 +110,11 @@ export default function useLoginAuth(onLogin) {
     [clearMessages, isLoading, isRegistering, onLogin],
   );
 
-  const handlePasswordReset = useCallback(
-    async (event) => {
-      event.preventDefault();
-      if (isLoading) return;
-
-      const formData = new FormData(event.currentTarget);
-      const email = String(formData.get('email') || '').trim().toLowerCase();
-
-      clearMessages();
-
-      if (!email) {
-        setErrorMessage('Informe seu e-mail institucional.');
-        return;
-      }
-
-      if (!email.endsWith(INSTITUTIONAL_DOMAIN)) {
-        setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        await sendPasswordResetEmail(auth, email);
-        setSuccessMsg('Link de recuperacao enviado para seu e-mail institucional.');
-      } catch (error) {
-        setErrorMessage(getFirebaseErrorMessage(error));
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [clearMessages, isLoading],
-  );
-
-  const handleGoogleLogin = useCallback(async () => {
-    if (isLoading) return;
-
-    clearMessages();
-    setIsLoading(true);
-
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        hd: 'somosicev.com',
-        prompt: 'select_account',
-      });
-
-      if (shouldUseRedirectFlow()) {
-        await signInWithRedirect(auth, provider);
-        return;
-      }
-
-      const result = await signInWithPopup(auth, provider);
-      const user = result?.user;
-      const userEmail = String(user?.email || '').toLowerCase();
-
-      if (!userEmail.endsWith(INSTITUTIONAL_DOMAIN)) {
-        await signOut(auth);
-        setErrorMessage(`Acesso restrito a e-mails ${INSTITUTIONAL_DOMAIN}`);
-        return;
-      }
-
-      const nextView = user?.displayName ? 'hero' : 'name';
-      onLogin?.(nextView);
-    } catch (error) {
-      const code = String(error?.code || '');
-      if (code === 'auth/popup-closed-by-user') {
-        setErrorMessage('Autenticacao cancelada.');
-      } else {
-        setErrorMessage(getFirebaseErrorMessage(error));
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clearMessages, isLoading, onLogin]);
-
   return {
     isRegistering,
-    isResetting,
     isLoading,
     errorMessage,
-    successMsg,
     handleSubmit,
-    handlePasswordReset,
-    handleGoogleLogin,
-    enterResetMode,
-    backToLoginMode,
     toggleRegisterMode,
   };
 }
