@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, signOut, updatePassword, updateProfile } from 'firebase/auth';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth, storage } from '../firebase';
+import { auth } from '../firebase';
+// getCroppedImg retorna um Data URL (Base64 JPEG 160x160), sem uso de Storage.
 import getCroppedImg from '../utils/getCroppedImg';
 
 const MAX_AVATAR_SIZE_MB = 2;
-const MAX_AVATAR_SIZE_BYTES = MAX_AVATAR_SIZE_MB * 1024 * 1024;
 
 function getProfileData(user) {
   return {
@@ -24,7 +23,7 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   const [editNameValue, setEditNameValue] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [imageSrc, setImageSrc] = useState('');
+  const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -65,7 +64,7 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
       if (event.key === 'Escape') {
         if (imageSrc) {
           if (!isUploading) {
-            setImageSrc('');
+            setImageSrc(null);
             setCrop({ x: 0, y: 0 });
             setZoom(1);
             setCroppedAreaPixels(null);
@@ -226,7 +225,7 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   }, [fileInputRef, isUploading]);
 
   const resetCropState = useCallback(() => {
-    setImageSrc('');
+    setImageSrc(null);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedAreaPixels(null);
@@ -254,7 +253,7 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
         return;
       }
 
-      if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      if (file.size > MAX_AVATAR_SIZE_MB * 1024 * 1024) {
         setProfileError(`A imagem deve ter no maximo ${MAX_AVATAR_SIZE_MB}MB.`);
         return;
       }
@@ -307,28 +306,34 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     setIsUploading(true);
 
     try {
-      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+      // 1. Gera o Data URL (Base64 JPEG 160x160) via canvas — sem Storage
+      const photoURL = await getCroppedImg(imageSrc, croppedAreaPixels);
 
-      if (croppedBlob.size > MAX_AVATAR_SIZE_BYTES) {
-        throw new Error(`A imagem final excede ${MAX_AVATAR_SIZE_MB}MB.`);
+      // Sanidade: verifica que o resultado é um data URL válido
+      if (typeof photoURL !== 'string' || !photoURL.startsWith('data:image/')) {
+        throw new Error('Falha ao gerar o recorte da imagem.');
       }
 
-      const fileRef = storageRef(storage, `avatars/${auth.currentUser.uid}`);
-      await uploadBytes(fileRef, croppedBlob, {
-        contentType: 'image/jpeg',
-        cacheControl: 'public,max-age=3600',
-      });
-
-      const photoURL = await getDownloadURL(fileRef);
+      // 2. Salva o Base64 diretamente no perfil do Firebase Auth
+      //    Não há upload de Storage — a imagem vive no próprio perfil do usuário
       await updateProfile(auth.currentUser, { photoURL });
+
+      // 3. Recarrega o usuário para sincronizar o estado com o servidor
+      await auth.currentUser.reload();
+
+      // 4. Atualiza o estado local (reflete imediatamente na UI)
       setProfileData((current) => ({ ...current, photoURL }));
       setProfileNotice('Foto atualizada com sucesso.');
     } catch (error) {
       const errorMessage = error?.message ? String(error.message) : 'erro desconhecido';
       setProfileError(`Erro ao enviar: ${errorMessage}`);
     } finally {
+      // Garante que o loading SEMPRE seja desligado — previne loop infinito
       setIsUploading(false);
-      resetCropState();
+      setImageSrc(null);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
     }
   }, [croppedAreaPixels, imageSrc, isUploading, resetCropState]);
 

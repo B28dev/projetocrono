@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Função auxiliar: usuário autenticado com domínio institucional ──────────
+    function isInstitutional() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.matches('^[^@]+@somosicev\\.com$');
+    }
+
+    // ─── Função auxiliar: o doc pertence ao usuário autenticado ─────────────────
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // ─── Função auxiliar: campo existe e não é nulo ──────────────────────────────
+    function hasField(data, field) {
+      return field in data && data[field] != null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COLEÇÃO: users/{userId}
+    // Armazena o perfil e as preferências de cada usuário.
+    // ═══════════════════════════════════════════════════════════════════════════
+    match /users/{userId} {
+      // Leitura: apenas o próprio dono do documento
+      allow read: if isInstitutional() && isOwner(userId);
+
+      // Criação: exige campos obrigatórios para evitar documentos malformados
+      allow create: if isInstitutional()
+        && isOwner(userId)
+        && hasField(request.resource.data, 'uid')
+        && hasField(request.resource.data, 'email')
+        && request.resource.data.uid == request.auth.uid;
+
+      // Atualização: o dono pode editar, mas NÃO pode alterar uid ou email
+      allow update: if isInstitutional()
+        && isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email;
+
+      // Exclusão: bloqueada por padrão (proteção de dados)
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COLEÇÃO: users/{userId}/progress/{topicId}
+    // Registra o progresso de estudo de cada tópico por usuário.
+    // ═══════════════════════════════════════════════════════════════════════════
+    match /users/{userId}/progress/{topicId} {
+      // Leitura e escrita: apenas o dono do progresso
+      allow read: if isInstitutional() && isOwner(userId);
+
+      allow create: if isInstitutional()
+        && isOwner(userId)
+        && hasField(request.resource.data, 'userId')
+        && hasField(request.resource.data, 'topicId')
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isInstitutional()
+        && isOwner(userId)
+        // Impede alteração do ID do dono após criação (integridade)
+        && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if isInstitutional() && isOwner(userId);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COLEÇÃO: users/{userId}/studySessions/{sessionId}
+    // Cada documento representa uma sessão de estudo cronometrada.
+    // ═══════════════════════════════════════════════════════════════════════════
+    match /users/{userId}/studySessions/{sessionId} {
+      allow read: if isInstitutional() && isOwner(userId);
+
+      allow create: if isInstitutional()
+        && isOwner(userId)
+        && hasField(request.resource.data, 'userId')
+        && hasField(request.resource.data, 'startedAt')
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isInstitutional() && isOwner(userId);
+      allow delete: if isInstitutional() && isOwner(userId);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BLOQUEIO GLOBAL — nega tudo que não foi explicitamente permitido acima
+    // ═══════════════════════════════════════════════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

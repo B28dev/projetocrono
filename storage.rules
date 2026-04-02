@@ -7,8 +7,10 @@ service firebase.storage {
         && request.auth.token.email.matches('^[^@]+@somosicev\\.com$');
     }
 
+    // Avatares de perfil: leitura pública (necessário para <img src> carregar)
+    // Escrita restrita ao próprio usuário institucional autenticado
     match /avatars/{userId} {
-      allow read: if isInstitutional();
+      allow read: if true;
 
       allow create, update: if isInstitutional()
         && request.auth.uid == userId
