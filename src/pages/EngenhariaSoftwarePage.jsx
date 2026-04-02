@@ -304,20 +304,20 @@ export default function EngenhariaSoftwarePage({
               ))}
 
               {displayStudyPlan.overdue.length > 0 && (
-                <div className="study-plan-card cyber-glass mb-6 rounded-2xl border border-red-500/45 bg-[linear-gradient(135deg,rgba(127,29,29,0.14),rgba(153,27,27,0.04))] p-4 shadow-[0_0_0_1px_rgba(239,68,68,0.1),0_22px_48px_rgba(127,29,29,0.14)] dark:border-orange-500/45 dark:bg-[linear-gradient(135deg,rgba(124,45,18,0.1),rgba(120,53,15,0.03))] dark:shadow-[0_0_0_1px_rgba(249,115,22,0.1),0_18px_40px_rgba(124,45,18,0.12)] cyberpunk:border-[#ff3ea5]/60 cyberpunk:bg-[linear-gradient(135deg,rgba(64,6,29,0.9),rgba(127,29,29,0.3))] cyberpunk:shadow-[0_0_26px_rgba(255,62,165,0.24),0_0_60px_rgba(225,29,72,0.12)]">
+                <div className="study-plan-card cyber-glass mb-6 rounded-2xl border border-red-500/45 bg-[linear-gradient(135deg,rgba(127,29,29,0.14),rgba(153,27,27,0.04))] p-4 shadow-[0_0_0_1px_rgba(239,68,68,0.1),0_22px_48px_rgba(127,29,29,0.14)] dark:border-red-400/70 dark:bg-[linear-gradient(135deg,rgba(255,245,245,0.98),rgba(255,241,242,0.96),rgba(254,226,226,0.92))] dark:shadow-[0_0_0_1px_rgba(248,113,113,0.18),0_22px_48px_rgba(239,68,68,0.16)] cyberpunk:border-[#ff3ea5]/60 cyberpunk:bg-[linear-gradient(135deg,rgba(64,6,29,0.9),rgba(127,29,29,0.3))] cyberpunk:shadow-[0_0_26px_rgba(255,62,165,0.24),0_0_60px_rgba(225,29,72,0.12)]">
                   <div className="study-plan-card-content">
                     <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex rounded-full border border-red-700 bg-red-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-red-50 shadow-[0_0_0_1px_rgba(127,29,29,0.18)] dark:border-orange-500/75 dark:bg-orange-500/12 dark:text-orange-300 dark:shadow-[0_0_16px_rgba(249,115,22,0.12)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5] cyberpunk:text-[#14040f] cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]">
+                      <span className="inline-flex rounded-full border border-red-700 bg-red-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-red-50 shadow-[0_0_0_1px_rgba(127,29,29,0.18)] dark:border-red-500/85 dark:bg-red-600 dark:text-white dark:shadow-[0_0_14px_rgba(239,68,68,0.28)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5] cyberpunk:text-[#14040f] cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]">
                         materias atrasadas
                       </span>
-                      <span className="text-xs text-red-200 dark:text-stone-700 cyberpunk:text-[#ff8dcb]">Estude nesta ordem</span>
+                      <span className="text-xs text-red-200 dark:text-red-700 cyberpunk:text-[#ff8dcb]">Estude nesta ordem</span>
                     </div>
                     <button
                       type="button"
                       data-magnetic
                       onClick={() => setIsOverdueCollapsed((current) => !current)}
-                      className="inline-flex items-center gap-1.5 text-xs text-red-200 transition-colors hover:text-red-50 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-[#ff8dcb] cyberpunk:hover:text-[#ffd2ec]"
+                      className="inline-flex items-center gap-1.5 text-xs text-red-200 transition-colors hover:text-red-50 dark:text-red-700 dark:hover:text-red-800 cyberpunk:text-[#ff8dcb] cyberpunk:hover:text-[#ffd2ec]"
                     >
                       <svg
                         className={`h-3.5 w-3.5 transition-transform ${isOverdueCollapsed ? '-rotate-90' : 'rotate-0'}`}

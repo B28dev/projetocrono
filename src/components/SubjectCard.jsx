@@ -70,7 +70,7 @@ export default function SubjectCard({ subject, metrics = null, shift = 'noturno-
       onClick={handleClick}
       className={`cyber-glass relative group flex select-none flex-col gap-3 rounded-xl border p-5 backdrop-blur-md transition-colors duration-300 ${
         active
-          ? 'cursor-pointer relative h-full border border-white/10 rounded-2xl bg-gradient-to-br from-[#ff3ea5]/15 via-[#0d0d14] to-[#00e8ff]/15 backdrop-blur-md shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] hover:border-[#00e8ff]/30 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:hover:border-[#00e8ff]/30'
+          ? 'cursor-pointer relative h-full rounded-2xl border border-white/10 bg-gradient-to-br from-[#ff3ea5]/15 via-[#0d0d14] to-[#00e8ff]/15 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] hover:border-[#00e8ff]/30 dark:border-black/5 dark:bg-none dark:bg-white/60 dark:from-transparent dark:via-transparent dark:to-transparent dark:shadow-lg dark:hover:border-stone-400 dark:hover:bg-white/70 cyberpunk:border-white/10 cyberpunk:bg-gradient-to-br cyberpunk:from-[#ff3ea5]/15 cyberpunk:via-[#0d0d14] cyberpunk:to-[#00e8ff]/15 cyberpunk:shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] cyberpunk:hover:border-[#00e8ff]/30'
           : 'cursor-not-allowed border-zinc-800/60 bg-zinc-900/30 dark:border-stone-300 dark:bg-stone-100/80 cyberpunk:border-white/5 cyberpunk:bg-white/[0.02]'
       }`}
     >
