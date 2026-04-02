@@ -12,8 +12,10 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
     ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.14),0_18px_40px_rgba(127,29,29,0.2)] dark:border-red-500/60 dark:shadow-[0_0_0_1px_rgba(248,113,113,0.18),0_18px_40px_rgba(239,68,68,0.18)] cyberpunk:border-[#ff3ea5]/60 cyberpunk:shadow-[0_0_26px_rgba(255,62,165,0.28),0_0_54px_rgba(244,63,94,0.16)]'
     : item.isExamDay
     ? 'border-amber-500/60 cyberpunk:border-[#ff3ea5]/35'
+    : isToday && allDone
+    ? 'border-emerald-500/50 shadow-[0_0_16px_rgba(16,185,129,0.2)] dark:border-emerald-500/45 dark:shadow-[0_0_14px_rgba(16,185,129,0.16)] cyberpunk:border-[#00e8ff]/45 cyberpunk:shadow-[0_0_16px_rgba(0,232,255,0.22)]'
     : isToday
-    ? 'border-blue-400/55 shadow-[0_0_24px_rgba(59,130,246,0.22),0_0_56px_rgba(59,130,246,0.08)] dark:border-stone-500 dark:shadow-[0_0_0_1px_rgba(41,37,36,0.08),0_16px_36px_rgba(120,113,108,0.18),0_0_24px_rgba(120,113,108,0.12)] cyberpunk:border-[#00e8ff] cyberpunk:shadow-[0_0_20px_rgba(0,232,255,0.35)]'
+    ? 'border-blue-400/55 shadow-[0_0_16px_rgba(59,130,246,0.18)] sm:shadow-[0_0_24px_rgba(59,130,246,0.22),0_0_56px_rgba(59,130,246,0.08)] dark:border-stone-500 dark:shadow-[0_0_0_1px_rgba(41,37,36,0.08),0_16px_36px_rgba(120,113,108,0.18),0_0_24px_rgba(120,113,108,0.12)] cyberpunk:border-[#00e8ff] cyberpunk:shadow-[0_0_14px_rgba(0,232,255,0.24)] sm:cyberpunk:shadow-[0_0_20px_rgba(0,232,255,0.35)]'
     : isPast
     ? 'border-white/5 cyberpunk:border-white/5'
     : 'border-white/10 cyberpunk:border-white/10';
@@ -34,12 +36,16 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const cardSurfaceClass = item.isOverdue
     ? 'bg-red-950/10 dark:bg-[linear-gradient(135deg,rgba(255,245,245,0.98),rgba(254,242,242,0.96),rgba(254,226,226,0.92))] cyberpunk:bg-[linear-gradient(135deg,rgba(76,5,25,0.72),rgba(127,29,29,0.34))]'
+    : isToday && allDone
+    ? 'bg-emerald-500/[0.08] dark:bg-emerald-500/10'
     : isToday
     ? 'bg-blue-500/[0.08] dark:bg-stone-50'
     : 'bg-white/5 dark:bg-stone-100/50';
 
   const cardHoverClass = item.isOverdue
     ? 'hover:border-red-500/70 hover:bg-red-900/20 dark:hover:border-red-500/75 dark:hover:bg-[linear-gradient(135deg,rgba(254,242,242,1),rgba(254,226,226,0.98),rgba(252,165,165,0.2))] cyberpunk:hover:border-[#ff3ea5]/65 cyberpunk:hover:bg-[linear-gradient(135deg,rgba(103,8,39,0.82),rgba(127,29,29,0.42))]'
+    : isToday && allDone
+    ? 'hover:border-emerald-500/60 hover:bg-emerald-500/[0.14] dark:hover:border-emerald-500/55 dark:hover:bg-emerald-500/12 cyberpunk:hover:border-[#00e8ff]/55 cyberpunk:hover:bg-[#00e8ff]/10'
     : 'hover:border-[#00e8ff]/40 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10';
 
   const dateTextClass = item.isOverdue
