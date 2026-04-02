@@ -238,27 +238,34 @@
 
   .theme-cyberpunk .hero-title-outline {
     z-index: 0;
-    color: transparent;
+    -webkit-text-stroke: 0 transparent !important;
+    text-shadow: none;
+  }
+
+  .theme-cyberpunk .hero-title-gradient {
+    color: transparent !important;
     background-image: linear-gradient(90deg, #ff3ea5 0%, #ff66ba 34%, #7cecff 72%, #00e8ff 100%);
     background-clip: text;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 0;
+    -webkit-text-fill-color: transparent !important;
+    -webkit-text-stroke: 0 transparent !important;
     text-shadow:
       0 0 10px rgba(255, 62, 165, 0.22),
       0 0 18px rgba(0, 232, 255, 0.16);
   }
 
-  .theme-cyberpunk .hero-title-outline::before {
+  .theme-cyberpunk .hero-title-outline::before,
+  .theme-cyberpunk .hero-title-gradient::before {
     content: none;
   }
 
-  .theme-cyberpunk .hero-title-outline::after {
+  .theme-cyberpunk .hero-title-outline::after,
+  .theme-cyberpunk .hero-title-gradient::after {
     content: none;
   }
 
-  .theme-cyberpunk .hero-title:hover .hero-title-outline,
-  .theme-cyberpunk .hero-title-outline:hover {
+  .theme-cyberpunk .hero-title:hover .hero-title-gradient,
+  .theme-cyberpunk .hero-title-gradient:hover {
     text-shadow:
       0 0 12px rgba(255, 62, 165, 0.28),
       0 0 22px rgba(0, 232, 255, 0.22);
