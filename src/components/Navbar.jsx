@@ -58,6 +58,7 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
   } = useProfileHub({ profileHubRef, fileInputRef });
 
   const brandLinkClass = 'flex items-center gap-1.5 rounded-xl border border-transparent px-2.5 py-1.5 text-xs text-zinc-100 transition-colors hover:bg-white/5 md:gap-2 md:px-4 md:py-2 md:text-sm dark:text-stone-900 dark:hover:bg-stone-200/50 cyberpunk:text-white';
+  const avatarSrc = profileData.avatarBase64 || profileData.photoURL;
   const cropperModal = imageSrc && typeof document !== 'undefined'
     ? createPortal(
       <div className="fixed inset-0 z-[1200] flex items-center justify-center overflow-y-auto bg-[#05050a]/85 p-4 backdrop-blur-xl">
@@ -161,9 +162,9 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
               onClick={handleToggleProfile}
               className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/5 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:border-cyan-400 hover:bg-white/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.4)] focus:outline-none focus:ring-2 focus:ring-cyan-500/30 dark:border-stone-400 dark:bg-stone-200/60 dark:text-stone-900 dark:hover:border-cyan-500"
             >
-              {profileData.photoURL ? (
+              {avatarSrc ? (
                 <img
-                  src={profileData.photoURL}
+                  src={avatarSrc}
                   alt="Avatar do usuario"
                   loading="lazy"
                   decoding="async"
@@ -181,9 +182,9 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-sm md:text-base font-semibold text-white">
-                  {profileData.photoURL ? (
+                  {avatarSrc ? (
                     <img
-                      src={profileData.photoURL}
+                      src={avatarSrc}
                       alt="Avatar do usuario"
                       loading="lazy"
                       decoding="async"

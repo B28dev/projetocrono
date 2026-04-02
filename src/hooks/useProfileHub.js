@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, signOut, updatePassword, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase';
-// getCroppedImg retorna um Data URL (Base64 JPEG 160x160), sem uso de Storage.
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import getCroppedImg from '../utils/getCroppedImg';
 
 const MAX_AVATAR_SIZE_MB = 2;
@@ -11,10 +11,24 @@ function getProfileData(user) {
     displayName: String(user?.displayName || '').trim(),
     email: String(user?.email || '').trim(),
     photoURL: String(user?.photoURL || '').trim(),
+    avatarBase64: '',
     providerIds: Array.isArray(user?.providerData)
       ? user.providerData.map((provider) => provider?.providerId).filter(Boolean)
       : [],
   };
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    if (!(blob instanceof Blob)) {
+      reject(new Error('Formato de imagem invalido para conversao.'));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Nao foi possivel converter o recorte para Base64.'));
+    reader.readAsDataURL(blob);
+  });
 }
 
 export default function useProfileHub({ profileHubRef, fileInputRef }) {
@@ -35,13 +49,41 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   const [profileData, setProfileData] = useState(() => getProfileData(auth.currentUser));
 
   useEffect(() => {
+    let isMounted = true;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const nextProfile = getProfileData(user);
-      setProfileData(nextProfile);
-      setEditNameValue(nextProfile.displayName);
+      void (async () => {
+        const nextProfile = getProfileData(user);
+
+        if (!user) {
+          if (!isMounted) return;
+          setProfileData(nextProfile);
+          setEditNameValue(nextProfile.displayName);
+          return;
+        }
+
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          const avatarBase64 = userDoc.exists() ? String(userDoc.data()?.avatarBase64 || '').trim() : '';
+
+          if (!isMounted) return;
+          setProfileData({
+            ...nextProfile,
+            avatarBase64,
+          });
+          setEditNameValue(nextProfile.displayName);
+        } catch {
+          if (!isMounted) return;
+          setProfileData(nextProfile);
+          setEditNameValue(nextProfile.displayName);
+        }
+      })();
     });
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -306,29 +348,32 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     setIsUploading(true);
 
     try {
-      // 1. Gera o Data URL (Base64 JPEG 160x160) via canvas — sem Storage
-      const photoURL = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const croppedResult = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const avatarBase64 = typeof croppedResult === 'string'
+        ? croppedResult
+        : await blobToDataUrl(croppedResult);
 
-      // Sanidade: verifica que o resultado é um data URL válido
-      if (typeof photoURL !== 'string' || !photoURL.startsWith('data:image/')) {
+      if (typeof avatarBase64 !== 'string' || !avatarBase64.startsWith('data:image/')) {
         throw new Error('Falha ao gerar o recorte da imagem.');
       }
 
-      // 2. Salva o Base64 diretamente no perfil do Firebase Auth
-      //    Não há upload de Storage — a imagem vive no próprio perfil do usuário
-      await updateProfile(auth.currentUser, { photoURL });
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      await setDoc(
+        userDocRef,
+        {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email || '',
+          avatarBase64,
+        },
+        { merge: true },
+      );
 
-      // 3. Recarrega o usuário para sincronizar o estado com o servidor
-      await auth.currentUser.reload();
-
-      // 4. Atualiza o estado local (reflete imediatamente na UI)
-      setProfileData((current) => ({ ...current, photoURL }));
+      setProfileData((current) => ({ ...current, avatarBase64 }));
       setProfileNotice('Foto atualizada com sucesso.');
     } catch (error) {
       const errorMessage = error?.message ? String(error.message) : 'erro desconhecido';
       setProfileError(`Erro ao enviar: ${errorMessage}`);
     } finally {
-      // Garante que o loading SEMPRE seja desligado — previne loop infinito
       setIsUploading(false);
       setImageSrc(null);
       setCrop({ x: 0, y: 0 });
