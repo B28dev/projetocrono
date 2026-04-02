@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ALLOWED_EMAIL_DOMAINS_LABEL, hasAllowedEmailDomain } from '../constants/authDomains';
@@ -91,9 +90,8 @@ export default function useLoginAuth(onLogin) {
 
         if (isRegistering) {
           userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const inferredDisplayName = email.split('@')[0]?.trim() || 'Operador';
-          await updateProfile(userCredential.user, { displayName: inferredDisplayName });
-          onLogin?.('dashboard');
+          // Novo usuário sempre segue para onboarding de nome.
+          onLogin?.('name');
           return;
         }
 

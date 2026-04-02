@@ -100,6 +100,7 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center gap-4">
           <div className="flex flex-col gap-2 mr-auto">
             <p className="text-base md:text-lg font-semibold text-zinc-100 leading-none dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
+              {'Eai '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-cyan-500">
                 {userName || 'Aluno'}
               </span>

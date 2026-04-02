@@ -137,7 +137,7 @@ export default function LoginModal({
                   value={passwordValue}
                   onChange={(event) => setPasswordValue(event.target.value)}
                   placeholder="**********"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 pr-12 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:py-3"
+                  className="hide-password-native-toggle w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 pr-12 text-white placeholder:text-white/40 transition focus:border-[#00e8ff] focus:outline-none focus:shadow-[0_0_0_1px_rgba(0,232,255,0.35),0_0_28px_rgba(0,232,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:py-3"
                 />
                 <button
                   type="button"
