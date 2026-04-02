@@ -12,6 +12,8 @@ import {
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
 import { CountdownFull } from '../components/Countdown';
+import OverdueStatusCard from '../components/OverdueStatusCard';
+import ProgressBar from '../components/ProgressBar';
 import TopicChip from '../components/TopicChip';
 import StudyPlanItem from '../components/StudyPlanItem';
 import SummaryAccordion from '../components/SummaryAccordion';
@@ -41,6 +43,7 @@ function Section({ title, subtitle, children }) {
 }
 
 export default function EngenhariaSoftwarePage({
+  theme = 'dark',
   shift = 'noturno-adele',
   shiftLabel = 'Noturno (Adele)',
 }) {
@@ -78,6 +81,27 @@ export default function EngenhariaSoftwarePage({
 
   const todayKey = getLocalDateKey();
   const studyPlan = getStudyPlanByShift(shift);
+  const totalTasks = useMemo(
+    () => studyPlan.reduce((sum, item) => sum + item.tasks.length, 0),
+    [studyPlan],
+  );
+  const completedTasks = useMemo(
+    () =>
+      studyPlan.reduce((sum, item) => {
+        const storageDate = getStudyPlanTaskStorageKey(shift, item);
+        const checkedTasks = taskProgress[storageDate] || {};
+
+        return (
+          sum +
+          item.tasks.reduce(
+            (taskSum, _, index) => taskSum + (checkedTasks[index] ? 1 : 0),
+            0,
+          )
+        );
+      }, 0),
+    [shift, studyPlan, taskProgress],
+  );
+  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   const toggleTask = (storageKey, taskIndex) => {
     setTaskProgress((current) => ({
@@ -134,6 +158,16 @@ export default function EngenhariaSoftwarePage({
   displayStudyPlan.today.sort((a, b) => a.date.localeCompare(b.date));
   displayStudyPlan.future.sort((a, b) => a.date.localeCompare(b.date));
 
+  const todayTotal = displayStudyPlan.today.reduce((sum, item) => sum + item.tasks.length, 0);
+  const todayDone = displayStudyPlan.today.reduce((sum, item) => {
+    const checkedTasks = taskProgress[item.storageDate] || {};
+    return sum + item.tasks.reduce((taskSum, _, index) => taskSum + (checkedTasks[index] ? 1 : 0), 0);
+  }, 0);
+  const pendingOverdueTasks = displayStudyPlan.overdue.reduce((sum, item) => {
+    const checkedTasks = taskProgress[item.storageDate] || {};
+    return sum + item.tasks.reduce((taskSum, _, index) => taskSum + (checkedTasks[index] ? 0 : 1), 0);
+  }, 0);
+
   return (
     <>
       <div
@@ -185,6 +219,34 @@ export default function EngenhariaSoftwarePage({
                 <CountdownFull target={actualExamDate} />
               </div>
             </div>
+          </div>
+
+          <div className="mb-8 mt-6 max-w-md">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-blue-500/25 bg-blue-500/8 px-2.5 py-2 dark:border-stone-300 dark:bg-white/80 cyberpunk:border-[#00e8ff]/25 cyberpunk:bg-[#00e8ff]/8">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 dark:text-stone-600 cyberpunk:font-mono cyberpunk:text-[#00e8ff]">
+                  Ritmo atual
+                </p>
+                <p className="mt-0.5 text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:text-white">
+                  Hoje {todayDone}/{todayTotal || 0}
+                </p>
+              </div>
+              <OverdueStatusCard theme={theme} pendingCount={pendingOverdueTasks} />
+            </div>
+            <div className="mb-2 flex items-end justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-stone-600 cyberpunk:font-mono cyberpunk:text-white/60">
+                Progresso Geral
+              </span>
+              <div className="flex items-end gap-2">
+                <span className="text-xs font-mono font-semibold text-zinc-300 dark:text-stone-800 cyberpunk:text-white/70">
+                  {completedTasks}/{totalTasks}
+                </span>
+                <span className="text-sm font-bold text-teal-400 dark:text-teal-700 cyberpunk:text-[#00e8ff]">
+                  {progress}%
+                </span>
+              </div>
+            </div>
+            <ProgressBar value={progress} color="teal" className="h-2 border border-white/5 bg-white/5 dark:bg-stone-200 cyberpunk:bg-white/10" />
           </div>
 
           <Section

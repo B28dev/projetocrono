@@ -129,9 +129,9 @@ export default function SubjectCard({ subject, metrics = null, shift = 'noturno-
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl p-[1.5px] shadow-[0_0_20px_rgba(255,62,165,0.28),0_0_26px_rgba(0,232,255,0.24)]">
-      <div className="pointer-events-none absolute -inset-[95%] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(255,62,165,1)_100deg,rgba(0,232,255,1)_220deg,transparent_320deg)] opacity-90 blur-[1px] animate-[spin_6s_linear_infinite]" />
-      <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_20%_20%,rgba(255,62,165,0.35),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(0,232,255,0.32),transparent_46%)] blur-lg" />
+    <div className="relative overflow-hidden rounded-xl p-[1.5px] shadow-[0_0_12px_rgba(255,62,165,0.18),0_0_18px_rgba(0,232,255,0.16)]">
+      <div className="pointer-events-none absolute -inset-[95%] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(255,62,165,0.82)_100deg,rgba(0,232,255,0.82)_220deg,transparent_320deg)] opacity-65 blur-[0.5px] animate-[spin_8s_linear_infinite]" />
+      <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_20%_20%,rgba(255,62,165,0.22),transparent_46%),radial-gradient(circle_at_80%_80%,rgba(0,232,255,0.2),transparent_46%)] blur-md" />
       <div className="relative z-[1]">
         {cardContent}
       </div>

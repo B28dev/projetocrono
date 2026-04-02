@@ -163,7 +163,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
                   isAuthLoading
                     ? null
                     : isAuthenticated
-                    ? <ArquiteturaPage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
+                    ? <ArquiteturaPage theme={theme} shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} />
                     : <Navigate to="/" replace />
                 }
               />
@@ -173,7 +173,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
                   isAuthLoading
                     ? null
                     : isAuthenticated
-                    ? <EngenhariaSoftwarePage shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} userName={userName} />
+                    ? <EngenhariaSoftwarePage theme={theme} shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} userName={userName} />
                     : <Navigate to="/" replace />
                 }
               />

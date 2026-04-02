@@ -80,7 +80,7 @@ export default function Landing({ onNavigate, userName = '' }) {
 
         <h1
           ref={titleRef}
-          className="hero-title text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white"
+          className="hero-title relative isolate transform-gpu will-change-transform text-4xl sm:text-5xl font-bold text-zinc-100 leading-tight tracking-tight overflow-hidden dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white"
         >
           <span className="word-shell inline-block overflow-hidden mr-[0.25em]">
           </span>

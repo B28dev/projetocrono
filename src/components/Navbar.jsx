@@ -1,5 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import Cropper from 'react-easy-crop';
+import 'react-easy-crop/react-easy-crop.css';
 import heroMark from '../../assets/styles/fundoquad.png';
 import useProfileHub from '../hooks/useProfileHub';
 
@@ -24,6 +26,9 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     editNameValue,
     isSavingName,
     isUploading,
+    imageSrc,
+    crop,
+    zoom,
     newPassword,
     isUpdatingPassword,
     passwordFeedback,
@@ -36,6 +41,8 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     isEmailUser,
     maxAvatarSizeMb,
     setEditNameValue,
+    setCrop,
+    setZoom,
     setNewPassword,
     handleToggleProfile,
     handleToggleEditingName,
@@ -43,6 +50,9 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
     handleUpdatePassword,
     handleLogout,
     handleTriggerFilePicker,
+    handleCropComplete,
+    handleCancelCrop,
+    handleConfirmCrop,
     handleImageChange,
   } = useProfileHub({ profileHubRef, fileInputRef });
 
@@ -228,6 +238,73 @@ function Navbar({ theme, onToggleTheme, shift, onShiftChange, onNavigate }) {
           </div>
         </nav>
       </div>
+
+      {imageSrc ? (
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-[#05050a]/80 p-4 backdrop-blur-xl">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#08080f]/95 p-4 shadow-[0_20px_70px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-[#00e8ff]">
+              Recorte de avatar
+            </p>
+            <p className="mt-1 text-sm text-white/65">
+              Ajuste a imagem antes de enviar.
+            </p>
+
+            <div className="relative mt-4 h-72 w-full overflow-hidden rounded-xl border border-white/10 bg-black/55">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={handleCropComplete}
+              />
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <label htmlFor="avatar-zoom" className="text-xs text-white/65">
+                Zoom
+              </label>
+              <input
+                id="avatar-zoom"
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(event) => setZoom(Number(event.target.value))}
+                className="w-full accent-cyan-400"
+                disabled={isUploading}
+              />
+            </div>
+
+            {profileError ? (
+              <p className="mt-3 text-xs text-rose-400">{profileError}</p>
+            ) : null}
+
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleCancelCrop}
+                disabled={isUploading}
+                className="h-9 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-semibold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCrop}
+                disabled={isUploading}
+                className="h-9 rounded-lg border border-cyan-500/40 bg-cyan-500/15 px-3 text-xs font-semibold uppercase tracking-wide text-cyan-200 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isUploading ? 'Enviando imagem...' : 'Confirmar recorte'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }

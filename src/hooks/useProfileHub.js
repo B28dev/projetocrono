@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, signOut, updatePassword, updateProfile } from 'firebase/auth';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
+import getCroppedImg from '../utils/getCroppedImg';
 
 const MAX_AVATAR_SIZE_MB = 2;
 const MAX_AVATAR_SIZE_BYTES = MAX_AVATAR_SIZE_MB * 1024 * 1024;
@@ -23,6 +24,10 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
   const [editNameValue, setEditNameValue] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [imageSrc, setImageSrc] = useState('');
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordFeedback, setPasswordFeedback] = useState(null);
@@ -44,6 +49,8 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     if (!isProfileOpen) return undefined;
 
     const handlePointerDown = (event) => {
+      if (imageSrc) return;
+
       if (!profileHubRef.current?.contains(event.target)) {
         setIsProfileOpen(false);
         setIsEditingName(false);
@@ -56,6 +63,16 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
 
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
+        if (imageSrc) {
+          if (!isUploading) {
+            setImageSrc('');
+            setCrop({ x: 0, y: 0 });
+            setZoom(1);
+            setCroppedAreaPixels(null);
+          }
+          return;
+        }
+
         setIsProfileOpen(false);
         setIsEditingName(false);
         setProfileError('');
@@ -74,7 +91,7 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
       document.removeEventListener('touchstart', handlePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isProfileOpen, profileHubRef]);
+  }, [imageSrc, isProfileOpen, isUploading, profileHubRef]);
 
   const displayName = useMemo(
     () => profileData.displayName || 'Usuario ICEV',
@@ -208,8 +225,24 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     fileInputRef.current?.click();
   }, [fileInputRef, isUploading]);
 
+  const resetCropState = useCallback(() => {
+    setImageSrc('');
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+  }, []);
+
+  const handleCropComplete = useCallback((_, croppedPixels) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
+
+  const handleCancelCrop = useCallback(() => {
+    if (isUploading) return;
+    resetCropState();
+  }, [isUploading, resetCropState]);
+
   const handleImageChange = useCallback(
-    async (event) => {
+    (event) => {
       const file = event.target.files?.[0];
       event.target.value = '';
 
@@ -233,23 +266,71 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
 
       setProfileError('');
       setProfileNotice('');
-      setIsUploading(true);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
 
-      try {
-        const fileRef = storageRef(storage, `avatars/${auth.currentUser.uid}`);
-        await uploadBytes(fileRef, file);
-        const photoURL = await getDownloadURL(fileRef);
-        await updateProfile(auth.currentUser, { photoURL });
-        setProfileData((current) => ({ ...current, photoURL }));
-        setProfileNotice('Foto atualizada com sucesso.');
-      } catch {
-        setProfileError('Falha no upload da imagem. Tente novamente.');
-      } finally {
-        setIsUploading(false);
-      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result !== 'string') {
+          setProfileError('Nao foi possivel preparar a imagem selecionada.');
+          return;
+        }
+
+        setImageSrc(reader.result);
+      };
+      reader.onerror = () => {
+        setProfileError('Nao foi possivel ler o arquivo selecionado.');
+      };
+      reader.readAsDataURL(file);
     },
     [],
   );
+
+  const handleConfirmCrop = useCallback(async () => {
+    if (isUploading) return;
+
+    if (!auth.currentUser) {
+      setProfileError('Sessao invalida. Faca login novamente.');
+      resetCropState();
+      return;
+    }
+
+    if (!imageSrc || !croppedAreaPixels) {
+      setProfileError('Nao foi possivel preparar o recorte da imagem.');
+      resetCropState();
+      return;
+    }
+
+    setProfileError('');
+    setProfileNotice('');
+    setIsUploading(true);
+
+    try {
+      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+
+      if (croppedBlob.size > MAX_AVATAR_SIZE_BYTES) {
+        throw new Error(`A imagem final excede ${MAX_AVATAR_SIZE_MB}MB.`);
+      }
+
+      const fileRef = storageRef(storage, `avatars/${auth.currentUser.uid}`);
+      await uploadBytes(fileRef, croppedBlob, {
+        contentType: 'image/jpeg',
+        cacheControl: 'public,max-age=3600',
+      });
+
+      const photoURL = await getDownloadURL(fileRef);
+      await updateProfile(auth.currentUser, { photoURL });
+      setProfileData((current) => ({ ...current, photoURL }));
+      setProfileNotice('Foto atualizada com sucesso.');
+    } catch (error) {
+      const errorMessage = error?.message ? String(error.message) : 'erro desconhecido';
+      setProfileError(`Erro ao enviar: ${errorMessage}`);
+    } finally {
+      setIsUploading(false);
+      resetCropState();
+    }
+  }, [croppedAreaPixels, imageSrc, isUploading, resetCropState]);
 
   return {
     isProfileOpen,
@@ -257,6 +338,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     editNameValue,
     isSavingName,
     isUploading,
+    imageSrc,
+    crop,
+    zoom,
     newPassword,
     isUpdatingPassword,
     passwordFeedback,
@@ -269,6 +353,8 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     isEmailUser,
     maxAvatarSizeMb: MAX_AVATAR_SIZE_MB,
     setEditNameValue,
+    setCrop,
+    setZoom,
     setNewPassword,
     handleToggleProfile,
     handleToggleEditingName,
@@ -276,6 +362,9 @@ export default function useProfileHub({ profileHubRef, fileInputRef }) {
     handleUpdatePassword,
     handleLogout,
     handleTriggerFilePicker,
+    handleCropComplete,
+    handleCancelCrop,
+    handleConfirmCrop,
     handleImageChange,
   };
 }
