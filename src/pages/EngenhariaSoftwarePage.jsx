@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   examCoverage,
@@ -27,6 +27,28 @@ function getLocalDateKey(date = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function persistTaskProgress(storageKey, payload) {
+  if (typeof window === 'undefined') return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const writeProgress = () => {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(payload));
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(writeProgress, { timeout: 700 });
+      return;
+    }
+
+    window.setTimeout(writeProgress, 0);
+  });
 }
 
 function Section({ title, subtitle, children }) {
@@ -74,14 +96,10 @@ export default function EngenhariaSoftwarePage({
       return {};
     }
   });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STUDY_PLAN_STORAGE_KEY, JSON.stringify(taskProgress));
-  }, [taskProgress]);
+  const taskProgressRef = useRef(taskProgress);
 
   const todayKey = getLocalDateKey();
-  const studyPlan = getStudyPlanByShift(shift);
+  const studyPlan = useMemo(() => getStudyPlanByShift(shift), [shift]);
   const totalTasks = useMemo(
     () => studyPlan.reduce((sum, item) => sum + item.tasks.length, 0),
     [studyPlan],
@@ -104,84 +122,124 @@ export default function EngenhariaSoftwarePage({
   );
   const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const toggleTask = (storageKey, taskIndex) => {
-    setTaskProgress((current) => ({
-      ...current,
+  const toggleTask = async (storageKey, taskIndex) => {
+    const currentProgress = taskProgressRef.current || {};
+    const previousValue = Boolean(currentProgress[storageKey]?.[taskIndex]);
+    const nextValue = !previousValue;
+    const nextProgress = {
+      ...currentProgress,
       [storageKey]: {
-        ...current[storageKey],
-        [taskIndex]: !current[storageKey]?.[taskIndex],
+        ...(currentProgress[storageKey] || {}),
+        [taskIndex]: nextValue,
       },
-    }));
+    };
+
+    // Optimistic UI: atualiza primeiro, persiste depois.
+    setTaskProgress(nextProgress);
+    taskProgressRef.current = nextProgress;
+
+    try {
+      await persistTaskProgress(STUDY_PLAN_STORAGE_KEY, nextProgress);
+    } catch (error) {
+      console.error('Erro ao salvar progresso:', error);
+      const revertedProgress = {
+        ...nextProgress,
+        [storageKey]: {
+          ...(nextProgress[storageKey] || {}),
+          [taskIndex]: previousValue,
+        },
+      };
+      setTaskProgress(revertedProgress);
+      taskProgressRef.current = revertedProgress;
+    }
   };
 
-  const displayStudyPlan = studyPlan.reduce(
-    (groups, item) => {
-      const storageDate = getStudyPlanTaskStorageKey(shift, item);
-      const checkedTasks = taskProgress[storageDate] || {};
-      const isDone = item.tasks.length > 0 && item.tasks.every((_, index) => checkedTasks[index]);
-      const preparedItem = {
-        ...item,
-        storageDate,
-        renderKey: item.id || item.date,
-        isOverdue: false,
-      };
+  const {
+    displayStudyPlan,
+    conteudosAtrasados,
+    tarefasHoje,
+    hojePendentes,
+    hojeConcluidas,
+  } = useMemo(() => {
+    const groups = studyPlan.reduce(
+      (acc, item) => {
+        const storageDate = getStudyPlanTaskStorageKey(shift, item);
+        const checkedTasks = taskProgress[storageDate] || {};
+        const isDone = item.tasks.length > 0 && item.tasks.every((_, index) => checkedTasks[index]);
+        const preparedItem = {
+          ...item,
+          storageDate,
+          renderKey: item.id || item.date,
+          isOverdue: false,
+        };
 
-      if (item.date < todayKey && isDone) {
-        groups.completedPast.push(preparedItem);
-        return groups;
-      }
+        if (item.date < todayKey && isDone) {
+          acc.completedPast.push(preparedItem);
+          return acc;
+        }
 
-      if (item.date < todayKey && !isDone) {
-        groups.overdue.push({
-          ...preparedItem,
-          renderKey: `${item.id || item.date}-overdue`,
-          isOverdue: true,
-        });
-        return groups;
-      }
+        if (item.date < todayKey && !isDone) {
+          acc.overdue.push({
+            ...preparedItem,
+            renderKey: `${item.id || item.date}-overdue`,
+            isOverdue: true,
+          });
+          return acc;
+        }
 
-      if (item.date === todayKey) {
-        groups.today.push(preparedItem);
-        return groups;
-      }
+        if (item.date === todayKey) {
+          acc.today.push(preparedItem);
+          return acc;
+        }
 
-      if (item.date > todayKey) {
-        groups.future.push(preparedItem);
-      }
+        if (item.date > todayKey) {
+          acc.future.push(preparedItem);
+        }
 
-      return groups;
-    },
-    { completedPast: [], overdue: [], today: [], future: [] },
-  );
+        return acc;
+      },
+      { completedPast: [], overdue: [], today: [], future: [] },
+    );
 
-  displayStudyPlan.completedPast.sort((a, b) => a.date.localeCompare(b.date));
-  displayStudyPlan.overdue.sort((a, b) => a.date.localeCompare(b.date));
-  displayStudyPlan.today.sort((a, b) => a.date.localeCompare(b.date));
-  displayStudyPlan.future.sort((a, b) => a.date.localeCompare(b.date));
+    groups.completedPast.sort((a, b) => a.date.localeCompare(b.date));
+    groups.overdue.sort((a, b) => a.date.localeCompare(b.date));
+    groups.today.sort((a, b) => a.date.localeCompare(b.date));
+    groups.future.sort((a, b) => a.date.localeCompare(b.date));
 
-  const conteudosAtrasados = displayStudyPlan.overdue.flatMap((item) => {
-    const checkedTasks = taskProgress[item.storageDate] || {};
-    return item.tasks
-      .map((task, index) => ({
-        id: `${item.storageDate}-overdue-${index}`,
-        date: item.date,
+    const overdueItems = groups.overdue.flatMap((item) => {
+      const checkedTasks = taskProgress[item.storageDate] || {};
+      return item.tasks
+        .map((task, index) => ({
+          id: `${item.storageDate}-overdue-${index}`,
+          date: item.date,
+          text: task,
+          topic: item.topic,
+          checked: Boolean(checkedTasks[index]),
+        }))
+        .filter((task) => !task.checked);
+    });
+
+    const todayItems = groups.today.flatMap((item) => {
+      const checkedTasks = taskProgress[item.storageDate] || {};
+      return item.tasks.map((task, index) => ({
+        id: `${item.storageDate}-today-${index}`,
         text: task,
         topic: item.topic,
         checked: Boolean(checkedTasks[index]),
-      }))
-      .filter((task) => !task.checked);
-  });
-  const tarefasHoje = displayStudyPlan.today.flatMap((item) => {
-    const checkedTasks = taskProgress[item.storageDate] || {};
-    return item.tasks.map((task, index) => ({
-      id: `${item.storageDate}-today-${index}`,
-      text: task,
-      topic: item.topic,
-      checked: Boolean(checkedTasks[index]),
-    }));
-  });
-  const hojePendentes = tarefasHoje.filter((task) => !task.checked);
-  const hojeConcluidas = tarefasHoje.filter((task) => task.checked);
+      }));
+    });
+
+    const pendingTodayItems = todayItems.filter((task) => !task.checked);
+    const completedTodayItems = todayItems.filter((task) => task.checked);
+
+    return {
+      displayStudyPlan: groups,
+      conteudosAtrasados: overdueItems,
+      tarefasHoje: todayItems,
+      hojePendentes: pendingTodayItems,
+      hojeConcluidas: completedTodayItems,
+    };
+  }, [shift, studyPlan, taskProgress, todayKey]);
   const todayTotal = tarefasHoje.length;
   const todayDone = hojeConcluidas.length;
   return (
@@ -374,6 +432,7 @@ export default function EngenhariaSoftwarePage({
               {displayStudyPlan.completedPast.map((item) => (
                 <StudyPlanItem
                   key={`${item.renderKey}-completed`}
+                  theme={theme}
                   item={item}
                   isToday={false}
                   isPast={true}
@@ -414,6 +473,7 @@ export default function EngenhariaSoftwarePage({
                         {displayStudyPlan.overdue.map((item) => (
                           <StudyPlanItem
                             key={item.renderKey}
+                            theme={theme}
                             item={item}
                             isToday={false}
                             isPast={false}
@@ -436,6 +496,7 @@ export default function EngenhariaSoftwarePage({
               {displayStudyPlan.today.map((item) => (
                 <StudyPlanItem
                   key={item.renderKey}
+                  theme={theme}
                   item={item}
                   isToday={true}
                   isPast={false}
@@ -447,6 +508,7 @@ export default function EngenhariaSoftwarePage({
               {displayStudyPlan.future.map((item) => (
                 <StudyPlanItem
                   key={item.renderKey}
+                  theme={theme}
                   item={item}
                   isToday={false}
                   isPast={false}

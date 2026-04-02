@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { getRedirectResult, onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 
@@ -33,41 +33,74 @@ export default function useAuth() {
   }, [navigate]);
 
   useEffect(() => {
+    let isMounted = true;
+    let authResolved = false;
+    let redirectResolved = false;
+
+    const finishLoading = () => {
+      if (isMounted && authResolved && redirectResolved) {
+        setIsAuthLoading(false);
+      }
+    };
+
+    const syncAuthenticatedUser = async (user) => {
+      if (!user) {
+        setIsAuthenticated(false);
+        setUserName('');
+        setCurrentView('login');
+        return;
+      }
+
+      if (!isInstitutionalUser(user)) {
+        await signOut(auth);
+        setIsAuthenticated(false);
+        setUserName('');
+        setCurrentView('login');
+        navigateRef.current('/', { replace: true });
+        return;
+      }
+
+      setIsAuthenticated(true);
+      const firstName = getFirstName(user.displayName);
+      if (firstName) {
+        const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+        setUserName(firstName);
+        setCurrentView(getViewFromPath(pathname));
+        return;
+      }
+
+      setUserName('');
+      setCurrentView('name');
+    };
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        if (!user) {
-          setIsAuthenticated(false);
-          setUserName('');
-          setCurrentView('login');
-          return;
-        }
-
-        if (!isInstitutionalUser(user)) {
-          await signOut(auth);
-          setIsAuthenticated(false);
-          setUserName('');
-          setCurrentView('login');
-          navigateRef.current('/', { replace: true });
-          return;
-        }
-
-        setIsAuthenticated(true);
-        const firstName = getFirstName(user.displayName);
-        if (firstName) {
-          const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
-          setUserName(firstName);
-          setCurrentView(getViewFromPath(pathname));
-          return;
-        }
-
-        setUserName('');
-        setCurrentView('name');
+        await syncAuthenticatedUser(user);
       } finally {
-        setIsAuthLoading(false);
+        authResolved = true;
+        finishLoading();
       }
     });
 
-    return () => unsubscribe();
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (!isMounted || !result?.user) return;
+        await syncAuthenticatedUser(result.user);
+      } catch (error) {
+        console.error('Erro ao concluir login com redirect:', error);
+      } finally {
+        redirectResolved = true;
+        finishLoading();
+      }
+    };
+
+    handleRedirectResult();
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {

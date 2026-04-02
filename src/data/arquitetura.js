@@ -34,7 +34,7 @@ const studyPlanNoturnoBase = [
     tasks: [
       'Marcel Rios - Aula 1: Evolucao dos computadores.',
       'Marcel Rios - Aula 2: Componentes do computador.',
-      'Responder V/F do simulado (blocos 1-3) e justificar os itens falsos por escrito.',
+      'Responder questoes de V/F e justificar os itens FALSOS por escrito',
     ],
     resources: [
       {
@@ -102,7 +102,7 @@ const studyPlanNoturnoBase = [
     tasks: [
       'Codigo Binario - operacoes completas e revisao de sistemas de numeracao.',
       'Resolver os itens a-e das questoes 15, 16 e 17 do simulado.',
-      'Resolver os itens f-j encadeados: converter, operar e converter o resultado.',
+      'Resolver itens - (encadeados: converter -> operar -> converter resultado)',
     ],
     resources: [
       {
@@ -175,7 +175,7 @@ const studyPlanNoturnoBase = [
     tasks: [
       'Prof. Santiago - hierarquia e memoria cache (L1, L2 e L3).',
       'Material ICMC/USP - organizacao da memoria cache.',
-      'Redigir respostas das questoes 8, 9 e 10 do simulado.',
+      'Redigir respostas sobre memoria cache (Conceito de cache como e utilizada pra otimizar o desempenho, como ela funciona destacando vantagens, falar sobre os diferentes niveis de cache L1 L2 L3)',
     ],
     resources: [
       {
@@ -225,7 +225,7 @@ const studyPlanNoturnoBase = [
       'Como calcular barramento de enderecos em bits.',
       'Organizacao da memoria e espaco de enderecamento.',
       'Refazer os 4 exemplos da Aula 07 sem olhar a solucao.',
-      'Resolver os 10 exercicios de calculo de memoria.',
+      'Resolver os 10 exercicios de calculo de memoria do PDF da Aula',
     ],
     resources: [
       {
@@ -266,7 +266,7 @@ const studyPlanNoturnoBase = [
       'Video explicativo de RISC vs CISC.',
       'Filosofia RISC-V na pratica.',
       'Ler os slides do Luciani da Aula 02.',
-      'Redigir no papel as respostas das questoes 4, 5, 6 e 7 do simulado.',
+      'Redigir no papel sobre a diferenca entre RISC e CISC (conjunto de instrucoes, desempenho, complexidade de execucao, eficiencia e flexibilidade)',
     ],
     resources: [
       {
@@ -306,7 +306,7 @@ const studyPlanNoturnoBase = [
       'Prof. Santiago - Aula 14: Pipelining.',
       'Prof. Santiago - Aula 21: Paralelismo e arquitetura paralela.',
       'Prof. Santiago - CPU, caminho de dados e ULA.',
-      'Redigir respostas das questoes 11, 12 e 14 do simulado.',
+      'Redigir respostas sobre (1. pipeline: o que e, quais desafios, como e utilizada pra melhorar o desempenho, desafios e formas de mitigar; 2. arquitetura paralela: o que e, quais os tipos e como cada um funciona para melhorar o desempenho, exemplo de 2 estruturas paralelas; 3. ULA: o que e, quais as funcoes e como contribui para o desempenho.)',
     ],
     resources: [
       {
@@ -344,13 +344,14 @@ const studyPlanNoturnoBase = [
     ],
   },
   {
-    date: '2026-04-08',
-    label: 'Qua 08/04',
-    topic: 'Simulado completo cronometrado',
+    date: '2026-04-05',
+    label: 'Dom 05/04',
+    topic: 'Resolver Questoes (se possivel algum simulado)',
+    subtitle: 'REVISAO',
     tasks: [
-      'Resolver o simulado completo do zero em 1h40.',
-      'Comparar as respostas e marcar os pontos fracos.',
-      'Refazer as operacoes binarias das provas P1/2023 e P1/2024.',
+      'Revisao: Resolver o simulado completo do zero - 1h40 cronometrado',
+      'Revisao: Comparar respostas e marcar os pontos fracos',
+      'Revisao: Refazer operacoes binarias das provas P1/2023 e P1/2024',
     ],
     resources: [],
     notes: [
@@ -371,7 +372,7 @@ const studyPlanNoturnoBase = [
     label: 'Qui 09/04',
     topic: 'Reforco nos pontos fracos',
     tasks: [
-      'Rever os temas errados no simulado do dia 08.',
+      'Rever os temas que erraram no simulado do dia 9 (caso tenha achado).',
       'Escrever as respostas dissertativas no papel, como sera na prova real.',
       'Fazer 5 operacoes binarias aleatorias para manter o ritmo.',
     ],

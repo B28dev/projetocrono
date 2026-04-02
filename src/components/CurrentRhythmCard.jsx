@@ -10,44 +10,63 @@ function CurrentRhythmCard({
 }) {
   const isLight = theme === 'light';
   const isCyber = theme === 'cyberpunk';
-  const temHoje = todayTotalCount > 0;
-  const isSuccess = temHoje && todayPendingCount === 0;
+  const isHojeConcluido = todayTotalCount > 0 && todayPendingCount === 0;
   const dailyProgress = useMemo(
     () => (todayTotalCount > 0 ? Math.round((todayDoneCount / todayTotalCount) * 100) : 0),
     [todayDoneCount, todayTotalCount],
   );
   const progressColor = dailyProgress === 100 ? 'green' : 'blue';
 
-  const cardStyleClass = isSuccess
+  const cardStyleClass = isHojeConcluido
     ? isCyber
-      ? 'border-emerald-400/40 bg-emerald-400/10 shadow-[0_0_20px_rgba(16,185,129,0.16)]'
+      ? 'border-emerald-300/75 bg-[linear-gradient(135deg,rgba(6,78,59,0.56),rgba(5,150,105,0.16))] shadow-[0_0_28px_rgba(16,185,129,0.38),0_0_62px_rgba(16,185,129,0.14)]'
       : isLight
-      ? 'border-emerald-500/40 bg-emerald-500/10 shadow-[0_0_18px_rgba(16,185,129,0.12)]'
-      : 'border-emerald-500/25 bg-emerald-500/8 shadow-[0_0_18px_rgba(16,185,129,0.16)]'
-    : 'border-blue-500/25 bg-blue-500/8 dark:border-stone-300 dark:bg-white/80 cyberpunk:border-[#00e8ff]/25 cyberpunk:bg-[#00e8ff]/8';
+      ? 'border-emerald-200 bg-emerald-50 shadow-[0_0_16px_rgba(16,185,129,0.12)]'
+      : 'border-emerald-900/50 bg-neutral-900 shadow-[0_0_18px_rgba(16,185,129,0.16)]'
+    : isCyber
+    ? 'border-[#00e8ff]/35 bg-[#00e8ff]/8 shadow-[0_0_18px_rgba(0,232,255,0.14)]'
+    : isLight
+    ? 'border-blue-200 bg-blue-50/90 shadow-[0_0_12px_rgba(59,130,246,0.08)]'
+    : 'border-blue-500/30 bg-blue-500/8 shadow-[0_0_16px_rgba(59,130,246,0.12)]';
 
-  const labelStyleClass = isSuccess
+  const badgeStyleClass = isHojeConcluido
     ? isCyber
-      ? 'text-emerald-300'
+      ? 'border border-emerald-300/60 bg-emerald-400 text-[#052617] shadow-[0_0_20px_rgba(16,185,129,0.72)]'
+      : isLight
+      ? 'bg-emerald-500 text-white'
+      : 'border border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
+    : isCyber
+    ? 'border border-[#00e8ff]/30 bg-[#00e8ff]/20 text-[#7af7ff] shadow-[0_0_12px_rgba(0,232,255,0.35)]'
+    : isLight
+    ? 'bg-blue-500 text-white'
+    : 'border border-blue-400/20 bg-blue-500/12 text-blue-300';
+
+  const labelStyleClass = isHojeConcluido
+    ? isCyber
+      ? 'text-emerald-200'
       : isLight
       ? 'text-emerald-700'
       : 'text-emerald-300'
-    : 'text-zinc-500 dark:text-stone-600 cyberpunk:text-[#00e8ff]';
+    : isCyber
+    ? 'text-[#7af7ff]'
+    : isLight
+    ? 'text-blue-700'
+    : 'text-blue-300';
 
-  const valueStyleClass = isSuccess
+  const valueStyleClass = isHojeConcluido
     ? isCyber
-      ? 'text-emerald-200'
+      ? 'text-emerald-100'
       : isLight
       ? 'text-emerald-700'
       : 'text-emerald-300'
     : 'text-zinc-100 dark:text-stone-900 cyberpunk:text-white';
 
   return (
-    <div className={`rounded-lg border px-2.5 py-2 backdrop-blur-md transition-all duration-500 ${cardStyleClass}`}>
+    <div className={`rounded-lg border px-2.5 py-2 backdrop-blur-md transition-colors duration-500 ease-in-out ${cardStyleClass}`}>
       <div className="flex items-start justify-between gap-3">
-        <p className={`text-[10px] uppercase tracking-widest cyberpunk:font-mono ${labelStyleClass}`}>
+        <span className={`inline-flex h-5 items-center rounded-full px-2 text-[10px] uppercase tracking-widest transition-colors duration-500 ${badgeStyleClass}`}>
           Ritmo atual
-        </p>
+        </span>
         <span className={`text-[11px] font-mono font-semibold ${labelStyleClass}`}>
           {todayDoneCount}/{todayTotalCount || 0}
         </span>

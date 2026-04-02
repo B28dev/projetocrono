@@ -3,6 +3,7 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  signInWithRedirect,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -10,6 +11,18 @@ import {
 import { auth } from '../firebase';
 
 const INSTITUTIONAL_DOMAIN = '@somosicev.com';
+
+function shouldUseRedirectFlow() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+
+  const userAgent = navigator.userAgent || '';
+  const isMobileUserAgent =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const isCoarsePointer =
+    typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+
+  return isMobileUserAgent || isCoarsePointer;
+}
 
 function getFirebaseErrorMessage(error) {
   const code = String(error?.code || '');
@@ -162,7 +175,15 @@ export default function useLoginAuth(onLogin) {
 
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ hd: 'somosicev.com' });
+      provider.setCustomParameters({
+        hd: 'somosicev.com',
+        prompt: 'select_account',
+      });
+
+      if (shouldUseRedirectFlow()) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
 
       const result = await signInWithPopup(auth, provider);
       const user = result?.user;

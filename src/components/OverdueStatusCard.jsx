@@ -125,7 +125,7 @@ function OverdueStatusCard({ theme = 'dark', overdueContentItems = [], todayPend
     : 'border-red-500/25 bg-red-500/12 text-red-200';
 
   return (
-    <div className={`min-h-[10.25rem] rounded-lg border px-2.5 py-2 backdrop-blur-md transition-colors duration-500 ${cardStatusStyle}`}>
+    <div className={`min-h-[10.25rem] rounded-lg border px-2.5 py-2 backdrop-blur-md transition-colors duration-300 ease-in-out ${cardStatusStyle}`}>
       <div className="flex items-start gap-3">
         <div
           className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border ${iconWrapClass} ${
