@@ -9,6 +9,7 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const toggle = (i) => onToggleTask?.(item.storageDate || item.date, i);
   const allDone = item.tasks.length > 0 && item.tasks.every((_, i) => checked[i]);
+  const isCriticalExamDay = Boolean(item.isExamDay && item.isExamAlert);
   const useCyberHighlightedSurface = isCyber && (isToday || allDone);
   const cardBaseClass = useCyberHighlightedSurface
     ? 'relative overflow-hidden rounded-xl border p-4 backdrop-blur-md'
@@ -16,6 +17,8 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const borderColor = item.isOverdue
     ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.14),0_18px_40px_rgba(127,29,29,0.2)] dark:border-red-500/60 dark:shadow-[0_0_0_1px_rgba(248,113,113,0.18),0_18px_40px_rgba(239,68,68,0.18)] cyberpunk:border-[#ff3ea5]/60 cyberpunk:shadow-[0_0_26px_rgba(255,62,165,0.28),0_0_54px_rgba(244,63,94,0.16)]'
+    : isCriticalExamDay
+    ? 'border-red-500/70 shadow-[0_0_0_1px_rgba(239,68,68,0.2),0_20px_46px_rgba(127,29,29,0.22)] dark:border-red-500/70 dark:shadow-[0_0_0_1px_rgba(248,113,113,0.2),0_20px_46px_rgba(239,68,68,0.2)] cyberpunk:border-[#ff3ea5]/70 cyberpunk:shadow-[0_0_30px_rgba(255,62,165,0.34),0_0_60px_rgba(225,29,72,0.2)]'
     : item.isExamDay
     ? 'border-amber-500/60 cyberpunk:border-[#ff3ea5]/35'
     : allDone
@@ -36,6 +39,8 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const timelineLineClass = item.isOverdue
     ? 'bg-gradient-to-b from-red-500/90 via-rose-500/70 to-red-500/20 shadow-[0_0_18px_rgba(239,68,68,0.45)] dark:from-red-500 dark:via-red-400 dark:to-red-300/30 dark:shadow-[0_0_18px_rgba(239,68,68,0.3)] cyberpunk:from-[#ff3ea5] cyberpunk:via-rose-400 cyberpunk:to-[#ff3ea5]/15 cyberpunk:shadow-[0_0_22px_rgba(255,62,165,0.65)]'
+    : isCriticalExamDay
+    ? 'bg-gradient-to-b from-red-500/95 via-rose-500/75 to-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.48)] dark:from-red-500 dark:via-red-400 dark:to-red-300/30 dark:shadow-[0_0_20px_rgba(239,68,68,0.34)] cyberpunk:from-[#ff3ea5] cyberpunk:via-rose-400 cyberpunk:to-[#ff3ea5]/15 cyberpunk:shadow-[0_0_24px_rgba(255,62,165,0.7)]'
     : allDone
     ? isCyber
       ? 'bg-gradient-to-b from-emerald-400 via-emerald-400 to-emerald-400/20 shadow-[0_0_22px_rgba(16,185,129,0.62)]'
@@ -48,6 +53,8 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const markerClass = item.isOverdue
     ? 'border-red-500 bg-red-500/20 shadow-[0_0_0_1px_rgba(239,68,68,0.18),0_0_18px_rgba(239,68,68,0.3)] dark:border-red-500 dark:bg-red-500/15 dark:shadow-[0_0_16px_rgba(239,68,68,0.22)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5]/18 cyberpunk:shadow-[0_0_20px_rgba(255,62,165,0.55)]'
+    : isCriticalExamDay
+    ? 'border-red-500 bg-red-500/25 shadow-[0_0_0_1px_rgba(239,68,68,0.22),0_0_20px_rgba(239,68,68,0.35)] dark:border-red-500 dark:bg-red-500/18 dark:shadow-[0_0_18px_rgba(239,68,68,0.28)] cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5]/22 cyberpunk:shadow-[0_0_22px_rgba(255,62,165,0.6)]'
     : item.isExamDay
     ? 'border-amber-500 bg-amber-500/20 cyberpunk:border-[#ff3ea5] cyberpunk:bg-[#ff3ea5]/15'
     : allDone
@@ -60,6 +67,8 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const cardSurfaceClass = item.isOverdue
     ? 'bg-red-950/10 dark:bg-[linear-gradient(135deg,rgba(255,245,245,0.98),rgba(254,242,242,0.96),rgba(254,226,226,0.92))] cyberpunk:bg-[linear-gradient(135deg,rgba(76,5,25,0.72),rgba(127,29,29,0.34))]'
+    : isCriticalExamDay
+    ? 'bg-red-950/10 dark:bg-[linear-gradient(135deg,rgba(255,245,245,0.98),rgba(254,242,242,0.96),rgba(254,226,226,0.92))] cyberpunk:bg-[linear-gradient(135deg,rgba(88,7,35,0.86),rgba(127,29,29,0.36))]'
     : allDone
     ? isCyber
       ? 'bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.22),transparent_34%),linear-gradient(145deg,rgba(2,44,34,0.96),rgba(4,78,58,0.92)_42%,rgba(16,185,129,0.18)_100%)] shadow-[inset_0_1px_0_rgba(167,243,208,0.1),inset_0_0_34px_rgba(16,185,129,0.2)]'
@@ -76,6 +85,8 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
 
   const cardHoverClass = item.isOverdue
     ? 'hover:border-red-500/70 hover:bg-red-900/20 dark:hover:border-red-500/75 dark:hover:bg-[linear-gradient(135deg,rgba(254,242,242,1),rgba(254,226,226,0.98),rgba(252,165,165,0.2))] cyberpunk:hover:border-[#ff3ea5]/65 cyberpunk:hover:bg-[linear-gradient(135deg,rgba(103,8,39,0.82),rgba(127,29,29,0.42))]'
+    : isCriticalExamDay
+    ? 'hover:border-red-500/75 hover:bg-red-900/22 dark:hover:border-red-500/75 dark:hover:bg-[linear-gradient(135deg,rgba(254,242,242,1),rgba(254,226,226,0.98),rgba(252,165,165,0.22))] cyberpunk:hover:border-[#ff3ea5]/70 cyberpunk:hover:bg-[linear-gradient(135deg,rgba(110,9,42,0.86),rgba(127,29,29,0.44))]'
     : allDone
     ? isCyber
       ? ''
@@ -89,6 +100,8 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
     : 'hover:border-[#00e8ff]/40 hover:bg-white/10 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:hover:border-[#00e8ff]/40 cyberpunk:hover:bg-white/10';
 
   const dateTextClass = item.isOverdue
+    ? 'text-red-300 dark:text-red-700 cyberpunk:text-[#ff8dcb]'
+    : isCriticalExamDay
     ? 'text-red-300 dark:text-red-700 cyberpunk:text-[#ff8dcb]'
     : item.isExamDay
     ? 'text-amber-400 dark:text-amber-600 cyberpunk:text-[#ff3ea5]'
@@ -140,7 +153,11 @@ export default function StudyPlanItem({ item, isToday, isPast, checked = {}, onT
                   </span>
                 )}
                 {item.isExamDay && (
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-700 cyberpunk:border-[#ff3ea5]/25 cyberpunk:bg-[#ff3ea5]/10 cyberpunk:font-mono cyberpunk:text-[#ff3ea5]">
+                  <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold cyberpunk:font-mono ${
+                    isCriticalExamDay
+                      ? 'border-red-500/40 bg-red-500/15 text-red-300 dark:border-red-500/30 dark:bg-red-500/12 dark:text-red-700 cyberpunk:border-[#ff3ea5]/45 cyberpunk:bg-[#ff3ea5]/15 cyberpunk:text-[#ff8dcb]'
+                      : 'border-amber-500/30 bg-amber-500/15 text-amber-400 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-700 cyberpunk:border-[#ff3ea5]/25 cyberpunk:bg-[#ff3ea5]/10 cyberpunk:text-[#ff3ea5]'
+                  }`}>
                     PROVA
                   </span>
                 )}

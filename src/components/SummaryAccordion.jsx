@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 
+const BADGE_COLOR_CLASS = {
+  rose: 'border-rose-500/40 bg-rose-500/14 text-rose-200 dark:border-rose-500/35 dark:bg-rose-500/10 dark:text-rose-700 cyberpunk:border-[#ff3ea5]/45 cyberpunk:bg-[#ff3ea5]/18 cyberpunk:text-[#ffd2ec]',
+  cyan: 'border-cyan-500/40 bg-cyan-500/14 text-cyan-200 dark:border-cyan-500/35 dark:bg-cyan-500/10 dark:text-cyan-700 cyberpunk:border-[#00e8ff]/45 cyberpunk:bg-[#00e8ff]/14 cyberpunk:text-[#9ff7ff]',
+  emerald: 'border-emerald-500/40 bg-emerald-500/14 text-emerald-200 dark:border-emerald-500/35 dark:bg-emerald-500/10 dark:text-emerald-700 cyberpunk:border-emerald-400/45 cyberpunk:bg-emerald-400/14 cyberpunk:text-emerald-200',
+  amber: 'border-amber-500/40 bg-amber-500/14 text-amber-200 dark:border-amber-500/35 dark:bg-amber-500/10 dark:text-amber-700 cyberpunk:border-amber-400/45 cyberpunk:bg-amber-400/14 cyberpunk:text-amber-200',
+  indigo: 'border-indigo-500/40 bg-indigo-500/14 text-indigo-200 dark:border-indigo-500/35 dark:bg-indigo-500/10 dark:text-indigo-700 cyberpunk:border-indigo-400/45 cyberpunk:bg-indigo-400/14 cyberpunk:text-indigo-200',
+};
+
 export default function SummaryAccordion({ summaries }) {
   const [openId, setOpenId] = useState(null);
 
@@ -20,6 +28,7 @@ export default function SummaryAccordion({ summaries }) {
 
 function AccordionItem({ summary, isOpen, onToggle }) {
   const bodyRef = useRef(null);
+  const badgeColorClass = BADGE_COLOR_CLASS[summary.badge?.color] || BADGE_COLOR_CLASS.cyan;
 
   useEffect(() => {
     const el = bodyRef.current;
@@ -42,7 +51,14 @@ function AccordionItem({ summary, isOpen, onToggle }) {
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
       >
-        <span className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">{summary.title}</span>
+        <div className="min-w-0 flex items-center gap-2">
+          <span className="truncate text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">{summary.title}</span>
+          {summary.badge?.label ? (
+            <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${badgeColorClass}`}>
+              {summary.badge.label}
+            </span>
+          ) : null}
+        </div>
         <svg
           className={`w-4 h-4 text-zinc-500 dark:text-stone-500 flex-shrink-0 transition-transform duration-200 cyberpunk:text-[#00e8ff] ${isOpen ? 'rotate-180' : ''}`}
           fill="none"

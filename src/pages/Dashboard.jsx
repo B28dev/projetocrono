@@ -1,10 +1,41 @@
-﻿import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGsapStagger } from '../hooks/useGsapReveal';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import SubjectCard, { getSubjects } from '../components/SubjectCard';
-import { getStudyPlanByShift, getStudyPlanTaskStorageKey } from '../data/arquitetura';
+import {
+  getStudyPlanByShift as getArquiteturaStudyPlanByShift,
+  getStudyPlanTaskStorageKey as getArquiteturaStudyPlanTaskStorageKey,
+} from '../data/arquitetura';
+import {
+  getStudyPlanByShift as getEngSoftwareStudyPlanByShift,
+  getStudyPlanTaskStorageKey as getEngSoftwareStudyPlanTaskStorageKey,
+} from '../data/engenharia-software';
+import {
+  getStudyPlanByShift as getEmpreendedorismoStudyPlanByShift,
+  getStudyPlanTaskStorageKey as getEmpreendedorismoStudyPlanTaskStorageKey,
+} from '../data/empreendedorismo';
+import { isMainContent } from '../utils/studyPlanTasks';
 
-const STUDY_PLAN_STORAGE_KEY = 'arquitetura-study-plan-progress-v2';
+const SUBJECT_STORAGE_KEYS = {
+  arquitetura: 'arquitetura-study-plan-progress-v2',
+  'intro-eng-software': 'engsoftware-study-plan-progress-v2',
+  empreendedorismo: 'empreendedorismo-study-plan-progress-v2',
+};
+
+const SUBJECT_PLAN_ADAPTERS = {
+  arquitetura: {
+    getStudyPlanByShift: getArquiteturaStudyPlanByShift,
+    getStudyPlanTaskStorageKey: getArquiteturaStudyPlanTaskStorageKey,
+  },
+  'intro-eng-software': {
+    getStudyPlanByShift: getEngSoftwareStudyPlanByShift,
+    getStudyPlanTaskStorageKey: getEngSoftwareStudyPlanTaskStorageKey,
+  },
+  empreendedorismo: {
+    getStudyPlanByShift: getEmpreendedorismoStudyPlanByShift,
+    getStudyPlanTaskStorageKey: getEmpreendedorismoStudyPlanTaskStorageKey,
+  },
+};
 
 function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -13,23 +44,47 @@ function getLocalDateKey(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-export default function Dashboard({ shift = 'noturno-adele', examDate = new Date('2026-04-13T08:00:00'), userName = '' }) {
-  const [taskProgress] = useState(() => {
-    if (typeof window === 'undefined') return {};
+function loadTaskProgress(storageKey) {
+  if (typeof window === 'undefined') return {};
 
-    try {
-      const stored = window.localStorage.getItem(STUDY_PLAN_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
+  try {
+    const stored = window.localStorage.getItem(storageKey);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getDaysToExam(examDate) {
+  const now = new Date();
+  const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const examDay = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
+  return Math.max(Math.ceil((examDay - todayDate) / 86400000), 0);
+}
+
+function getMainTaskIndexes(tasks = []) {
+  return tasks.reduce((indexes, task, taskIndex) => {
+    if (isMainContent(task)) {
+      indexes.push(taskIndex);
     }
-  });
+
+    return indexes;
+  }, []);
+}
+
+export default function Dashboard({ shift = 'noturno-adele', userName = '' }) {
+  const [taskProgressBySubject] = useState(() =>
+    Object.entries(SUBJECT_STORAGE_KEYS).reduce((acc, [subjectId, storageKey]) => {
+      acc[subjectId] = loadTaskProgress(storageKey);
+      return acc;
+    }, {}),
+  );
 
   const gridRef = useGsapStagger('.subject-card');
   const magneticRef = useGsapMagnetic('[data-magnetic]');
   const subjects = useMemo(() => getSubjects(shift), [shift]);
   const orderedSubjects = useMemo(() => {
-    const priority = ['arquitetura', 'intro-eng-software'];
+    const priority = ['arquitetura', 'empreendedorismo', 'intro-eng-software'];
     return [...subjects].sort((a, b) => {
       const aIndex = priority.indexOf(a.id);
       const bIndex = priority.indexOf(b.id);
@@ -39,60 +94,90 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
       return 0;
     });
   }, [subjects]);
-  const studyPlan = useMemo(() => getStudyPlanByShift(shift), [shift]);
+
+  const metricsBySubject = useMemo(() => {
+    const todayKey = getLocalDateKey();
+
+    return Object.entries(SUBJECT_PLAN_ADAPTERS).reduce((acc, [subjectId, adapter]) => {
+      const subject = subjects.find((item) => item.id === subjectId);
+      if (!subject) return acc;
+
+      const studyPlan = adapter.getStudyPlanByShift(shift);
+      const taskProgress = taskProgressBySubject[subjectId] || {};
+      const preparedDays = studyPlan.map((item) => ({
+        ...item,
+        mainTaskIndexes: getMainTaskIndexes(item.tasks),
+      }));
+
+      const totalTasks = preparedDays.reduce((sum, item) => sum + item.mainTaskIndexes.length, 0);
+      const completedTasks = preparedDays.reduce((sum, item) => {
+        const saved = taskProgress[adapter.getStudyPlanTaskStorageKey(shift, item)] || {};
+        const doneCount = item.mainTaskIndexes.reduce(
+          (daySum, taskIndex) => daySum + (saved[taskIndex] ? 1 : 0),
+          0,
+        );
+        return sum + doneCount;
+      }, 0);
+
+      const todayPlans = preparedDays.filter((item) => item.date === todayKey);
+      const todayTotal = todayPlans.reduce((sum, item) => sum + item.mainTaskIndexes.length, 0);
+      const todayDone = todayPlans.reduce((sum, item) => {
+        const saved = taskProgress[adapter.getStudyPlanTaskStorageKey(shift, item)] || {};
+        const doneCount = item.mainTaskIndexes.reduce(
+          (daySum, taskIndex) => daySum + (saved[taskIndex] ? 1 : 0),
+          0,
+        );
+        return sum + doneCount;
+      }, 0);
+
+      acc[subjectId] = {
+        totalTasks,
+        completedTasks,
+        remainingTasks: Math.max(totalTasks - completedTasks, 0),
+        progressPercent: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        todayDone,
+        todayTotal,
+        daysToExam: getDaysToExam(subject.examDate),
+      };
+
+      return acc;
+    }, {});
+  }, [shift, subjects, taskProgressBySubject]);
 
   const checklistStats = useMemo(() => {
-    const totalTasks = studyPlan.reduce((acc, item) => acc + item.tasks.length, 0);
-    const completedTasks = studyPlan.reduce((acc, item) => {
-      const saved = taskProgress[getStudyPlanTaskStorageKey(shift, item)] || {};
-      const doneInDay = item.tasks.reduce((dayAcc, _, index) => dayAcc + (saved[index] ? 1 : 0), 0);
-      return acc + doneInDay;
-    }, 0);
+    const activeMetrics = orderedSubjects
+      .filter((subject) => subject.active)
+      .map((subject) => metricsBySubject[subject.id])
+      .filter(Boolean);
 
-    const remainingTasks = Math.max(totalTasks - completedTasks, 0);
-    const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    if (activeMetrics.length === 0) {
+      return {
+        totalTasks: 0,
+        completedTasks: 0,
+        remainingTasks: 0,
+        progressPercent: 0,
+        todayDone: 0,
+        todayTotal: 0,
+        daysToExam: 0,
+      };
+    }
 
-    const todayKey = getLocalDateKey();
-    const todayPlans = studyPlan.filter((item) => item.date === todayKey);
-    const todayTotal = todayPlans.reduce((acc, item) => acc + item.tasks.length, 0);
-    const todayDone = todayPlans.reduce((acc, item) => {
-      const saved = taskProgress[getStudyPlanTaskStorageKey(shift, item)] || {};
-      const doneInDay = item.tasks.reduce((dayAcc, _, index) => dayAcc + (saved[index] ? 1 : 0), 0);
-      return acc + doneInDay;
-    }, 0);
-
-    const now = new Date();
-    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const examDay = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
-    const daysToExam = Math.max(Math.ceil((examDay - todayDate) / 86400000), 0);
+    const totalTasks = activeMetrics.reduce((sum, metric) => sum + metric.totalTasks, 0);
+    const completedTasks = activeMetrics.reduce((sum, metric) => sum + metric.completedTasks, 0);
+    const todayDone = activeMetrics.reduce((sum, metric) => sum + metric.todayDone, 0);
+    const todayTotal = activeMetrics.reduce((sum, metric) => sum + metric.todayTotal, 0);
+    const daysToExam = Math.min(...activeMetrics.map((metric) => metric.daysToExam));
 
     return {
       totalTasks,
       completedTasks,
-      remainingTasks,
-      progressPercent,
+      remainingTasks: Math.max(totalTasks - completedTasks, 0),
+      progressPercent: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
       todayDone,
       todayTotal,
       daysToExam,
     };
-  }, [examDate, shift, studyPlan, taskProgress]);
-
-  const introEngSoftwareMetrics = useMemo(() => {
-    const now = new Date();
-    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const introExamDate = subjects.find((subject) => subject.id === 'intro-eng-software')?.examDate;
-    const introExamDay = introExamDate
-      ? new Date(introExamDate.getFullYear(), introExamDate.getMonth(), introExamDate.getDate())
-      : todayDate;
-    const daysToExam = Math.max(Math.ceil((introExamDay - todayDate) / 86400000), 0);
-
-    return {
-      todayDone: 0,
-      todayTotal: 3,
-      progressPercent: 0,
-      daysToExam,
-    };
-  }, [subjects]);
+  }, [orderedSubjects, metricsBySubject]);
 
   return (
     <div ref={magneticRef} className="cyber-shell min-h-screen transition-colors duration-300 dark:bg-[#EAEAE5] dark:text-stone-900">
@@ -130,23 +215,17 @@ export default function Dashboard({ shift = 'noturno-adele', examDate = new Date
         <div>
           <h2 className="text-lg font-semibold text-zinc-100 dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Materias</h2>
           <p className="text-sm text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">
-            Arquitetura e Intro. Engenharia de Software ja estao disponiveis. As demais materias aparecem com contagem e serao liberadas em breve.
+            Arquitetura, Intro. Engenharia de Software e Empreendedorismo estao disponiveis com progresso ativo.
           </p>
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {orderedSubjects.map((s) => (
-            <div key={`${shift}-${s.id}`} className="subject-card">
+          {orderedSubjects.map((subject) => (
+            <div key={`${shift}-${subject.id}`} className="subject-card">
               <SubjectCard
-                subject={s}
+                subject={subject}
                 shift={shift}
-                metrics={
-                  s.id === 'arquitetura'
-                    ? checklistStats
-                    : s.id === 'intro-eng-software'
-                    ? introEngSoftwareMetrics
-                    : null
-                }
+                metrics={subject.active ? metricsBySubject[subject.id] || null : null}
               />
             </div>
           ))}

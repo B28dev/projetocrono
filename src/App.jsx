@@ -10,6 +10,7 @@ const Navbar = lazy(() => import('./components/Navbar'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ArquiteturaPage = lazy(() => import('./pages/ArquiteturaPage'));
 const EngenhariaSoftwarePage = lazy(() => import('./pages/EngenhariaSoftwarePage'));
+const EmpreendedorismoPage = lazy(() => import('./pages/EmpreendedorismoPage'));
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
@@ -174,6 +175,16 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
                     ? null
                     : isAuthenticated
                     ? <EngenhariaSoftwarePage theme={theme} shift={shift} shiftLabel={selectedShift.label} examDate={selectedShift.examDate} userName={userName} />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route
+                path="/materia/empreendedorismo"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <EmpreendedorismoPage theme={theme} shift={shift} shiftLabel={selectedShift.label} />
                     : <Navigate to="/" replace />
                 }
               />

@@ -8,7 +8,7 @@ const SUBJECT_BASE = [
   { id: 'algoritmos-programacao', name: 'Algoritmos e Programacao', short: 'ALG', active: false, color: 'amber', progress: 0 },
   { id: 'intro-eng-software', name: 'Intro. Engenharia de Software', short: 'IES', active: true, color: 'teal', progress: 0 },
   { id: 'eletiva-ingles', name: 'Eletiva I (Ingles)', short: 'ING', active: false, color: 'green', progress: 0 },
-  { id: 'empreendedorismo', name: 'Empreendedorismo', short: 'EMP', active: false, color: 'rose', progress: 0 },
+  { id: 'empreendedorismo', name: 'Empreendedorismo', short: 'EMP', active: true, color: 'rose', progress: 0 },
 ];
 
 const SUBJECT_EXAM_DATES = {
