@@ -2,6 +2,7 @@ import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useState } from 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
 import NamePromptModal from './components/NamePromptModal';
+import ReleaseNotesModal from './components/ReleaseNotesModal';
 import SystemNotice from './components/SystemNotice';
 import Landing from './pages/Landing';
 import useAuth from './hooks/useAuth';
@@ -228,6 +229,13 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
           onSubmitName={handleNameSubmit}
           closeOnBackdrop={false}
           ctaLabel="Prosseguir"
+        />
+      ) : null}
+
+      {!isAuthLoading && isAuthenticated ? (
+        <ReleaseNotesModal
+          theme={theme}
+          enabled={currentView !== 'name'}
         />
       ) : null}
     </div>

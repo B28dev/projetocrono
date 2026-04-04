@@ -988,6 +988,282 @@ export const flashcardsBlocoB = [
   },
 ];
 
+export const flashcardsBlocoC = [
+  {
+    "id": "requisitos-c-1",
+    "categoria": "Fundamentos de Requisitos",
+    "frente": "O que são requisitos de software?",
+    "verso": "São descrições do que o software deve fazer e das condições que ele deve atender."
+  },
+  {
+    "id": "requisitos-c-2",
+    "categoria": "Fundamentos de Requisitos",
+    "frente": "O que é análise de requisitos?",
+    "verso": "É a atividade que busca entender o problema e definir o que o software vai fazer para resolvê-lo."
+  },
+  {
+    "id": "requisitos-c-3",
+    "categoria": "Tipos de Requisitos",
+    "frente": "Requisito funcional = ?",
+    "verso": "Diz o que o sistema faz."
+  },
+  {
+    "id": "requisitos-c-4",
+    "categoria": "Tipos de Requisitos",
+    "frente": "Requisito não funcional = ?",
+    "verso": "Diz como o sistema deve se comportar."
+  },
+  {
+    "id": "requisitos-c-5",
+    "categoria": "Tipos de Requisitos",
+    "frente": "Exemplo de requisito funcional.",
+    "verso": "“O sistema deve permitir login com e-mail e senha.”"
+  },
+  {
+    "id": "requisitos-c-6",
+    "categoria": "Tipos de Requisitos",
+    "frente": "Exemplo de requisito não funcional.",
+    "verso": "“O sistema deve responder em até 2 segundos.”"
+  },
+  {
+    "id": "requisitos-c-7",
+    "categoria": "Tipos de Requisitos",
+    "frente": "Diferença central entre funcional e não funcional.",
+    "verso": "Funcional = serviço/ação do sistema. Não funcional = qualidade, restrição ou comportamento do sistema."
+  },
+  {
+    "id": "requisitos-c-8",
+    "categoria": "Requisitos Implicitos e Legais",
+    "frente": "O que é requisito implícito?",
+    "verso": "É um requisito esperado, mas não documentado claramente."
+  },
+  {
+    "id": "requisitos-c-9",
+    "categoria": "Requisitos Implicitos e Legais",
+    "frente": "Por que requisitos implícitos são perigosos?",
+    "verso": "Porque geram retrabalho, conflito e falhas de entendimento."
+  },
+  {
+    "id": "requisitos-c-10",
+    "categoria": "Requisitos Implicitos e Legais",
+    "frente": "Como reduzir requisitos implícitos?",
+    "verso": "Com elicitação detalhada, validação e documentação clara."
+  },
+  {
+    "id": "requisitos-c-11",
+    "categoria": "Requisitos Implicitos e Legais",
+    "frente": "O que é requisito legal ou normativo?",
+    "verso": "É um requisito imposto por lei, norma ou regulação externa."
+  },
+  {
+    "id": "requisitos-c-12",
+    "categoria": "Requisitos Implicitos e Legais",
+    "frente": "O cliente pode mandar ignorar um requisito legal?",
+    "verso": "Não. Requisito legal não deve ser ignorado, mesmo se o cliente pedir."
+  },
+  {
+    "id": "requisitos-c-13",
+    "categoria": "Levantamento de Requisitos",
+    "frente": "O que é levantamento de requisitos?",
+    "verso": "É o processo de descobrir, coletar e entender as necessidades do sistema."
+  },
+  {
+    "id": "requisitos-c-14",
+    "categoria": "Levantamento de Requisitos",
+    "frente": "O que são técnicas observacionais?",
+    "verso": "São técnicas em que o analista observa o usuário e o ambiente real de trabalho."
+  },
+  {
+    "id": "requisitos-c-15",
+    "categoria": "Levantamento de Requisitos",
+    "frente": "Principal vantagem da técnica observacional.",
+    "verso": "Captura o uso real do sistema e revela detalhes que o usuário pode não mencionar."
+  },
+  {
+    "id": "requisitos-c-16",
+    "categoria": "Levantamento de Requisitos",
+    "frente": "Principal desvantagem da técnica observacional.",
+    "verso": "Pode ser mais lenta, custosa e constranger quem está sendo observado."
+  },
+  {
+    "id": "requisitos-c-17",
+    "categoria": "Levantamento de Requisitos",
+    "frente": "Entrevista x observação: diferença rápida.",
+    "verso": "Entrevista depende do que a pessoa diz; observação mostra o que ela realmente faz."
+  },
+  {
+    "id": "requisitos-c-18",
+    "categoria": "Gestao de Requisitos",
+    "frente": "O que é especificação de requisitos?",
+    "verso": "É o registro formal e organizado dos requisitos levantados."
+  },
+  {
+    "id": "requisitos-c-19",
+    "categoria": "Gestao de Requisitos",
+    "frente": "O que é validação de requisitos?",
+    "verso": "É verificar se os requisitos estão corretos, completos e alinhados com a necessidade do cliente."
+  },
+  {
+    "id": "requisitos-c-20",
+    "categoria": "Gestao de Requisitos",
+    "frente": "O que é gerenciamento de requisitos?",
+    "verso": "É controlar mudanças, versões e rastreabilidade dos requisitos ao longo do projeto."
+  },
+  {
+    "id": "requisitos-c-21",
+    "categoria": "Tipos de Requisitos",
+    "frente": "“O sistema deve gerar relatório em PDF.” Isso é que tipo de requisito?",
+    "verso": "Requisito funcional."
+  },
+  {
+    "id": "requisitos-c-22",
+    "categoria": "Tipos de Requisitos",
+    "frente": "“O sistema deve estar disponível 99,9% do tempo.” Isso é que tipo de requisito?",
+    "verso": "Requisito não funcional."
+  },
+  {
+    "id": "requisitos-c-23",
+    "categoria": "Fundamentos de Requisitos",
+    "frente": "Por que requisitos são tão importantes no processo de software?",
+    "verso": "Porque orientam projeto, implementação, testes e validação do produto."
+  },
+  {
+    "id": "requisitos-c-24",
+    "categoria": "Fundamentos de Requisitos",
+    "frente": "Erro clássico em requisitos.",
+    "verso": "Começar o desenvolvimento com requisitos vagos, implícitos ou mal validados."
+  }
+];
+
+export const questoesBlocoC = [
+  {
+    "id": "qc-1",
+    "categoria": "Fundamentos de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "O que são requisitos de software e por que eles são tão importantes no desenvolvimento?",
+    "resposta": "Requisitos de software são as descrições do que o sistema deve fazer e das condições que ele deve atender para ser considerado adequado. Eles são importantes porque orientam todo o restante do desenvolvimento: projeto, implementação, testes, validação e até manutenção. Quando os requisitos estão mal entendidos, incompletos ou ambíguos, a equipe corre o risco de construir um sistema tecnicamente correto, mas que não resolve o problema real do cliente.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>requisitos descrevem necessidades, comportamentos e restrições do sistema;</li><li>servem de base para as demais atividades do processo;</li><li>erros em requisitos tendem a se espalhar pelo restante do projeto;</li></ul>"
+  },
+  {
+    "id": "qc-2",
+    "categoria": "Tipos de Requisitos",
+    "tipo": "Comparacao",
+    "pergunta": "Explique a diferença entre requisitos funcionais e requisitos não funcionais.",
+    "resposta": "Requisitos funcionais descrevem o que o sistema faz, isto é, as funções, serviços e comportamentos esperados. Já os requisitos não funcionais descrevem como o sistema deve se comportar ou sob quais condições deve operar, envolvendo aspectos como desempenho, segurança, disponibilidade, usabilidade e confiabilidade. Em outras palavras, o funcional trata da função entregue; o não funcional trata da qualidade ou da restrição associada a essa entrega.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>funcionais = o que o sistema faz;</li><li>não funcionais = como o sistema se comporta ou quais restrições deve cumprir;</li><li>os dois são necessários para definir corretamente o produto;</li></ul>"
+  },
+  {
+    "id": "qc-3",
+    "categoria": "Tipos de Requisitos",
+    "tipo": "Comparacao",
+    "pergunta": "Dê exemplos de requisitos funcionais e não funcionais e explique por que eles pertencem a categorias diferentes.",
+    "resposta": "Um exemplo de requisito funcional seria: “o sistema deve permitir login com e-mail e senha”. Ele descreve uma capacidade concreta do sistema. Já um exemplo de requisito não funcional seria: “o sistema deve responder à autenticação em até 2 segundos” ou “deve proteger os dados com mecanismos adequados de segurança”. Nesse caso, não se descreve uma função nova, mas sim uma condição de qualidade, desempenho ou restrição aplicada à função.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>exemplo funcional ligado a ação ou serviço do sistema;</li><li>exemplo não funcional ligado a desempenho, segurança, disponibilidade, usabilidade ou qualidade;</li><li>a diferença está entre capacidade e condição de operação;</li></ul>"
+  },
+  {
+    "id": "qc-4",
+    "categoria": "Requisitos Implicitos",
+    "tipo": "Fixacao",
+    "pergunta": "O que são requisitos implícitos e por que eles costumam ser problemáticos?",
+    "resposta": "Requisitos implícitos são necessidades que o cliente, a equipe ou os usuários assumem como óbvias, mas que não foram explicitamente registradas ou discutidas. Eles são problemáticos porque criam expectativas escondidas: alguém acredita que determinada funcionalidade ou comportamento “está entendido”, enquanto outra parte sequer percebe que aquilo deveria existir. O resultado costuma ser retrabalho, conflito, atraso e frustração na validação final.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>são requisitos não documentados ou não verbalizados claramente;</li><li>geram mal-entendidos entre cliente e equipe;</li><li>costumam causar retrabalho, conflito e correções tardias;</li></ul>"
+  },
+  {
+    "id": "qc-5",
+    "categoria": "Requisitos Implicitos",
+    "tipo": "Fixacao",
+    "pergunta": "Como a equipe pode reduzir o risco de requisitos implícitos durante o projeto?",
+    "resposta": "A principal forma de reduzir requisitos implícitos é tornar o entendimento do sistema o mais explícito possível. Isso inclui conversar bastante com o cliente, validar exemplos concretos de uso, registrar decisões, revisar requisitos com frequência e confirmar se todos estão interpretando as necessidades da mesma maneira. Sempre que algo parecer “óbvio”, vale a pena perguntar e documentar — porque, em projetos de software, o óbvio para uma pessoa pode não ser óbvio para outra.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>esclarecer dúvidas cedo e com frequência;</li><li>validar entendimento com exemplos e revisões;</li><li>documentar decisões para evitar suposições escondidas;</li></ul>"
+  },
+  {
+    "id": "qc-6",
+    "categoria": "Requisitos Legais",
+    "tipo": "Fixacao",
+    "pergunta": "O que são requisitos legais ou normativos e por que eles não podem ser ignorados?",
+    "resposta": "Requisitos legais ou normativos são exigências impostas por leis, regulamentos, normas técnicas ou obrigações formais do contexto em que o software será usado. Eles não podem ser ignorados porque não dependem apenas da vontade do cliente ou da equipe: muitas vezes representam obrigações externas que precisam ser cumpridas. Se forem desconsiderados, o sistema pode até funcionar do ponto de vista técnico, mas ainda assim estar inadequado, irregular ou sujeito a problemas sérios de conformidade.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>vêm de leis, normas ou exigências externas ao projeto;</li><li>não dependem apenas da preferência do cliente;</li><li>seu descumprimento pode tornar o sistema inadequado mesmo que funcione;</li></ul>"
+  },
+  {
+    "id": "qc-7",
+    "categoria": "Requisitos Legais",
+    "tipo": "Situacional",
+    "pergunta": "Situação prática: o cliente diz que determinada exigência legal “não precisa ser seguida”. Como a equipe deve enxergar isso?",
+    "resposta": "A equipe não deve tratar essa fala como autorização automática para ignorar o requisito. Quando a exigência é legal ou normativa, ela ultrapassa a simples preferência do cliente. Nesse caso, o papel da equipe é deixar claro que existe uma obrigação externa que precisa ser considerada no produto. Aceitar a exclusão sem análise pode levar à entrega de um sistema que falha justamente em um ponto crítico de conformidade.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>requisito legal não pode ser tratado como opcional apenas porque o cliente quer;</li><li>a equipe precisa reconhecer a obrigação externa envolvida;</li><li>ignorar esse tipo de requisito pode comprometer o sistema como um todo;</li></ul>"
+  },
+  {
+    "id": "qc-8",
+    "categoria": "Engenharia de Requisitos",
+    "tipo": "Comparacao",
+    "pergunta": "Qual é a diferença entre levantamento de requisitos e análise de requisitos?",
+    "resposta": "O levantamento de requisitos está ligado à coleta de informações: entender o contexto, ouvir o cliente, observar usuários, descobrir necessidades e identificar problemas. Já a análise de requisitos vai além da coleta; ela procura organizar, interpretar, esclarecer e estruturar o que foi levantado para que fique compreensível e útil ao desenvolvimento. Em resumo, levantar é descobrir; analisar é transformar essa descoberta em entendimento consistente sobre o que o software deve fazer.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>levantamento = coletar informações e necessidades;</li><li>análise = interpretar, organizar e esclarecer o que foi levantado;</li><li>a análise transforma dados brutos em entendimento do sistema;</li></ul>"
+  },
+  {
+    "id": "qc-9",
+    "categoria": "Analise de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "O que significa dizer que a análise de requisitos procura entender o problema e como o software irá resolvê-lo?",
+    "resposta": "Significa que a equipe não deve apenas listar funcionalidades soltas. Antes disso, precisa compreender qual problema real existe no contexto do cliente, por que esse problema importa e de que forma o software pode atuar como solução. Essa visão evita que o projeto vire apenas um acúmulo de pedidos desconexos. Um bom trabalho de análise conecta necessidade, objetivo e funcionalidade, dando coerência ao produto final.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>a análise não é só listar funções;</li><li>é preciso entender o problema do cliente;</li><li>o software deve ser pensado como solução para esse problema;</li></ul>"
+  },
+  {
+    "id": "qc-10",
+    "categoria": "Documentacao de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "O que é especificação ou documentação de requisitos e qual é seu papel no projeto?",
+    "resposta": "Especificação ou documentação de requisitos é o registro organizado do que foi entendido sobre o sistema: suas funções, restrições, expectativas e condições de operação. Seu papel é servir como referência compartilhada entre cliente, analistas, desenvolvedores, testadores e demais envolvidos. Ela não existe para burocratizar o processo, mas para reduzir ambiguidades, preservar decisões importantes e permitir que o time trabalhe com uma visão comum do que precisa ser construído.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>é o registro estruturado dos requisitos;</li><li>ajuda a alinhar todos os envolvidos no projeto;</li><li>reduz ambiguidades e serve de base para desenvolvimento e testes;</li></ul>"
+  },
+  {
+    "id": "qc-11",
+    "categoria": "Validacao de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "O que é validação de requisitos e por que ela é necessária antes de avançar demais no desenvolvimento?",
+    "resposta": "Validação de requisitos é a atividade de verificar se aquilo que foi levantado e analisado realmente representa o que o cliente precisa e o que o sistema deve atender. Ela é necessária porque um requisito pode estar bem escrito e ainda assim estar errado do ponto de vista do negócio. Validar cedo evita que a equipe invista tempo em projetar, codificar e testar uma solução baseada em um entendimento incorreto.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>validação confirma se o requisito está correto para o problema real;</li><li>um requisito pode estar claro e mesmo assim estar errado;</li><li>validar cedo evita retrabalho caro no restante do projeto;</li></ul>"
+  },
+  {
+    "id": "qc-12",
+    "categoria": "Gerenciamento de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "O que é gerenciamento de requisitos e por que ele se torna especialmente importante quando há mudanças?",
+    "resposta": "Gerenciamento de requisitos é o conjunto de cuidados usados para acompanhar, controlar e manter os requisitos coerentes ao longo do projeto. Isso inclui registrar mudanças, revisar impactos, manter consistência entre decisões e evitar que o time trabalhe com versões contraditórias do que deve ser construído. Ele se torna especialmente importante quando há mudanças porque, sem esse controle, o projeto perde referência, surgem conflitos entre partes do sistema e aumenta o risco de cada membro estar seguindo uma ideia diferente do produto.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>gerenciar requisitos é acompanhar e controlar sua evolução;</li><li>mudanças precisam ser registradas e avaliadas;</li><li>sem gerenciamento, o projeto perde consistência e direção;</li></ul>"
+  },
+  {
+    "id": "qc-13",
+    "categoria": "Tecnicas de Levantamento",
+    "tipo": "Fixacao",
+    "pergunta": "Quais são as vantagens das técnicas observacionais no levantamento de requisitos?",
+    "resposta": "As técnicas observacionais têm a vantagem de mostrar como o trabalho ou o uso do sistema acontece na prática, e não apenas como as pessoas dizem que acontece. Muitas vezes o usuário esquece detalhes, omite etapas ou descreve uma rotina idealizada quando responde perguntas. Ao observar diretamente o contexto real, a equipe consegue identificar necessidades escondidas, dificuldades concretas e comportamentos que talvez nunca aparecessem apenas em entrevistas.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>mostram a prática real, não só o discurso do usuário;</li><li>ajudam a encontrar detalhes que o usuário pode esquecer ou omitir;</li><li>tendem a gerar compreensão mais concreta do contexto;</li></ul>"
+  },
+  {
+    "id": "qc-14",
+    "categoria": "Tecnicas de Levantamento",
+    "tipo": "Comparacao",
+    "pergunta": "Quais são as limitações ou desvantagens das técnicas observacionais em comparação com entrevistas?",
+    "resposta": "Apesar de serem mais realistas em muitos casos, técnicas observacionais também têm limitações. Elas podem consumir mais tempo, exigir maior presença da equipe no ambiente do usuário e nem sempre revelam bem intenções, justificativas e expectativas futuras. Observar mostra muito do comportamento real, mas não substitui totalmente perguntar. Por isso, em muitos projetos, o melhor resultado vem da combinação entre observação e entrevista.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>podem ser mais lentas e exigir mais esforço de campo;</li><li>nem sempre revelam motivações ou expectativas futuras com clareza;</li><li>costumam funcionar melhor quando combinadas com outras técnicas;</li></ul>"
+  },
+  {
+    "id": "qc-15",
+    "categoria": "Requisitos Implicitos",
+    "tipo": "Situacional",
+    "pergunta": "Situação prática: durante a entrega, o cliente reclama de algo que “era óbvio”, mas isso não estava documentado. Que problema de requisitos aconteceu aí?",
+    "resposta": "Esse é um caso clássico de requisito implícito. Algo que uma das partes considerava evidente não foi explicitado, validado nem registrado, e por isso acabou ficando fora da solução. O problema não está apenas no cliente ou apenas na equipe: ele revela falha de comunicação e de validação. Em situações assim, a lição principal é que aquilo que parece óbvio precisa ser tornado visível e verificável antes da implementação avançar.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>trata-se de um requisito implícito;</li><li>houve falha de comunicação e de validação do entendimento;</li><li>o “óbvio” precisa ser explicitado e registrado;</li></ul>"
+  },
+  {
+    "id": "qc-16",
+    "categoria": "Analise de Requisitos",
+    "tipo": "Situacional",
+    "pergunta": "Situação prática: a equipe levantou muitos requisitos, mas eles estão vagos, misturados e contraditórios. Qual etapa precisa ser fortalecida e por quê?",
+    "resposta": "Nesse caso, a etapa que precisa ser fortalecida é a análise de requisitos. O problema não parece ser apenas falta de informação, mas falta de tratamento adequado da informação coletada. A análise serve justamente para separar, interpretar, esclarecer, organizar prioridades e resolver ambiguidades ou contradições. Sem isso, o projeto segue adiante com uma base instável e qualquer decisão posterior fica comprometida.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>a etapa central aqui é a análise de requisitos;</li><li>o objetivo é organizar, esclarecer e resolver contradições;</li><li>seguir sem análise sólida compromete projeto, implementação e testes;</li></ul>"
+  },
+  {
+    "id": "qc-17",
+    "categoria": "Fundamentos de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "Explique por que requisitos de software aparecem como um dos temas mais cobrados da prova.",
+    "resposta": "Requisitos aparecem muito porque eles estão no começo da cadeia de decisões do desenvolvimento. Se a equipe entende mal o que deve ser construído, todas as demais atividades ficam comprometidas: projeto, implementação, testes, validação e entrega. Além disso, o tema permite ao professor cobrar tanto definição quanto comparação e cenário prático, como requisitos funcionais versus não funcionais, requisitos implícitos, exigências legais e técnicas de levantamento.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>requisitos influenciam todas as etapas seguintes do processo;</li><li>erros de requisitos geram impacto amplo no projeto;</li><li>o tema permite cobrar definição, comparação e aplicação prática;</li></ul>"
+  },
+  {
+    "id": "qc-18",
+    "categoria": "Engenharia de Requisitos",
+    "tipo": "Fixacao",
+    "pergunta": "Faça uma síntese: quais são as etapas principais do trabalho com requisitos apresentadas no material da disciplina?",
+    "resposta": "O material organiza o trabalho com requisitos em um fluxo que passa por levantamento e análise de requisitos, depois especificação e documentação, seguido por validação e gerenciamento de requisitos. A lógica é simples: primeiro descobrir e entender o que o sistema precisa atender; depois registrar isso de forma clara; em seguida confirmar se está correto; e, por fim, acompanhar mudanças e manter a consistência ao longo do projeto.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>levantamento e análise;</li><li>especificação/documentação;</li><li>validação;</li><li>gerenciamento para acompanhar mudanças e manter consistência;</li></ul>"
+  }
+];
+
 export const questoesBlocoB = [
   {
     "id": "qb-1",
@@ -1264,3 +1540,4 @@ export const examCoverage = [
     ],
   },
 ];
+
