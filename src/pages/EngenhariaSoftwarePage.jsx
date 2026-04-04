@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   examCoverage,
   flashcardsBlocoA,
+  flashcardsBlocoB,
   getStudyPlanByShift,
   getStudyPlanTaskStorageKey,
   modelSummaries,
   questoesBlocoA,
+  questoesBlocoB,
   referencePlaylists,
   topicVideoSets,
   topics,
@@ -173,6 +175,7 @@ const QUESTION_BADGE_STYLES = {
 function QuestionAccordionItem({ item, isOpen, onToggle, theme = 'dark' }) {
   const isCyber = theme === 'cyberpunk';
   const badgeStyle = QUESTION_BADGE_STYLES[item.tipo] || QUESTION_BADGE_STYLES.Fixacao;
+  const hasHtmlResponse = typeof item.resposta === 'string' && /<\/?[a-z][\s\S]*>/i.test(item.resposta);
 
   const containerClass = isCyber
     ? isOpen
@@ -222,8 +225,15 @@ function QuestionAccordionItem({ item, isOpen, onToggle, theme = 'dark' }) {
 
       <div className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
         <div className="overflow-hidden">
-          <div className={`whitespace-pre-line px-4 py-3 text-sm leading-relaxed ${answerSurfaceClass} ${answerTextClass}`}>
-            {item.resposta}
+          <div className={`px-4 py-3 text-sm leading-relaxed ${answerSurfaceClass} ${answerTextClass}`}>
+            {hasHtmlResponse ? (
+              <div
+                className="[&_ul]:mt-2 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5 [&_li]:leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: item.resposta }}
+              />
+            ) : (
+              <div className="whitespace-pre-line">{item.resposta}</div>
+            )}
           </div>
         </div>
       </div>
@@ -256,6 +266,10 @@ export default function EngenhariaSoftwarePage({
   const [activeStudyContentTab, setActiveStudyContentTab] = useState('flashcards');
   const [visibleCount, setVisibleCount] = useState(6);
   const [openQuestionIds, setOpenQuestionIds] = useState({});
+  const [isBlocoBOpen, setIsBlocoBOpen] = useState(false);
+  const [activeStudyContentTabB, setActiveStudyContentTabB] = useState('flashcards');
+  const [visibleCountB, setVisibleCountB] = useState(6);
+  const [openQuestionIdsB, setOpenQuestionIdsB] = useState({});
   const [taskProgress, setTaskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
 
@@ -417,6 +431,10 @@ export default function EngenhariaSoftwarePage({
   const visibleQuestions = questoesBlocoA.slice(0, visibleCount);
   const currentTotalCount = activeStudyContentTab === 'flashcards' ? flashcardsBlocoA.length : questoesBlocoA.length;
   const hasMoreToShow = visibleCount < currentTotalCount;
+  const visibleFlashcardsB = flashcardsBlocoB.slice(0, visibleCountB);
+  const visibleQuestionsB = questoesBlocoB.slice(0, visibleCountB);
+  const currentTotalCountB = activeStudyContentTabB === 'flashcards' ? flashcardsBlocoB.length : questoesBlocoB.length;
+  const hasMoreToShowB = visibleCountB < currentTotalCountB;
 
   const handleChangeStudyTab = (tabId) => {
     setActiveStudyContentTab(tabId);
@@ -425,6 +443,15 @@ export default function EngenhariaSoftwarePage({
 
   const handleLoadMore = () => {
     setVisibleCount((current) => current + 4);
+  };
+
+  const handleChangeStudyTabB = (tabId) => {
+    setActiveStudyContentTabB(tabId);
+    setVisibleCountB(6);
+  };
+
+  const handleLoadMoreB = () => {
+    setVisibleCountB((current) => current + 4);
   };
 
   return (
@@ -856,6 +883,114 @@ export default function EngenhariaSoftwarePage({
                           <button
                             type="button"
                             onClick={handleLoadMore}
+                            className="inline-flex items-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-700 dark:hover:bg-stone-100 dark:hover:text-stone-900 cyberpunk:border-cyan-400/35 cyberpunk:bg-cyan-400/10 cyberpunk:text-[#9cf8ff] cyberpunk:hover:border-cyan-300/60 cyberpunk:hover:text-white"
+                          >
+                            Carregar mais (+)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
+                  isCyber
+                    ? isBlocoBOpen
+                      ? 'border-cyan-500/55 bg-white/[0.05] shadow-[0_0_22px_rgba(6,182,212,0.24)]'
+                      : 'border-cyan-500/25 bg-[#070d18]/85'
+                    : 'border-stone-300 bg-white shadow-sm'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsBlocoBOpen((current) => !current)}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">
+                      BLOCO B - Apoio Forte
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                      Processo de software, analise, projeto, V&V e manutencao
+                    </p>
+                  </div>
+                  <svg
+                    className={`h-4 w-4 shrink-0 transition-transform duration-300 ${
+                      isCyber ? 'text-cyan-300' : 'text-stone-500'
+                    } ${isBlocoBOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                <div className={`grid transition-all duration-300 ${isBlocoBOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : 'border-stone-200 bg-stone-50/70'}`}>
+                      <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1 dark:border-stone-300 dark:bg-stone-100/70 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">
+                        {STUDY_CONTENT_TABS.map((tab) => {
+                          const isActive = activeStudyContentTabB === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => handleChangeStudyTabB(tab.id)}
+                              className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                                isActive
+                                  ? 'bg-cyan-500/20 text-cyan-200 dark:bg-stone-900 dark:text-stone-100 cyberpunk:bg-[#00e8ff]/20 cyberpunk:text-[#9cf8ff]'
+                                  : 'text-zinc-500 hover:text-zinc-200 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/65 cyberpunk:hover:text-white'
+                              }`}
+                            >
+                              {tab.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {activeStudyContentTabB === 'flashcards' ? (
+                        <div>
+                          <p className="mb-3 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                            Bloco B ({flashcardsBlocoB.length} flashcards) - clique no card para virar.
+                          </p>
+                          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                            {visibleFlashcardsB.map((card) => (
+                              <Flashcard key={card.id} card={card} theme={theme} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                            Bloco B ({questoesBlocoB.length} perguntas) - clique no enunciado para expandir a resposta.
+                          </p>
+                          <div className="space-y-2">
+                            {visibleQuestionsB.map((item) => (
+                              <QuestionAccordionItem
+                                key={item.id}
+                                item={item}
+                                isOpen={Boolean(openQuestionIdsB[item.id])}
+                                onToggle={() =>
+                                  setOpenQuestionIdsB((current) => ({
+                                    ...current,
+                                    [item.id]: !current[item.id],
+                                  }))
+                                }
+                                theme={theme}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {hasMoreToShowB && (
+                        <div className="flex justify-center pt-1">
+                          <button
+                            type="button"
+                            onClick={handleLoadMoreB}
                             className="inline-flex items-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-700 dark:hover:bg-stone-100 dark:hover:text-stone-900 cyberpunk:border-cyan-400/35 cyberpunk:bg-cyan-400/10 cyberpunk:text-[#9cf8ff] cyberpunk:hover:border-cyan-300/60 cyberpunk:hover:text-white"
                           >
                             Carregar mais (+)

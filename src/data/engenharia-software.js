@@ -793,6 +793,316 @@ export const flashcardsBlocoA = [
   },
 ];
 
+export const flashcardsBlocoB = [
+  {
+    id: 'modelos-b-1',
+    categoria: 'Fundamentos de Modelos',
+    frente: 'O que é um modelo de processo?',
+    verso: 'É uma descrição geral e simplificada de processos que possuem ciclo de vida semelhante. Ele basicamente descreve o ciclo de vida e facilita a compreensão dos processos.',
+  },
+  {
+    id: 'modelos-b-2',
+    categoria: 'Fundamentos de Modelos',
+    frente: 'Quais são os modelos clássicos apresentados nos materiais?',
+    verso: 'Codifica-remenda, Cascata (sequencial/linear), Incremental, Espiral e RAD.',
+  },
+  {
+    id: 'modelos-b-3',
+    categoria: 'Codifica-remenda',
+    frente: 'O que é o modelo codifica-remenda na prática?',
+    verso: 'Na prática, é a ausência de um processo definido. A lógica é “sentar e programar”; se der errado, corrige depois.',
+  },
+  {
+    id: 'modelos-b-4',
+    categoria: 'Codifica-remenda',
+    frente: 'Quais ideias erradas sustentam o codifica-remenda?',
+    verso: 'Os materiais associam o modelo a velhos mitos, como: achar que o único produto do processo é o programa, acreditar que começar a programar mais cedo sempre significa entregar mais cedo, e pensar que processos de engenharia só desperdiçam tempo e esforço.',
+  },
+  {
+    id: 'modelos-b-5',
+    categoria: 'Codifica-remenda',
+    frente: 'Quais são as principais características do codifica-remenda?',
+    verso: 'Ele é voluntarista, simples e caótico. Depende muito da atitude individual, não segue regras claras, não controla bem qualidade nem riscos e pode deixar erros passarem despercebidos.',
+  },
+  {
+    id: 'modelos-b-6',
+    categoria: 'Modelo Cascata',
+    frente: 'Quais são as etapas centrais do modelo cascata mostradas nos slides?',
+    verso: 'Análise, Projeto, Implementação e Entrega. A lógica é sequencial: primeiro entender o que o software deve fazer, depois definir como ele fará, implementar e então entregar.',
+  },
+  {
+    id: 'modelos-b-7',
+    categoria: 'Modelo Cascata',
+    frente: 'Quais são os principais problemas do cascata destacados no material?',
+    verso: 'Baixa comunicação com o cliente, necessidade de conhecer os requisitos a priori e baixa reação a mudanças.',
+  },
+  {
+    id: 'modelos-b-8',
+    categoria: 'Modelo Cascata',
+    frente: 'Quando o modelo cascata tende a ser mais adequado?',
+    verso: 'Quando os requisitos estão bem definidos desde o início e o projeto exige uma sequência mais rígida de etapas. O próprio cronograma destaca essa relação entre cascata e requisitos bem conhecidos.',
+  },
+  {
+    id: 'modelos-b-9',
+    categoria: 'Prototipagem',
+    frente: 'Qual é a ideia central do desenvolvimento por prototipagem?',
+    verso: 'Melhorar a comunicação com o cliente, melhorar o levantamento de requisitos e melhorar o entendimento do software por meio de mock-ups ou protótipos rápidos.',
+  },
+  {
+    id: 'modelos-b-10',
+    categoria: 'Prototipagem',
+    frente: 'Como é o protótipo segundo os slides?',
+    verso: 'É uma versão de testes da interface do software, de construção rápida, não necessariamente completamente funcional e de qualidade reduzida, mas suficiente para permitir que o usuário teste o “software”.',
+  },
+  {
+    id: 'modelos-b-11',
+    categoria: 'Prototipagem',
+    frente: 'O que normalmente acontece quando o protótipo fica “bom”?',
+    verso: 'Inicia-se a produção do produto real, geralmente usando um modelo cascata. Nesse caso, a prototipagem funciona como substituta da análise inicial.',
+  },
+  {
+    id: 'modelos-b-12',
+    categoria: 'Prototipagem',
+    frente: 'Quais são as vantagens da prototipagem?',
+    verso: 'Menor erro, maior comunicação com o cliente e visibilidade antecipada do resultado final.',
+  },
+  {
+    id: 'modelos-b-13',
+    categoria: 'Prototipagem',
+    frente: 'Quais são as desvantagens da prototipagem?',
+    verso: 'Pode ser um processo longo, o cliente pode não entender a diferença entre mock-up e produto real, e há tendência de se apegar a decisões de projeto feitas ainda no protótipo.',
+  },
+  {
+    id: 'modelos-b-14',
+    categoria: 'Incremental e Evolutivos',
+    frente: 'O que caracteriza os modelos evolutivos?',
+    verso: 'Eles aplicam a característica iterativa do cascata a todo o desenvolvimento, permitindo desenvolvimento modular. Os principais modelos evolutivos mostrados são o Incremental e o Espiral.',
+  },
+  {
+    id: 'modelos-b-15',
+    categoria: 'Incremental e Evolutivos',
+    frente: 'Como o material define o modelo incremental?',
+    verso: 'Ele utiliza abordagem iterativa, mas com a previsibilidade do modelo cascata e com planejamento antecipado. A entrega acontece em partes, por incrementos.',
+  },
+  {
+    id: 'modelos-b-16',
+    categoria: 'Incremental e Evolutivos',
+    frente: 'Quais são as vantagens do modelo incremental?',
+    verso: 'Permite correção de erros em versões posteriores e possibilita desenvolvimento concorrente.',
+  },
+  {
+    id: 'modelos-b-17',
+    categoria: 'Incremental e Evolutivos',
+    frente: 'Quais são as desvantagens do modelo incremental?',
+    verso: 'Exige planejamento complexo, nem todo software pode ser facilmente modularizado e pode ser caro.',
+  },
+  {
+    id: 'modelos-b-18',
+    categoria: 'Modelo Espiral',
+    frente: 'Como o material caracteriza o modelo espiral?',
+    verso: 'Ele se vale do planejamento incremental, permite trabalhar quando os requisitos não são bem compreendidos e é orientado à redução de riscos.',
+  },
+  {
+    id: 'modelos-b-19',
+    categoria: 'Modelo Espiral',
+    frente: 'Quais são as vantagens do modelo espiral?',
+    verso: 'Alta comunicação com o cliente, facilidade de controlar custos e riscos, além de alta reação a mudanças e correção de erros.',
+  },
+  {
+    id: 'modelos-b-20',
+    categoria: 'Modelo Espiral',
+    frente: 'Quais são as desvantagens do modelo espiral?',
+    verso: 'Ele pode ser bastante caro, ter ausência de um planejamento geral fechado desde o início e envolver alta documentação.',
+  },
+  {
+    id: 'modelos-b-21',
+    categoria: 'Modelo Espiral',
+    frente: 'Por que um cronograma fechado no início entra em conflito com o modelo espiral?',
+    verso: 'Porque o espiral trabalha por ciclos e orienta o processo à análise e redução de riscos. Como ele admite mudanças e refinamentos ao longo do caminho, um cronograma totalmente fechado no começo não combina bem com essa lógica.',
+  },
+  {
+    id: 'modelos-b-22',
+    categoria: 'RAD e 4a Geracao',
+    frente: 'O que são as ferramentas de 4ª geração?',
+    verso: 'São ferramentas que partem da ideia de que desenvolvimento não é apenas programação. Elas buscam eliminar a codificação manual, já que boa parte dos erros acontece na implementação.',
+  },
+  {
+    id: 'modelos-b-23',
+    categoria: 'RAD e 4a Geracao',
+    frente: 'Como funcionam as ferramentas de 4ª geração?',
+    verso: 'Elas se baseiam em projeto detalhado e bem feito, fazem geração de código a partir do projeto, evitam erro humano de codificação, mas podem produzir código de baixa qualidade.',
+  },
+  {
+    id: 'modelos-b-24',
+    categoria: 'RAD e 4a Geracao',
+    frente: 'O que é o modelo RAD?',
+    verso: 'É o modelo mais tradicional de 4ª geração. Ele é baseado nessas ferramentas, combina conceitos de 4ª geração com o modelo incremental e pode ser iterativo ou paralelo. RAD significa *Rapid Application Development*.',
+  },
+  {
+    id: 'modelos-b-25',
+    categoria: 'RAD e 4a Geracao',
+    frente: 'Quais são as vantagens do RAD?',
+    verso: 'Elimina erros de implementação, pode ser usado em paralelo e proporciona codificação rápida.',
+  },
+  {
+    id: 'modelos-b-26',
+    categoria: 'RAD e 4a Geracao',
+    frente: 'Quais são as desvantagens do RAD?',
+    verso: 'Pode gerar código de menor qualidade, para uso em paralelo exige muitas equipes e exige software modularizável.',
+  },
+  {
+    id: 'modelos-b-27',
+    categoria: 'Aplicacao de Modelos',
+    frente: 'Em um caso em que o cliente não sabe bem o que quer, qual modelo tende a ser mais indicado segundo os materiais?',
+    verso: 'A prototipagem tende a ser mais indicada, porque melhora a comunicação com o cliente, ajuda no levantamento de requisitos e permite validar ideias antes do desenvolvimento final.',
+  },
+  {
+    id: 'modelos-b-28',
+    categoria: 'Aplicacao de Modelos',
+    frente: 'Em um caso em que os requisitos não são bem compreendidos, qual modelo tende a ser mais indicado?',
+    verso: 'O modelo espiral, porque ele lida melhor com requisitos pouco claros, aceita evolução ao longo do processo e é orientado à redução de riscos.',
+  },
+  {
+    id: 'modelos-b-29',
+    categoria: 'Aplicacao de Modelos',
+    frente: 'Em um caso em que os requisitos estão bem definidos desde o início, qual modelo tende a ser mais indicado?',
+    verso: 'O cascata tende a ser mais adequado, porque trabalha com fases sequenciais rígidas e depende de requisitos conhecidos a priori.',
+  },
+  {
+    id: 'modelos-b-30',
+    categoria: 'Aplicacao de Modelos',
+    frente: 'Qual modelo é chamado no cronograma de “anti-modelo”?',
+    verso: 'O codifica-remenda, porque não tem planejamento real, não organiza adequadamente o processo e tende a gerar dívida técnica e caos no desenvolvimento.',
+  },
+  {
+    id: 'modelos-b-31',
+    categoria: 'Aplicacao de Modelos',
+    frente: 'Qual é a principal ideia do incremental em linguagem simples?',
+    verso: 'Entregar o software em partes, por incrementos, aproveitando iteração e modularização sem abandonar totalmente o planejamento.',
+  },
+  {
+    id: 'modelos-b-32',
+    categoria: 'Aplicacao de Modelos',
+    frente: 'Qual é a principal diferença entre RAD e prototipagem?',
+    verso: 'A prototipagem é voltada a entender melhor requisitos e melhorar a comunicação com o cliente por meio de versões de teste. Já o RAD é um modelo de 4ª geração que busca rapidez de construção com geração automatizada de código e pode operar de forma iterativa ou paralela.',
+  },
+];
+
+export const questoesBlocoB = [
+  {
+    "id": "qb-1",
+    "categoria": "Fundamentos de Modelos",
+    "tipo": "Fixacao",
+    "pergunta": "O que é um modelo de processo e por que ele é útil no estudo da Engenharia de Software?",
+    "resposta": "Um modelo de processo é uma descrição geral e simplificada de um grupo de processos que possuem ciclos de vida semelhantes. Em vez de estudar separadamente cada processo proposto por autores ou organizações, o modelo permite compreender a lógica comum entre eles. Essa simplificação é útil porque facilita o entendimento de como o trabalho é organizado no tempo, como as etapas se relacionam e em que situações cada abordagem tende a funcionar melhor.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>é uma descrição geral e simplificada;</li><li>agrupa processos com ciclos de vida semelhantes;</li><li>serve para facilitar a compreensão dos processos de software;</li></ul>"
+  },
+  {
+    "id": "qb-2",
+    "categoria": "Codifica-remenda",
+    "tipo": "Fixacao",
+    "pergunta": "Explique por que o codifica-remenda é tratado como um “anti-modelo” de processo.",
+    "resposta": "O codifica-remenda é considerado um “anti-modelo” porque, na prática, ele representa a ausência de um processo definido. A lógica dele é começar a programar o mais rápido possível, sem planejamento adequado, sem preocupação real com análise, projeto e organização do trabalho. Isso parece acelerar a entrega no começo, mas normalmente gera correções sucessivas, retrabalho, aumento da dificuldade de manutenção e queda da qualidade do software. Ele se apoia em mitos antigos, como a ideia de que basta programar logo para terminar mais cedo.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>é a ausência de um processo bem definido;</li><li>prioriza começar a programar imediatamente;</li><li>tende a gerar retrabalho, correções e baixa qualidade;</li></ul>"
+  },
+  {
+    "id": "qb-3",
+    "categoria": "Modelo Cascata",
+    "tipo": "Fixacao",
+    "pergunta": "Quais são as principais características do modelo cascata e em que situação ele tende a ser mais adequado?",
+    "resposta": "O modelo cascata organiza o desenvolvimento em fases sequenciais e bem definidas, de modo que cada atividade deve ser concluída antes da próxima começar. Isso o torna simples de entender, previsível e relativamente fácil de gerenciar quando o projeto está bem delimitado. Ele tende a ser mais adequado quando os requisitos já são conhecidos com antecedência, mudam pouco e o projeto exige uma estrutura mais rígida e linear. Em contextos assim, a previsibilidade do cascata deixa de ser um problema e passa a ser uma vantagem.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>fases sequenciais e rígidas;</li><li>cada etapa termina antes da próxima começar;</li><li>funciona melhor quando os requisitos já são bem conhecidos;</li></ul>"
+  },
+  {
+    "id": "qb-4",
+    "categoria": "Modelo Cascata",
+    "tipo": "Fixacao",
+    "pergunta": "Por que o modelo cascata costuma falhar quando os requisitos não são bem conhecidos desde o início?",
+    "resposta": "Porque o cascata depende justamente de uma boa definição inicial do que será construído. Quando os requisitos ainda estão incertos, o projeto avança com base em suposições frágeis. Como o modelo tem baixa comunicação contínua com o cliente e baixa reação a mudanças, qualquer erro de entendimento no começo costuma aparecer tarde demais, quando corrigir já ficou caro. Por isso, em cenários de incerteza, o cascata tende a gerar retrabalho e decisões inadequadas.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>exige conhecimento prévio dos requisitos;</li><li>reage mal a mudanças;</li><li>erros iniciais de entendimento custam caro depois;</li></ul>"
+  },
+  {
+    "id": "qb-5",
+    "categoria": "Prototipagem",
+    "tipo": "Fixacao",
+    "pergunta": "O que é desenvolvimento por prototipagem e qual problema ele tenta resolver?",
+    "resposta": "O desenvolvimento por prototipagem é uma abordagem que usa mock-ups ou protótipos para melhorar a comunicação com o cliente e esclarecer melhor os requisitos antes da construção do produto final. O protótipo é uma versão rápida da interface ou do comportamento esperado do software, nem sempre totalmente funcional e geralmente com qualidade reduzida, mas suficiente para permitir que o usuário teste e reaja. O principal problema que essa abordagem tenta resolver é a dificuldade de entender, logo de início, o que o cliente realmente precisa.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>usa mock-ups ou protótipos rápidos;</li><li>melhora a comunicação com o cliente;</li><li>ajuda no levantamento e entendimento dos requisitos;</li></ul>"
+  },
+  {
+    "id": "qb-6",
+    "categoria": "Prototipagem",
+    "tipo": "Fixacao",
+    "pergunta": "Quais são as principais vantagens e desvantagens da prototipagem?",
+    "resposta": "Entre as principais vantagens da prototipagem estão a redução de erros de entendimento, a maior comunicação com o cliente e a visibilidade antecipada do resultado final, já que o usuário consegue testar algo antes da construção definitiva. Por outro lado, ela também tem desvantagens: pode tornar o processo mais longo, o cliente pode confundir o mock-up com o produto real e a equipe pode acabar se apegando demais a decisões tomadas no protótipo, mesmo quando elas não são as melhores para o sistema final.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>vantagens: menos erro, mais comunicação, mais visibilidade antecipada;</li><li>desvantagens: pode ser longo;</li><li>risco de confundir protótipo com produto final e de se prender ao mock-up;</li></ul>"
+  },
+  {
+    "id": "qb-7",
+    "categoria": "Modelo Incremental",
+    "tipo": "Fixacao",
+    "pergunta": "Explique o modelo incremental e diga por que ele costuma ser uma boa alternativa quando os requisitos não estão totalmente fechados.",
+    "resposta": "O modelo incremental divide o desenvolvimento em partes menores chamadas incrementos, entregando o software aos poucos, em vez de esperar tudo ficar pronto para só então apresentar o resultado. Isso permite que o cliente acompanhe a evolução do produto, valide entregas parciais e ajude a ajustar o rumo do projeto ao longo do tempo. Ele costuma ser uma boa alternativa quando os requisitos não estão totalmente fechados porque reduz o risco de apostar tudo em uma visão inicial ainda imatura. Em vez de tentar acertar tudo de uma vez, o sistema evolui por entregas sucessivas.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>entrega o software em partes;</li><li>permite acompanhamento e validação progressiva;</li><li>é mais adequado quando os requisitos ainda não estão completamente definidos;</li></ul>"
+  },
+  {
+    "id": "qb-8",
+    "categoria": "Modelo Espiral",
+    "tipo": "Fixacao",
+    "pergunta": "O que diferencia o modelo espiral dos outros modelos clássicos e por que ele costuma ser associado ao controle de riscos?",
+    "resposta": "O modelo espiral se diferencia por organizar o desenvolvimento em ciclos iterativos que combinam planejamento, construção, avaliação e replanejamento contínuo. Ele mantém alta comunicação com o cliente, reage bem a mudanças e permite corrigir erros ao longo do processo. Sua associação com o controle de riscos vem do fato de que cada volta da espiral serve não apenas para desenvolver parte do produto, mas também para reavaliar incertezas, custos e decisões antes de avançar. É um modelo mais robusto para contextos complexos, embora também mais caro e mais documentado.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>funciona em ciclos iterativos;</li><li>tem alta comunicação com o cliente e alta reação a mudanças;</li><li>facilita o controle de custos e riscos;</li></ul>"
+  },
+  {
+    "id": "qb-9",
+    "categoria": "Modelo Espiral",
+    "tipo": "Fixacao",
+    "pergunta": "Por que um cronograma completamente fechado no início é incompatível com o modelo espiral?",
+    "resposta": "Porque o espiral foi pensado para um desenvolvimento em que o planejamento é revisado continuamente a cada ciclo. Como o projeto avança por iterações e incorpora avaliação constante de riscos, custos, mudanças e correções, não faz sentido congelar todo o cronograma logo no início como se nada relevante pudesse mudar. O próprio material destaca como desvantagem do espiral a ausência de um planejamento geral rígido. Por isso, um cronograma fechado combina muito mais com modelos lineares, como o cascata, do que com o espiral.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>o espiral revisa o planejamento ao longo do processo;</li><li>incorpora mudanças e reavaliações sucessivas;</li><li>é incompatível com um cronograma totalmente rígido desde o começo;</li></ul>"
+  },
+  {
+    "id": "qb-10",
+    "categoria": "RAD e 4a Geracao",
+    "tipo": "Fixacao",
+    "pergunta": "O que são ferramentas de 4ª geração e qual é a lógica por trás do modelo RAD?",
+    "resposta": "As ferramentas de 4ª geração partem da ideia de que desenvolvimento não se resume à programação manual e de que muitos erros acontecem justamente na implementação. Por isso, elas buscam gerar código a partir de um projeto detalhado, automatizando parte do trabalho e reduzindo erro humano de codificação. O RAD, ou Rapid Application Development, é o modelo mais tradicional ligado a essa lógica. Ele combina conceitos das ferramentas de 4ª geração com a ideia incremental, podendo funcionar de forma iterativa ou até em paralelo entre módulos.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>ferramentas de 4ª geração automatizam parte do desenvolvimento;</li><li>geram código a partir do projeto;</li><li>o RAD combina 4ª geração com conceitos incrementais;</li></ul>"
+  },
+  {
+    "id": "qb-11",
+    "categoria": "RAD e 4a Geracao",
+    "tipo": "Fixacao",
+    "pergunta": "Quais são as principais vantagens e limitações do modelo RAD?",
+    "resposta": "O RAD tem como vantagens a codificação rápida, a possibilidade de reduzir erros de implementação e, em certos casos, o uso paralelo de equipes ou módulos, o que acelera a produção. Porém, ele também apresenta limitações importantes: pode gerar código de menor qualidade, exige software bem modularizável e, quando usado em paralelo, depende de várias equipes trabalhando ao mesmo tempo. Em outras palavras, ele pode ser muito eficiente em certos contextos, mas não é uma solução universal.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>vantagens: rapidez, menos erro de implementação, possibilidade de paralelismo;</li><li>desvantagens: código de menor qualidade;</li><li>exige modularização e, em paralelo, muitas equipes;</li></ul>"
+  },
+  {
+    "id": "qb-12",
+    "categoria": "Comparacao de Modelos",
+    "tipo": "Comparacao",
+    "pergunta": "Compare prototipagem e RAD. Apesar de ambos buscarem acelerar ou facilitar o desenvolvimento, qual é a diferença central entre eles?",
+    "resposta": "A diferença central é que a prototipagem existe principalmente para entender melhor o problema e os requisitos, enquanto o RAD busca acelerar a construção do sistema por meio de automação e organização modular. Na prototipagem, o foco é validar ideias com o cliente antes da produção real; no RAD, o foco é transformar rapidamente um projeto em aplicação. Assim, um ajuda mais na descoberta e refinamento do que deve ser feito, enquanto o outro atua mais na velocidade de implementação.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>prototipagem foca em entender e validar requisitos;</li><li>RAD foca em acelerar a implementação;</li><li>um atua mais na descoberta do problema, o outro na rapidez da construção;</li></ul>"
+  },
+  {
+    "id": "qb-13",
+    "categoria": "Aplicacao de Modelos",
+    "tipo": "Situacional",
+    "pergunta": "Situação prática: Elisa está usando o modelo cascata, mas o cliente ainda não sabe bem o que quer e os requisitos mudam com frequência. O processo é adequado? Qual modelo tende a ser mais apropriado?",
+    "resposta": "Não, o cascata não é o modelo mais adequado nessa situação. Como ele depende de requisitos bem definidos logo no início e reage mal a mudanças, usar cascata nesse contexto aumenta a chance de erro e retrabalho. Se o maior problema for o cliente ainda não conseguir expressar claramente o que deseja, a prototipagem tende a ser a melhor saída inicial, porque melhora a comunicação e o entendimento do software. Se o projeto já puder avançar por entregas sucessivas mesmo com alguma incerteza, o incremental também se torna uma alternativa forte.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>cascata não é adequado com requisitos incertos;</li><li>prototipagem ajuda quando o cliente não sabe bem o que quer;</li><li>incremental é boa opção quando o sistema pode evoluir em partes;</li></ul>"
+  },
+  {
+    "id": "qb-14",
+    "categoria": "Aplicacao de Modelos",
+    "tipo": "Situacional",
+    "pergunta": "Situação prática: Elisa usa o modelo espiral, mas o cliente exige um cronograma fechado logo no início do projeto. Isso é compatível? Para qual modelo ela poderia migrar?",
+    "resposta": "Não é totalmente compatível. O espiral pressupõe reavaliação contínua, ajustes ao longo dos ciclos e planejamento progressivo, o que entra em choque com a ideia de um cronograma totalmente congelado desde o começo. Se o cliente realmente quer previsibilidade rígida e os requisitos estiverem bem definidos, a migração mais coerente tende a ser para o modelo cascata, que trabalha com fases sequenciais e planejamento mais estável. Se os requisitos ainda tiverem alguma incerteza, o incremental pode ser um meio-termo melhor que o cascata.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>espiral não combina com cronograma totalmente fechado;</li><li>cascata faz mais sentido quando há previsibilidade e requisitos claros;</li><li>incremental pode ser alternativa se ainda houver alguma incerteza;</li></ul>"
+  },
+  {
+    "id": "qb-15",
+    "categoria": "Aplicacao de Modelos",
+    "tipo": "Situacional",
+    "pergunta": "Situação prática: um sistema pode ser dividido claramente em módulos independentes, a empresa tem várias equipes disponíveis e quer acelerar ao máximo a implementação. Qual modelo passa a fazer mais sentido e por quê?",
+    "resposta": "Nesse cenário, o RAD passa a fazer bastante sentido. O material mostra que ele pode funcionar em paralelo, acelera a codificação e aproveita ferramentas automatizadas de desenvolvimento. Como o sistema é modularizável e existem várias equipes, duas das principais exigências do RAD estão sendo atendidas. Ainda assim, a resposta completa deve reconhecer a limitação: essa velocidade pode vir acompanhada de menor qualidade de código se o projeto não for muito bem conduzido.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>RAD é adequado quando há modularização e várias equipes;</li><li>permite acelerar a implementação e até trabalhar em paralelo;</li><li>deve-se mencionar o risco de código de menor qualidade;</li></ul>"
+  },
+  {
+    "id": "qb-16",
+    "categoria": "Comparacao de Modelos",
+    "tipo": "Comparacao",
+    "pergunta": "Em uma comparação geral, como escolher entre cascata, prototipagem, incremental, espiral e RAD sem decorar tudo mecanicamente?",
+    "resposta": "A melhor forma de escolher é pensar no tipo de problema do projeto. Se os requisitos são claros e a previsibilidade é prioridade, o cascata faz mais sentido. Se o cliente não sabe bem o que quer, a prototipagem ajuda a descobrir. Se o sistema pode evoluir em entregas sucessivas, o incremental é forte candidato. Se o projeto envolve incerteza alta, necessidade de revisão contínua e atenção a riscos, o espiral tende a ser melhor. Se o objetivo é acelerar a implementação com apoio de automação e modularização, o RAD se destaca. Em resumo, a escolha correta nasce do cenário, não da decoração isolada do nome do modelo.<br /><br /><span class=\"text-amber-500 font-bold\">&#9888; Pontos que nao podem faltar:</span><ul class=\"mt-2 list-disc pl-5 space-y-1\"><li>a escolha depende do cenário do projeto;</li><li>cascata = previsibilidade e requisitos claros;</li><li>prototipagem = descoberta de requisitos;</li><li>incremental = entregas em partes;</li><li>espiral = risco e revisão contínua;</li><li>RAD = velocidade com automação e modularização;</li></ul>"
+  }
+];
+
 export const questoesBlocoA = [
   {
     id: 'qa-1',
