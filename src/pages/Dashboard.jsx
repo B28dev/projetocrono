@@ -14,12 +14,17 @@ import {
   getStudyPlanByShift as getEmpreendedorismoStudyPlanByShift,
   getStudyPlanTaskStorageKey as getEmpreendedorismoStudyPlanTaskStorageKey,
 } from '../data/empreendedorismo';
+import {
+  getStudyPlanByShift as getInglesStudyPlanByShift,
+  getStudyPlanTaskStorageKey as getInglesStudyPlanTaskStorageKey,
+} from '../data/ingles';
 import { isMainContent } from '../utils/studyPlanTasks';
 
 const SUBJECT_STORAGE_KEYS = {
   arquitetura: 'arquitetura-study-plan-progress-v2',
   'intro-eng-software': 'engsoftware-study-plan-progress-v2',
   empreendedorismo: 'empreendedorismo-study-plan-progress-v2',
+  'eletiva-ingles': 'ingles-study-plan-progress-v2',
 };
 
 const SUBJECT_PLAN_ADAPTERS = {
@@ -34,6 +39,10 @@ const SUBJECT_PLAN_ADAPTERS = {
   empreendedorismo: {
     getStudyPlanByShift: getEmpreendedorismoStudyPlanByShift,
     getStudyPlanTaskStorageKey: getEmpreendedorismoStudyPlanTaskStorageKey,
+  },
+  'eletiva-ingles': {
+    getStudyPlanByShift: getInglesStudyPlanByShift,
+    getStudyPlanTaskStorageKey: getInglesStudyPlanTaskStorageKey,
   },
 };
 
@@ -84,7 +93,7 @@ export default function Dashboard({ shift = 'noturno-adele', userName = '' }) {
   const magneticRef = useGsapMagnetic('[data-magnetic]');
   const subjects = useMemo(() => getSubjects(shift), [shift]);
   const orderedSubjects = useMemo(() => {
-    const priority = ['arquitetura', 'empreendedorismo', 'intro-eng-software'];
+    const priority = ['arquitetura', 'empreendedorismo', 'eletiva-ingles', 'intro-eng-software'];
     return [...subjects].sort((a, b) => {
       const aIndex = priority.indexOf(a.id);
       const bIndex = priority.indexOf(b.id);
@@ -215,7 +224,7 @@ export default function Dashboard({ shift = 'noturno-adele', userName = '' }) {
         <div>
           <h2 className="text-lg font-semibold text-zinc-100 dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Materias</h2>
           <p className="text-sm text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">
-            Arquitetura, Intro. Engenharia de Software e Empreendedorismo estao disponiveis com progresso ativo.
+            Arquitetura, Intro. Engenharia de Software, Empreendedorismo e Eletiva I (Ingles) estao disponiveis com progresso ativo.
           </p>
         </div>
 

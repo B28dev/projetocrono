@@ -68,6 +68,36 @@ export const referenceVideoMaterials = [
 
 export const referencePlaylists = referenceVideoMaterials.filter((item) => item.kind === 'playlist');
 
+export const referenceVideoSections = [
+  {
+    id: 'videos-fundamentos-contexto',
+    title: 'Videos da disciplina - Fundamentos e contexto',
+    description: 'Base para conceitos, ecossistema e visao empreendedora em software.',
+    items: referenceVideoMaterials.filter((item) =>
+      [
+        'video-univesp-playlist',
+        'video-entrepreneurship-se',
+        'video-projetos-empreendedores',
+        'video-empreendedorismo-inovacao',
+      ].includes(item.id),
+    ),
+  },
+  {
+    id: 'videos-persona-valor-pitch',
+    title: 'Videos da disciplina - Persona, proposta de valor e pitch',
+    description: 'Bloco focado em persona, valor percebido, comunicacao e apresentacao.',
+    items: referenceVideoMaterials.filter((item) =>
+      [
+        'video-proto-personas',
+        'video-canvas-proposta-valor',
+        'video-certi-proposta-valor',
+        'video-pitch-startups',
+        'video-ia-generativa',
+      ].includes(item.id),
+    ),
+  },
+];
+
 export const referencePdfMaterials = [
   {
     id: 'pdf-aula-01',

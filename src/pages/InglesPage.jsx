@@ -1,15 +1,16 @@
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  examDate as empreendedorismoExamDate,
+  examDate as inglesExamDate,
   examCoverage,
   getStudyPlanByShift,
   getStudyPlanTaskStorageKey,
   modelSummaries,
   referencePdfMaterials,
   referenceVideoSections,
+  summaryNotice,
   topics,
-} from '../data/empreendedorismo';
+} from '../data/ingles';
 import { useGsapMagnetic } from '../hooks/useGsapMagnetic';
 import { useGsapReveal, useGsapStagger } from '../hooks/useGsapReveal';
 import { CountdownFull } from '../components/Countdown';
@@ -21,7 +22,7 @@ import StudyPlanItem from '../components/StudyPlanItem';
 import SummaryAccordion from '../components/SummaryAccordion';
 import LevelUpModal from '../components/LevelUpModal';
 
-const STUDY_PLAN_STORAGE_KEY = 'empreendedorismo-study-plan-progress-v2';
+const STUDY_PLAN_STORAGE_KEY = 'ingles-study-plan-progress-v2';
 
 function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -97,11 +98,11 @@ function DocumentIcon() {
   );
 }
 
-export default function EmpreendedorismoPage({
+export default function InglesPage({
   theme = 'dark',
   shift = 'noturno-adele',
   shiftLabel = 'Noturno (Adele)',
-  examDate = empreendedorismoExamDate,
+  examDate = inglesExamDate,
 }) {
   const navigate = useNavigate();
   const headerRef = useGsapReveal();
@@ -114,8 +115,8 @@ export default function EmpreendedorismoPage({
   const examDateText = formatDatePtBr(examDate);
   const [isReferencesOpen, setIsReferencesOpen] = useState(true);
   const [openReferenceGroupIds, setOpenReferenceGroupIds] = useState(() => ({
-    'videos-fundamentos-contexto': true,
-    'videos-persona-valor-pitch': false,
+    'videos-leitura-estrategica': true,
+    'videos-vocabulario-apoio': false,
     'pdfs-disciplina': true,
   }));
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
@@ -314,14 +315,14 @@ export default function EmpreendedorismoPage({
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-50 cyberpunk:border-white/10 cyberpunk:bg-[linear-gradient(135deg,rgba(0,232,255,0.16),rgba(255,62,165,0.22))] cyberpunk:text-white">
-                    EMP
+                    ING
                   </span>
                   <span className="text-xs font-medium text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
-                    Empreendedorismo - 2026/1 - {shiftLabel}
+                    Eletiva I (Ingles) - 2026/1 - {shiftLabel}
                   </span>
                 </div>
                 <h1 className="text-2xl font-bold text-zinc-100 tracking-tight dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">
-                  Empreendedorismo
+                  Eletiva I - Ingles
                 </h1>
                 <p className="text-sm text-zinc-500 mt-1 dark:text-stone-600 cyberpunk:text-white/65">
                   Prova em <span className="text-amber-400 font-semibold dark:text-amber-600 cyberpunk:text-[#ff3ea5]">{examDateText}</span>
@@ -341,11 +342,11 @@ export default function EmpreendedorismoPage({
                         {completedTasks}/{totalTasks}
                       </span>
                     </div>
-                    <span className="text-sm font-bold text-rose-400 dark:text-rose-700 cyberpunk:text-[#ff3ea5]">
+                    <span className="text-sm font-bold text-green-400 dark:text-green-700 cyberpunk:text-[#00e8ff]">
                       {progress}%
                     </span>
                   </div>
-                  <ProgressBar value={progress} color="rose" className="h-2 border border-white/5 bg-white/5 dark:bg-stone-200 cyberpunk:bg-white/10" />
+                  <ProgressBar value={progress} color="green" className="h-2 border border-white/5 bg-white/5 dark:bg-stone-200 cyberpunk:bg-white/10" />
                 </div>
               </div>
             </div>
@@ -366,7 +367,7 @@ export default function EmpreendedorismoPage({
 
           <Section
             title="Temas mais cobrados"
-            subtitle="Baseado no exercicio de revisao 2025 (6 questoes dissertativas)"
+            subtitle="Baseado em 2 provas analisadas (P1/2024 e P1/2023)"
           >
             <div ref={topicsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {topics.map((topic) => (
@@ -375,9 +376,8 @@ export default function EmpreendedorismoPage({
             </div>
 
             <div className="flex flex-wrap gap-4 text-xs text-zinc-500 mt-1 dark:text-stone-600 cyberpunk:text-white/60">
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400 cyberpunk:bg-[#ff3ea5]" /> Muito frequente (3/3)</span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 cyberpunk:bg-[#00e8ff]" /> Frequente (2/3)</span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-400 cyberpunk:bg-emerald-300" /> Apareceu (1/3)</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400 cyberpunk:bg-[#ff3ea5]" /> Muito frequente (2/2)</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-400 cyberpunk:bg-emerald-300" /> Apareceu (1/2)</span>
             </div>
           </Section>
 
@@ -547,7 +547,7 @@ export default function EmpreendedorismoPage({
 
           <Section
             title="Plano ate a prova"
-            subtitle="Um bloco por dia com tarefas dissertativas, revisoes e prova."
+            subtitle="Blocos objetivos para leitura tecnica, simulacao e prova."
           >
             <div ref={studyPlanRef}>
               {displayStudyPlan.completedPast.map((item) => (
@@ -642,11 +642,11 @@ export default function EmpreendedorismoPage({
 
           <Section
             title="Resumos modelo para a prova"
-            subtitle="Base consolidada dos temas centrais para revisao rapida."
+            subtitle="Resumo rapido com foco no modelo de cobranca da disciplina."
           >
             <div ref={modelSummariesRef}>
-              <div className="mb-3 rounded-lg border border-rose-500/35 bg-rose-500/10 px-3 py-2 text-xs leading-relaxed text-rose-100 dark:border-rose-500/35 dark:bg-rose-500/10 dark:text-rose-700 cyberpunk:border-[#ff3ea5]/45 cyberpunk:bg-[#ff3ea5]/12 cyberpunk:text-[#ffd2ec]">
-                Respostas modelo no formato esperado pelo Prof. Italo: Problema -&gt; Causa -&gt; Solucao -&gt; Impacto. A prova e dissertativa e foca em aplicacao pratica.
+              <div className="mb-3 rounded-lg border border-cyan-500/35 bg-cyan-500/10 px-3 py-2 text-xs leading-relaxed text-cyan-100 dark:border-cyan-500/35 dark:bg-cyan-500/10 dark:text-cyan-700 cyberpunk:border-[#00e8ff]/45 cyberpunk:bg-[#00e8ff]/12 cyberpunk:text-[#c9fbff]">
+                {summaryNotice}
               </div>
               <SummaryAccordion summaries={modelSummaries} />
             </div>
@@ -654,7 +654,7 @@ export default function EmpreendedorismoPage({
 
           <Section
             title="O que cada prova cobrou"
-            subtitle="Resumo das cobrancas do exercicio de revisao aplicado em 2025."
+            subtitle="Resumo das cobrancas de 2024 e 2023."
           >
             <div ref={summariesRef}>
               <SummaryAccordion summaries={examCoverage} />
@@ -675,7 +675,7 @@ export default function EmpreendedorismoPage({
           </Section>
         </div>
       </div>
-      <LevelUpModal level={12} title="Mestre do Empreendedorismo" message="Voce dominou todos os topicos desta fase. Continue avancando." />
+      <LevelUpModal level={12} title="Mestre do Ingles Instrumental" message="Voce dominou os topicos-chave para a prova de Eletiva I." />
     </>
   );
 }

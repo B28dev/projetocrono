@@ -69,14 +69,54 @@ function AccordionItem({ summary, isOpen, onToggle }) {
       </button>
 
       <div ref={bodyRef} className="overflow-hidden" style={{ height: 0, opacity: 0 }}>
-        <ul className="px-4 pb-4 space-y-2">
-          {summary.bullets.map((bullet, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-zinc-400 dark:text-stone-700 leading-relaxed cyberpunk:text-white/70">
-              <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 dark:bg-stone-400 flex-shrink-0 cyberpunk:bg-[#ff3ea5]" />
-              <span>{bullet}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="px-4 pb-4 space-y-3">
+          {summary.table ? (
+            <div className="overflow-x-auto rounded-lg border border-white/10 dark:border-stone-300 cyberpunk:border-white/10">
+              <table className="min-w-full text-left text-xs">
+                <thead className="bg-zinc-900/60 text-zinc-300 dark:bg-stone-200 dark:text-stone-700 cyberpunk:bg-white/[0.06] cyberpunk:text-white/75">
+                  <tr>
+                    {summary.table.headers.map((header) => (
+                      <th key={header} className="px-3 py-2 font-semibold tracking-wide">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.table.rows.map((row, rowIndex) => (
+                    <tr
+                      key={`${summary.id}-row-${rowIndex}`}
+                      className="border-t border-white/10 text-zinc-300 dark:border-stone-300 dark:text-stone-700 cyberpunk:border-white/10 cyberpunk:text-white/72"
+                    >
+                      {row.map((cell, cellIndex) => (
+                        <td key={`${summary.id}-row-${rowIndex}-cell-${cellIndex}`} className="px-3 py-2 align-top leading-relaxed">
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+
+          {summary.bullets?.length ? (
+            <ul className="space-y-2">
+              {summary.bullets.map((bullet, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-zinc-400 dark:text-stone-700 leading-relaxed cyberpunk:text-white/70">
+                  <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 dark:bg-stone-400 flex-shrink-0 cyberpunk:bg-[#ff3ea5]" />
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {summary.note ? (
+            <p className="text-xs leading-relaxed text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+              {summary.note}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );
