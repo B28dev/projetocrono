@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   examDate as empreendedorismoExamDate,
   examCoverage,
+  flashcardsEmpreendBloco1,
   getStudyPlanByShift,
   getStudyPlanTaskStorageKey,
   modelSummaries,
+  questoesEmpreendBloco1,
   referencePdfMaterials,
   referenceVideoSections,
   topics,
@@ -83,7 +85,7 @@ function toFileUrl(localPath = '') {
 }
 
 function resolvePdfHref(pdfItem) {
-  if (pdfItem?.url) return pdfItem.url;
+  if (pdfItem?.url) return encodeURI(pdfItem.url);
   return toFileUrl(pdfItem?.localPath || '');
 }
 
@@ -94,6 +96,149 @@ function DocumentIcon() {
       <path d="M9.5 1.5V5H13.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M6.5 8.25h3.5M6.5 10.25h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
+  );
+}
+
+const STUDY_CONTENT_TABS = [
+  { id: 'flashcards', label: 'Flashcards' },
+  { id: 'questions', label: 'Banco de questoes' },
+];
+
+function FlipHintIcon() {
+  return (
+    <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M3 5.25A4.75 4.75 0 0 1 7.75.5h2.1M13 10.75A4.75 4.75 0 0 1 8.25 15.5h-2.1"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <path d="M10.5 1.5 9 3l1.5 1.5M5.5 14.5 7 13l-1.5-1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Flashcard({ card, theme = 'dark' }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const isCyber = theme === 'cyberpunk';
+
+  const frontClass = isCyber
+    ? 'border-[#ff3ea5]/60 bg-[linear-gradient(145deg,rgba(12,12,20,0.88),rgba(34,7,22,0.72))] text-white shadow-[0_0_24px_rgba(255,62,165,0.2)]'
+    : 'border-stone-300 bg-stone-50 text-stone-900 shadow-md';
+  const backClass = isCyber
+    ? 'border-[#00e8ff]/60 bg-[linear-gradient(145deg,rgba(11,12,20,0.9),rgba(3,44,52,0.65))] text-white shadow-[0_0_24px_rgba(0,232,255,0.2)]'
+    : 'border-stone-300 bg-stone-100 text-stone-900 shadow-md';
+  const badgeClass = isCyber
+    ? 'border-[#ff3ea5]/55 bg-[#ff3ea5]/14 text-[#ffc8e8]'
+    : 'border-stone-400 bg-stone-200 text-stone-700';
+  const hintClass = isCyber
+    ? 'text-white/60 hover:text-[#00e8ff]'
+    : 'text-stone-500 hover:text-stone-800';
+
+  return (
+    <button
+      type="button"
+      onClick={() => setIsFlipped((current) => !current)}
+      className="relative h-60 w-full text-left [perspective:1200px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+      aria-label={`Flashcard: ${card.frente}`}
+    >
+      <div
+        className={`relative h-full w-full rounded-xl transition-transform duration-500 [transform-style:preserve-3d] ${
+          isFlipped ? '[transform:rotateY(180deg)]' : ''
+        }`}
+      >
+        <div className={`absolute inset-0 flex h-full flex-col rounded-xl border p-4 [backface-visibility:hidden] ${frontClass}`}>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider ${badgeClass}`}>
+              {card.categoria || 'Flashcard'}
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-zinc-500 dark:text-stone-600 cyberpunk:text-white/55">
+              frente
+            </span>
+          </div>
+          <p className="line-clamp-6 text-sm leading-relaxed text-zinc-200 dark:text-stone-900 cyberpunk:text-white/90">
+            {card.frente}
+          </p>
+          <div className={`mt-auto inline-flex items-center gap-1.5 text-[11px] font-medium transition-colors ${hintClass}`}>
+            <FlipHintIcon />
+            Clique para ver a resposta
+          </div>
+        </div>
+
+        <div className={`absolute inset-0 flex h-full flex-col rounded-xl border p-4 [backface-visibility:hidden] [transform:rotateY(180deg)] ${backClass}`}>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <span className="inline-flex rounded-full border border-emerald-400/40 bg-emerald-400/12 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-emerald-200 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-700 cyberpunk:border-emerald-300/45 cyberpunk:bg-emerald-300/14 cyberpunk:text-emerald-200">
+              resolucao
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-zinc-500 dark:text-stone-600 cyberpunk:text-white/55">
+              verso
+            </span>
+          </div>
+          <p className="line-clamp-8 text-sm leading-relaxed text-zinc-300 dark:text-stone-800 cyberpunk:text-white/85">
+            {card.verso}
+          </p>
+          <div className={`mt-auto inline-flex items-center gap-1.5 text-[11px] font-medium transition-colors ${hintClass}`}>
+            <FlipHintIcon />
+            Clique para voltar
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function QuestionAccordionItem({ item, isOpen, onToggle, theme = 'dark' }) {
+  const isCyber = theme === 'cyberpunk';
+  const hasHtmlResponse = typeof item.resposta === 'string' && /<\/?[a-z][\s\S]*>/i.test(item.resposta);
+
+  const containerClass = isCyber
+    ? isOpen
+      ? 'border-cyan-500/80 bg-white/[0.06] shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+      : 'border-cyan-500/20 bg-[#080f1b]/80'
+    : 'border-stone-300 bg-white shadow-sm';
+  const questionTextClass = isCyber ? 'text-white/90' : 'text-stone-900';
+  const answerTextClass = isCyber ? 'text-white/75' : 'text-stone-700';
+  const answerSurfaceClass = isCyber
+    ? 'border-t border-cyan-500/25 bg-white/[0.03]'
+    : 'border-t border-stone-200 bg-stone-50';
+  const iconClass = isCyber ? 'text-cyan-300' : 'text-stone-500';
+
+  return (
+    <div className={`overflow-hidden rounded-xl border transition-all duration-300 ${containerClass}`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left"
+      >
+        <div className="min-w-0 space-y-1.5">
+          <span className={`text-sm font-semibold leading-relaxed ${questionTextClass}`}>{item.pergunta}</span>
+        </div>
+
+        <svg
+          className={`h-4 w-4 shrink-0 transition-transform duration-300 ${iconClass} ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 16 16"
+          aria-hidden="true"
+        >
+          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      <div className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+        <div className="overflow-hidden">
+          <div className={`px-4 py-3 text-sm leading-relaxed ${answerSurfaceClass} ${answerTextClass}`}>
+            {hasHtmlResponse ? (
+              <div
+                className="[&_ul]:mt-2 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5 [&_li]:leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: item.resposta }}
+              />
+            ) : (
+              <div className="whitespace-pre-line">{item.resposta}</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -119,6 +264,10 @@ export default function EmpreendedorismoPage({
     'pdfs-disciplina': true,
   }));
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
+  const [isBloco1Open, setIsBloco1Open] = useState(true);
+  const [activeStudyContentTab, setActiveStudyContentTab] = useState('flashcards');
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [openQuestionIds, setOpenQuestionIds] = useState({});
   const [taskProgress, setTaskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
 
@@ -282,6 +431,23 @@ export default function EmpreendedorismoPage({
   }, [shift, studyPlan, taskProgress, todayKey]);
   const todayTotal = tarefasHoje.length;
   const todayDone = hojeConcluidas.length;
+  const isCyber = theme === 'cyberpunk';
+  const visibleFlashcards = flashcardsEmpreendBloco1.slice(0, visibleCount);
+  const visibleQuestions = questoesEmpreendBloco1.slice(0, visibleCount);
+  const currentTotalCount = activeStudyContentTab === 'flashcards'
+    ? flashcardsEmpreendBloco1.length
+    : questoesEmpreendBloco1.length;
+  const hasMoreToShow = visibleCount < currentTotalCount;
+
+  const handleChangeStudyTab = (tabId) => {
+    setActiveStudyContentTab(tabId);
+    setVisibleCount(6);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((current) => current + 4);
+  };
+
   return (
     <>
       <div
@@ -661,16 +827,148 @@ export default function EmpreendedorismoPage({
             </div>
           </Section>
 
-          <Section title="Banco de questoes">
-            <div className="cyber-glass rounded-xl border border-dashed border-white/10 bg-white/5 backdrop-blur-md px-6 py-10 flex flex-col items-center gap-3 text-center transition-colors duration-300 dark:border-stone-300 dark:bg-stone-100/50 cyberpunk:border-white/10 cyberpunk:bg-white/5">
-              <span className="text-3xl cyberpunk:text-[#00e8ff]">[ ]</span>
-              <p className="text-sm font-semibold text-zinc-300 dark:text-stone-800 cyberpunk:font-display cyberpunk:text-white">Banco de questoes</p>
-              <p className="text-xs text-zinc-500 max-w-xs dark:text-stone-600 cyberpunk:text-white/65">
-                Questoes comentadas das provas anteriores estarao disponiveis em breve.
-              </p>
-              <button disabled className="mt-2 text-xs font-semibold text-zinc-600 bg-zinc-800 rounded-lg px-4 py-2 cursor-not-allowed dark:bg-stone-900 dark:text-stone-100 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-white/[0.05] cyberpunk:text-white/50">
-                Em breve
-              </button>
+          <Section
+            title="Banco de questoes e flashcards"
+            subtitle="Treino ativo por blocos, no mesmo padrao visual dos modulos anteriores."
+          >
+            <div className="space-y-4">
+              <div className="rounded-lg border border-amber-400/55 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-100 dark:border-amber-500/45 dark:bg-amber-500/10 dark:text-amber-800 cyberpunk:border-[#ffb347]/55 cyberpunk:bg-[#ffb347]/14 cyberpunk:text-[#ffe4bf]">
+                &#9888; Atencao: Estas perguntas e flashcards foram gerados por Inteligencia Artificial com base nos PDFs das aulas para auxiliar no estudo ativo. O professor NAO tem envolvimento com este material e nao ha garantia de que estas exatas questoes cairao na prova. Use como base de raciocinio, nao como gabarito oficial.
+              </div>
+
+              <div
+                className={`rounded-lg border px-4 py-3 ${
+                  isCyber
+                    ? 'border-white/10 bg-white/[0.04]'
+                    : 'border-stone-300 bg-stone-50'
+                }`}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                  Mapa de estudos
+                </p>
+                <ul className="mt-2 space-y-2 text-sm text-zinc-300 dark:text-stone-800 cyberpunk:text-white/80">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400 dark:bg-emerald-600 cyberpunk:bg-emerald-300" />
+                    <span>
+                      <strong>Bloco 1 (Base de Conteudo):</strong> Focado em fixar a teoria fundamental (5Cs, Persona, Proposta de Valor, Empreendedorismo x Oportunidade). Ideal para iniciar os estudos.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-cyan-400 dark:bg-cyan-600 cyberpunk:bg-[#00e8ff]" />
+                    <span>
+                      <strong>Bloco 2 (Lote de Prova & Pegadinhas):</strong> Focado em cenarios complexos, argumentacao dissertativa e questoes estilo prova. O treino de elite.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div
+                className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
+                  isCyber
+                    ? isBloco1Open
+                      ? 'border-cyan-500/55 bg-white/[0.05] shadow-[0_0_22px_rgba(6,182,212,0.24)]'
+                      : 'border-cyan-500/25 bg-[#070d18]/85'
+                    : 'border-stone-300 bg-white shadow-sm'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsBloco1Open((current) => !current)}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">
+                      BLOCO 1 - Base de Conteudo
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                      Teoria fundamental para consolidar repertorio antes das questoes situacionais.
+                    </p>
+                  </div>
+                  <svg
+                    className={`h-4 w-4 shrink-0 transition-transform duration-300 ${
+                      isCyber ? 'text-cyan-300' : 'text-stone-500'
+                    } ${isBloco1Open ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                <div className={`grid transition-all duration-300 ${isBloco1Open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : 'border-stone-200 bg-stone-50/70'}`}>
+                      <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1 dark:border-stone-300 dark:bg-stone-100/70 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">
+                        {STUDY_CONTENT_TABS.map((tab) => {
+                          const isActive = activeStudyContentTab === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => handleChangeStudyTab(tab.id)}
+                              className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                                isActive
+                                  ? 'bg-cyan-500/20 text-cyan-200 dark:bg-stone-900 dark:text-stone-100 cyberpunk:bg-[#00e8ff]/20 cyberpunk:text-[#9cf8ff]'
+                                  : 'text-zinc-500 hover:text-zinc-200 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/65 cyberpunk:hover:text-white'
+                              }`}
+                            >
+                              {tab.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {activeStudyContentTab === 'flashcards' ? (
+                        <div>
+                          <p className="mb-3 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                            Bloco 1 ({flashcardsEmpreendBloco1.length} flashcards) - clique no card para virar.
+                          </p>
+                          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                            {visibleFlashcards.map((card) => (
+                              <Flashcard key={card.id} card={card} theme={theme} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                            Bloco 1 ({questoesEmpreendBloco1.length} perguntas) - clique no enunciado para expandir a resposta.
+                          </p>
+                          <div className="space-y-2">
+                            {visibleQuestions.map((item) => (
+                              <QuestionAccordionItem
+                                key={item.id}
+                                item={item}
+                                isOpen={Boolean(openQuestionIds[item.id])}
+                                onToggle={() =>
+                                  setOpenQuestionIds((current) => ({
+                                    ...current,
+                                    [item.id]: !current[item.id],
+                                  }))
+                                }
+                                theme={theme}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {hasMoreToShow && (
+                        <div className="flex justify-center pt-1">
+                          <button
+                            type="button"
+                            onClick={handleLoadMore}
+                            className="inline-flex items-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-700 dark:hover:bg-stone-100 dark:hover:text-stone-900 cyberpunk:border-cyan-400/35 cyberpunk:bg-cyan-400/10 cyberpunk:text-[#9cf8ff] cyberpunk:hover:border-cyan-300/60 cyberpunk:hover:text-white"
+                          >
+                            Carregar mais (+)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Section>
         </div>
