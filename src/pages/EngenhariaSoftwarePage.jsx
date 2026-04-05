@@ -93,19 +93,28 @@ function FlipHintIcon() {
 function Flashcard({ card, theme = 'dark' }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const isCyber = theme === 'cyberpunk';
+  const isLight = theme === 'light';
 
   const frontClass = isCyber
     ? 'border-[#ff3ea5]/60 bg-[linear-gradient(145deg,rgba(12,12,20,0.88),rgba(34,7,22,0.72))] text-white shadow-[0_0_24px_rgba(255,62,165,0.2)]'
-    : 'border-stone-300 bg-stone-50 text-stone-900 shadow-md';
+    : isLight
+      ? 'border-stone-300 bg-stone-50 text-stone-900 shadow-md'
+      : 'border-zinc-700 bg-zinc-900 text-zinc-100 shadow-md';
   const backClass = isCyber
     ? 'border-[#00e8ff]/60 bg-[linear-gradient(145deg,rgba(11,12,20,0.9),rgba(3,44,52,0.65))] text-white shadow-[0_0_24px_rgba(0,232,255,0.2)]'
-    : 'border-stone-300 bg-stone-100 text-stone-900 shadow-md';
+    : isLight
+      ? 'border-stone-300 bg-stone-100 text-stone-900 shadow-md'
+      : 'border-zinc-700 bg-zinc-800 text-zinc-100 shadow-md';
   const badgeClass = isCyber
     ? 'border-[#ff3ea5]/55 bg-[#ff3ea5]/14 text-[#ffc8e8]'
-    : 'border-stone-400 bg-stone-200 text-stone-700';
+    : isLight
+      ? 'border-stone-400 bg-stone-200 text-stone-700'
+      : 'border-zinc-600 bg-zinc-800 text-zinc-300';
   const hintClass = isCyber
     ? 'text-white/60 hover:text-[#00e8ff]'
-    : 'text-stone-500 hover:text-stone-800';
+    : isLight
+      ? 'text-stone-500 hover:text-stone-800'
+      : 'text-zinc-400 hover:text-zinc-100';
 
   return (
     <button
@@ -163,19 +172,23 @@ const QUESTION_BADGE_STYLES = {
   Fixacao: {
     cyber: 'border-emerald-400/45 bg-emerald-400/12 text-emerald-200',
     clean: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+    dark: 'border-emerald-500/40 bg-emerald-500/12 text-emerald-300',
   },
   Comparacao: {
     cyber: 'border-cyan-400/45 bg-cyan-400/12 text-cyan-200',
     clean: 'border-sky-300 bg-sky-50 text-sky-700',
+    dark: 'border-cyan-500/40 bg-cyan-500/12 text-cyan-300',
   },
   Situacional: {
     cyber: 'border-orange-400/45 bg-orange-400/12 text-orange-200',
     clean: 'border-amber-300 bg-amber-50 text-amber-700',
+    dark: 'border-amber-500/40 bg-amber-500/12 text-amber-300',
   },
 };
 
 function QuestionAccordionItem({ item, isOpen, onToggle, theme = 'dark' }) {
   const isCyber = theme === 'cyberpunk';
+  const isLight = theme === 'light';
   const badgeStyle = QUESTION_BADGE_STYLES[item.tipo] || QUESTION_BADGE_STYLES.Fixacao;
   const hasHtmlResponse = typeof item.resposta === 'string' && /<\/?[a-z][\s\S]*>/i.test(item.resposta);
 
@@ -183,14 +196,20 @@ function QuestionAccordionItem({ item, isOpen, onToggle, theme = 'dark' }) {
     ? isOpen
       ? 'border-cyan-500/80 bg-white/[0.06] shadow-[0_0_15px_rgba(6,182,212,0.3)]'
       : 'border-cyan-500/20 bg-[#080f1b]/80'
-    : 'border-stone-300 bg-white shadow-sm';
+    : isLight
+      ? 'border-stone-300 bg-white shadow-sm'
+      : isOpen
+        ? 'border-zinc-600 bg-zinc-900/95 shadow-[0_8px_24px_rgba(0,0,0,0.3)]'
+        : 'border-zinc-700 bg-zinc-900/70';
 
-  const questionTextClass = isCyber ? 'text-white/90' : 'text-stone-900';
-  const answerTextClass = isCyber ? 'text-white/75' : 'text-stone-700';
+  const questionTextClass = isCyber ? 'text-white/90' : isLight ? 'text-stone-900' : 'text-zinc-100';
+  const answerTextClass = isCyber ? 'text-white/75' : isLight ? 'text-stone-700' : 'text-zinc-300';
   const answerSurfaceClass = isCyber
     ? 'border-t border-cyan-500/25 bg-white/[0.03]'
-    : 'border-t border-stone-200 bg-stone-50';
-  const iconClass = isCyber ? 'text-cyan-300' : 'text-stone-500';
+    : isLight
+      ? 'border-t border-stone-200 bg-stone-50'
+      : 'border-t border-zinc-700/80 bg-zinc-900/75';
+  const iconClass = isCyber ? 'text-cyan-300' : isLight ? 'text-stone-500' : 'text-zinc-400';
 
   return (
     <div className={`overflow-hidden rounded-xl border transition-all duration-300 ${containerClass}`}>
@@ -204,7 +223,7 @@ function QuestionAccordionItem({ item, isOpen, onToggle, theme = 'dark' }) {
             <span className={`text-sm font-semibold leading-relaxed ${questionTextClass}`}>{item.pergunta}</span>
             <span
               className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider ${
-                isCyber ? badgeStyle.cyber : badgeStyle.clean
+                isCyber ? badgeStyle.cyber : isLight ? badgeStyle.clean : badgeStyle.dark
               }`}
             >
               {item.tipo}
@@ -433,6 +452,7 @@ export default function EngenhariaSoftwarePage({
   const todayTotal = tarefasHoje.length;
   const todayDone = hojeConcluidas.length;
   const isCyber = theme === 'cyberpunk';
+  const isLight = theme === 'light';
   const visibleFlashcards = flashcardsBlocoA.slice(0, visibleCount);
   const visibleQuestions = questoesBlocoA.slice(0, visibleCount);
   const currentTotalCount = activeStudyContentTab === 'flashcards' ? flashcardsBlocoA.length : questoesBlocoA.length;
@@ -779,7 +799,15 @@ export default function EngenhariaSoftwarePage({
                 </p>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-zinc-300 dark:border-stone-300 dark:bg-stone-100/70 dark:text-stone-700 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05] cyberpunk:text-white/72">
+              <div
+                className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${
+                  isCyber
+                    ? 'border-white/10 bg-white/[0.05] text-white/72'
+                    : isLight
+                      ? 'border-stone-300 bg-stone-100/70 text-stone-700'
+                      : 'border-zinc-700 bg-zinc-900/70 text-zinc-300'
+                }`}
+              >
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-stone-600 cyberpunk:text-[#9cf8ff]">
                   Mapa de Estudos
                 </p>
@@ -811,7 +839,9 @@ export default function EngenhariaSoftwarePage({
                     ? isBlocoAOpen
                       ? 'border-cyan-500/55 bg-white/[0.05] shadow-[0_0_22px_rgba(6,182,212,0.24)]'
                       : 'border-cyan-500/25 bg-[#070d18]/85'
-                    : 'border-stone-300 bg-white shadow-sm'
+                    : isLight
+                      ? 'border-stone-300 bg-white shadow-sm'
+                      : 'border-zinc-700 bg-zinc-900/80 shadow-[0_14px_36px_rgba(0,0,0,0.35)]'
                 }`}
               >
                 <button
@@ -829,7 +859,7 @@ export default function EngenhariaSoftwarePage({
                   </div>
                   <svg
                     className={`h-4 w-4 shrink-0 transition-transform duration-300 ${
-                      isCyber ? 'text-cyan-300' : 'text-stone-500'
+                      isCyber ? 'text-cyan-300' : isLight ? 'text-stone-500' : 'text-zinc-400'
                     } ${isBlocoAOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 16 16"
@@ -841,7 +871,7 @@ export default function EngenhariaSoftwarePage({
 
                 <div className={`grid transition-all duration-300 ${isBlocoAOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                   <div className="overflow-hidden">
-                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : 'border-stone-200 bg-stone-50/70'}`}>
+                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : isLight ? 'border-stone-200 bg-stone-50/70' : 'border-zinc-700/80 bg-zinc-950/60'}`}>
                       <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1 dark:border-stone-300 dark:bg-stone-100/70 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">
                         {STUDY_CONTENT_TABS.map((tab) => {
                           const isActive = activeStudyContentTab === tab.id;
@@ -919,7 +949,9 @@ export default function EngenhariaSoftwarePage({
                     ? isBlocoBOpen
                       ? 'border-cyan-500/55 bg-white/[0.05] shadow-[0_0_22px_rgba(6,182,212,0.24)]'
                       : 'border-cyan-500/25 bg-[#070d18]/85'
-                    : 'border-stone-300 bg-white shadow-sm'
+                    : isLight
+                      ? 'border-stone-300 bg-white shadow-sm'
+                      : 'border-zinc-700 bg-zinc-900/80 shadow-[0_14px_36px_rgba(0,0,0,0.35)]'
                 }`}
               >
                 <button
@@ -937,7 +969,7 @@ export default function EngenhariaSoftwarePage({
                   </div>
                   <svg
                     className={`h-4 w-4 shrink-0 transition-transform duration-300 ${
-                      isCyber ? 'text-cyan-300' : 'text-stone-500'
+                      isCyber ? 'text-cyan-300' : isLight ? 'text-stone-500' : 'text-zinc-400'
                     } ${isBlocoBOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 16 16"
@@ -949,7 +981,7 @@ export default function EngenhariaSoftwarePage({
 
                 <div className={`grid transition-all duration-300 ${isBlocoBOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                   <div className="overflow-hidden">
-                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : 'border-stone-200 bg-stone-50/70'}`}>
+                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : isLight ? 'border-stone-200 bg-stone-50/70' : 'border-zinc-700/80 bg-zinc-950/60'}`}>
                       <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1 dark:border-stone-300 dark:bg-stone-100/70 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">
                         {STUDY_CONTENT_TABS.map((tab) => {
                           const isActive = activeStudyContentTabB === tab.id;
@@ -1027,7 +1059,9 @@ export default function EngenhariaSoftwarePage({
                     ? isBlocoCOpen
                       ? 'border-cyan-500/55 bg-white/[0.05] shadow-[0_0_22px_rgba(6,182,212,0.24)]'
                       : 'border-cyan-500/25 bg-[#070d18]/85'
-                    : 'border-stone-300 bg-white shadow-sm'
+                    : isLight
+                      ? 'border-stone-300 bg-white shadow-sm'
+                      : 'border-zinc-700 bg-zinc-900/80 shadow-[0_14px_36px_rgba(0,0,0,0.35)]'
                 }`}
               >
                 <button
@@ -1045,7 +1079,7 @@ export default function EngenhariaSoftwarePage({
                   </div>
                   <svg
                     className={`h-4 w-4 shrink-0 transition-transform duration-300 ${
-                      isCyber ? 'text-cyan-300' : 'text-stone-500'
+                      isCyber ? 'text-cyan-300' : isLight ? 'text-stone-500' : 'text-zinc-400'
                     } ${isBlocoCOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 16 16"
@@ -1057,7 +1091,7 @@ export default function EngenhariaSoftwarePage({
 
                 <div className={`grid transition-all duration-300 ${isBlocoCOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                   <div className="overflow-hidden">
-                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : 'border-stone-200 bg-stone-50/70'}`}>
+                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : isLight ? 'border-stone-200 bg-stone-50/70' : 'border-zinc-700/80 bg-zinc-950/60'}`}>
                       <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1 dark:border-stone-300 dark:bg-stone-100/70 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">
                         {STUDY_CONTENT_TABS.map((tab) => {
                           const isActive = activeStudyContentTabC === tab.id;

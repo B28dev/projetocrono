@@ -6,7 +6,6 @@ import {
   getStudyPlanByShift,
   getStudyPlanTaskStorageKey,
   modelSummaries,
-  referencePdfMaterials,
   referenceVideoSections,
   summaryNotice,
   topics,
@@ -74,30 +73,6 @@ function formatDatePtBr(date) {
   return `${day}/${month}/${year}`;
 }
 
-function toFileUrl(localPath = '') {
-  if (!localPath) return '';
-  const normalizedPath = localPath.replace(/\\/g, '/');
-  const prefixedPath = /^[a-zA-Z]:\//.test(normalizedPath)
-    ? `/${normalizedPath}`
-    : normalizedPath;
-  return encodeURI(`file://${prefixedPath}`);
-}
-
-function resolvePdfHref(pdfItem) {
-  if (pdfItem?.url) return pdfItem.url;
-  return toFileUrl(pdfItem?.localPath || '');
-}
-
-function DocumentIcon() {
-  return (
-    <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 16 16" aria-hidden="true">
-      <path d="M5 1.5h4.5L13.5 5v8a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9.5 1.5V5H13.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6.5 8.25h3.5M6.5 10.25h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export default function InglesPage({
   theme = 'dark',
   shift = 'noturno-adele',
@@ -117,7 +92,6 @@ export default function InglesPage({
   const [openReferenceGroupIds, setOpenReferenceGroupIds] = useState(() => ({
     'videos-leitura-estrategica': true,
     'videos-vocabulario-apoio': false,
-    'pdfs-disciplina': true,
   }));
   const [isOverdueCollapsed, setIsOverdueCollapsed] = useState(false);
   const [taskProgress, setTaskProgress] = useState(() => {
@@ -382,8 +356,8 @@ export default function InglesPage({
           </Section>
 
           <Section
-            title="Playlists e PDFs de referencia"
-            subtitle="Videos e materiais da disciplina no mesmo painel expansivel."
+            title="Playlists de referencia"
+            subtitle="Videos da disciplina no mesmo painel expansivel."
           >
             <div ref={playlistsRef} className="space-y-3">
               <div
@@ -477,67 +451,6 @@ export default function InglesPage({
                         );
                       })}
 
-                      <div
-                        className={`summary-item cyber-glass rounded-xl border backdrop-blur-md transition-colors duration-300 ${
-                          openReferenceGroupIds['pdfs-disciplina']
-                            ? 'border-white/20 bg-white/10 dark:border-stone-400 dark:bg-stone-50 cyberpunk:border-[#ff3ea5]/35 cyberpunk:bg-white/10'
-                            : 'border-white/10 bg-white/5 hover:border-[#ff3ea5]/30 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#ff3ea5]/30 cyberpunk:hover:bg-white/10'
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => toggleReferenceGroup('pdfs-disciplina')}
-                          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
-                        >
-                          <span className="min-w-0">
-                            <span className="block truncate text-xs font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:text-white">
-                              PDFs da disciplina
-                            </span>
-                            <span className="block truncate text-[11px] text-zinc-500 dark:text-stone-600 cyberpunk:text-white/58">
-                              Materiais oficiais para leitura e revisao.
-                            </span>
-                          </span>
-                          <svg
-                            className={`h-3.5 w-3.5 text-zinc-500 transition-transform duration-200 dark:text-stone-500 cyberpunk:text-[#ff8dcb] ${openReferenceGroupIds['pdfs-disciplina'] ? 'rotate-180' : ''}`}
-                            fill="none"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </button>
-
-                        {openReferenceGroupIds['pdfs-disciplina'] ? (
-                          <div className="border-t border-white/10 px-3 pb-3 pt-3 dark:border-stone-300 cyberpunk:border-white/10">
-                            <div className="space-y-2">
-                              {referencePdfMaterials.map((pdf) => {
-                                const pdfHref = resolvePdfHref(pdf);
-                                return (
-                                  <a
-                                    key={pdf.id}
-                                    href={pdfHref || undefined}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="playlist-card group flex items-center justify-between gap-2 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-slate-300 transition-colors hover:bg-slate-700/90 dark:border-stone-300 dark:bg-stone-100 dark:text-stone-800 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:text-white/78 cyberpunk:hover:border-[#ff3ea5]/35 cyberpunk:hover:bg-white/[0.1]"
-                                  >
-                                    <span className="flex min-w-0 items-center gap-2">
-                                      <DocumentIcon />
-                                      <span className="min-w-0">
-                                        <span className="block truncate text-xs font-medium">{pdf.title}</span>
-                                        <span className="block truncate text-[11px] text-slate-400 group-hover:text-slate-300 dark:text-stone-600 dark:group-hover:text-stone-700 cyberpunk:text-white/58">
-                                          {pdf.description}
-                                        </span>
-                                      </span>
-                                    </span>
-                                    <span className="shrink-0 rounded-full border border-slate-600 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate-300 dark:border-stone-300 dark:text-stone-600 cyberpunk:border-white/10 cyberpunk:text-[#ff8dcb]">
-                                      pdf
-                                    </span>
-                                  </a>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ) : null}
-                      </div>
                     </div>
                   </div>
                 ) : null}
