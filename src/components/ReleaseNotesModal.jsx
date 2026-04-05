@@ -8,7 +8,7 @@ import {
 const UPDATE_TYPE_STYLES = {
   novo: {
     label: 'NOVO',
-    cyber: 'border-emerald-400/50 bg-emerald-400/15 text-emerald-200',
+    cyber: 'border-emerald-300/70 bg-emerald-400/20 text-emerald-100 shadow-[0_0_12px_rgba(16,185,129,0.45)]',
     clean: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300 dark:border-emerald-300 dark:bg-emerald-50 dark:text-emerald-700',
   },
   melhoria: {
@@ -77,7 +77,7 @@ export default function ReleaseNotesModal({ theme = 'dark', enabled = true }) {
   return (
     <section
       className={`fixed inset-0 z-[1000] flex items-center justify-center px-4 py-8 ${
-        isCyber ? 'bg-[#040712]/78 backdrop-blur-md' : 'bg-black/70 backdrop-blur-sm'
+        isCyber ? 'bg-[#030510]/80 backdrop-blur-sm' : 'bg-black/70 backdrop-blur-sm'
       }`}
       role="dialog"
       aria-modal="true"
@@ -89,13 +89,13 @@ export default function ReleaseNotesModal({ theme = 'dark', enabled = true }) {
       <div
         className={`relative w-full max-w-2xl ${
           isCyber
-            ? 'overflow-hidden rounded-xl p-[2px] drop-shadow-[0_0_28px_rgba(236,72,153,0.95)] drop-shadow-[0_0_48px_rgba(6,182,212,0.85)]'
+            ? 'relative overflow-hidden rounded-xl p-[2px] drop-shadow-[0_0_28px_rgba(6,182,212,0.78)] drop-shadow-[0_0_44px_rgba(236,72,153,0.58)]'
             : 'rounded-xl border border-zinc-800/70 bg-zinc-950 text-zinc-100 shadow-2xl dark:border-stone-300 dark:bg-white dark:text-stone-900'
         }`}
       >
         {isCyber ? (
           <div
-            className="pointer-events-none absolute inset-[-100%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_42%,#ffffff_50%,#f472b6_64%,#ec4899_76%,#22d3ee_90%,#00000000_100%)] [filter:saturate(1.35)]"
+            className="pointer-events-none absolute inset-[-100%] animate-[spin_8s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#00000000_0%,#00000000_62%,#ec4899_76%,#06b6d4_90%,#00000000_100%)] [filter:saturate(1.45)_blur(0.35px)]"
             aria-hidden="true"
           />
         ) : null}
@@ -112,7 +112,7 @@ export default function ReleaseNotesModal({ theme = 'dark', enabled = true }) {
             onClick={closeModal}
             className={`absolute right-4 top-4 h-8 w-8 rounded-full border text-sm transition-colors ${
               isCyber
-                ? 'border-fuchsia-400/45 bg-fuchsia-500/12 text-fuchsia-200 hover:bg-fuchsia-500/20'
+                ? 'border-cyan-300/60 bg-cyan-500/12 text-cyan-100 hover:bg-cyan-500/20'
                 : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 dark:hover:bg-stone-200'
             }`}
             aria-label="Fechar notas de atualizacao"
@@ -125,17 +125,17 @@ export default function ReleaseNotesModal({ theme = 'dark', enabled = true }) {
               <p
                 className={`text-xs font-mono uppercase tracking-[0.2em] ${
                   isCyber
-                    ? 'neon-pink-cyan-blink'
+                    ? 'neon-pink-cyan-blink [animation-duration:5.2s]'
                     : 'text-zinc-400 dark:text-stone-500'
                 }`}
               >
-                Release {releaseData.version} - {releaseData.date}
+                {`RELEASE ${releaseData.version.toUpperCase()} - ${releaseData.date.toUpperCase()}`}
               </p>
             </div>
             <h2
               className={`text-2xl font-bold leading-tight ${
                 isCyber
-                  ? 'text-white drop-shadow-[0_0_14px_rgba(255,62,165,0.45)]'
+                  ? 'neon-pink-cyan-blink [animation-duration:4.8s]'
                   : 'text-zinc-100 dark:text-stone-900'
               }`}
             >
@@ -174,7 +174,7 @@ export default function ReleaseNotesModal({ theme = 'dark', enabled = true }) {
               onClick={closeModal}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                 isCyber
-                  ? 'border border-fuchsia-400/45 bg-fuchsia-500/18 text-fuchsia-100 hover:bg-fuchsia-500/26 hover:shadow-[0_0_16px_rgba(255,62,165,0.4)]'
+                  ? 'border border-cyan-300/60 bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-[0_0_18px_rgba(6,182,212,0.6)]'
                   : 'border border-zinc-700 bg-zinc-100 text-zinc-900 hover:bg-white dark:border-stone-300 dark:bg-stone-900 dark:text-stone-100 dark:hover:bg-stone-800'
               }`}
             >

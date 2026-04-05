@@ -4,10 +4,12 @@ import {
   examDate as empreendedorismoExamDate,
   examCoverage,
   flashcardsEmpreendBloco1,
+  flashcardsEmpreendLote2,
   getStudyPlanByShift,
   getStudyPlanTaskStorageKey,
   modelSummaries,
   questoesEmpreendBloco1,
+  questoesEmpreendLote2,
   referencePdfMaterials,
   referenceVideoSections,
   topics,
@@ -268,6 +270,10 @@ export default function EmpreendedorismoPage({
   const [activeStudyContentTab, setActiveStudyContentTab] = useState('flashcards');
   const [visibleCount, setVisibleCount] = useState(6);
   const [openQuestionIds, setOpenQuestionIds] = useState({});
+  const [isBloco2Open, setIsBloco2Open] = useState(false);
+  const [activeStudyContentTabLote2, setActiveStudyContentTabLote2] = useState('flashcards');
+  const [visibleCountLote2, setVisibleCountLote2] = useState(6);
+  const [openQuestionIdsLote2, setOpenQuestionIdsLote2] = useState({});
   const [taskProgress, setTaskProgress] = useState(() => {
     if (typeof window === 'undefined') return {};
 
@@ -438,6 +444,12 @@ export default function EmpreendedorismoPage({
     ? flashcardsEmpreendBloco1.length
     : questoesEmpreendBloco1.length;
   const hasMoreToShow = visibleCount < currentTotalCount;
+  const visibleFlashcardsLote2 = flashcardsEmpreendLote2.slice(0, visibleCountLote2);
+  const visibleQuestionsLote2 = questoesEmpreendLote2.slice(0, visibleCountLote2);
+  const currentTotalCountLote2 = activeStudyContentTabLote2 === 'flashcards'
+    ? flashcardsEmpreendLote2.length
+    : questoesEmpreendLote2.length;
+  const hasMoreToShowLote2 = visibleCountLote2 < currentTotalCountLote2;
 
   const handleChangeStudyTab = (tabId) => {
     setActiveStudyContentTab(tabId);
@@ -446,6 +458,15 @@ export default function EmpreendedorismoPage({
 
   const handleLoadMore = () => {
     setVisibleCount((current) => current + 4);
+  };
+
+  const handleChangeStudyTabLote2 = (tabId) => {
+    setActiveStudyContentTabLote2(tabId);
+    setVisibleCountLote2(6);
+  };
+
+  const handleLoadMoreLote2 = () => {
+    setVisibleCountLote2((current) => current + 4);
   };
 
   return (
@@ -856,7 +877,7 @@ export default function EmpreendedorismoPage({
                   <li className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-cyan-400 dark:bg-cyan-600 cyberpunk:bg-[#00e8ff]" />
                     <span>
-                      <strong>Bloco 2 (Lote de Prova & Pegadinhas):</strong> Focado em cenarios complexos, argumentacao dissertativa e questoes estilo prova. O treino de elite.
+                      <strong>Bloco 2 (Treino para Prova & Pegadinhas):</strong> Focado em cenarios complexos, argumentacao dissertativa e questoes estilo prova. O treino de elite.
                     </span>
                   </li>
                 </ul>
@@ -959,6 +980,114 @@ export default function EmpreendedorismoPage({
                           <button
                             type="button"
                             onClick={handleLoadMore}
+                            className="inline-flex items-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-700 dark:hover:bg-stone-100 dark:hover:text-stone-900 cyberpunk:border-cyan-400/35 cyberpunk:bg-cyan-400/10 cyberpunk:text-[#9cf8ff] cyberpunk:hover:border-cyan-300/60 cyberpunk:hover:text-white"
+                          >
+                            Carregar mais (+)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
+                  isCyber
+                    ? isBloco2Open
+                      ? 'border-cyan-500/55 bg-white/[0.05] shadow-[0_0_22px_rgba(6,182,212,0.24)]'
+                      : 'border-cyan-500/25 bg-[#070d18]/85'
+                    : 'border-stone-300 bg-white shadow-sm'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsBloco2Open((current) => !current)}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">
+                      BLOCO 2 - Treino para Prova & Pegadinhas
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                      Treino de elite com enunciados complexos, malicia de prova e argumentacao dissertativa.
+                    </p>
+                  </div>
+                  <svg
+                    className={`h-4 w-4 shrink-0 transition-transform duration-300 ${
+                      isCyber ? 'text-cyan-300' : 'text-stone-500'
+                    } ${isBloco2Open ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                <div className={`grid transition-all duration-300 ${isBloco2Open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className={`space-y-4 border-t px-4 py-4 ${isCyber ? 'border-cyan-500/25 bg-white/[0.02]' : 'border-stone-200 bg-stone-50/70'}`}>
+                      <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1 dark:border-stone-300 dark:bg-stone-100/70 cyberpunk:border-white/10 cyberpunk:bg-white/[0.05]">
+                        {STUDY_CONTENT_TABS.map((tab) => {
+                          const isActive = activeStudyContentTabLote2 === tab.id;
+                          return (
+                            <button
+                              key={`lote2-${tab.id}`}
+                              type="button"
+                              onClick={() => handleChangeStudyTabLote2(tab.id)}
+                              className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                                isActive
+                                  ? 'bg-cyan-500/20 text-cyan-200 dark:bg-stone-900 dark:text-stone-100 cyberpunk:bg-[#00e8ff]/20 cyberpunk:text-[#9cf8ff]'
+                                  : 'text-zinc-500 hover:text-zinc-200 dark:text-stone-600 dark:hover:text-stone-900 cyberpunk:text-white/65 cyberpunk:hover:text-white'
+                              }`}
+                            >
+                              {tab.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {activeStudyContentTabLote2 === 'flashcards' ? (
+                        <div>
+                          <p className="mb-3 text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                            Bloco 2 ({flashcardsEmpreendLote2.length} flashcards) - clique no card para virar.
+                          </p>
+                          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                            {visibleFlashcardsLote2.map((card) => (
+                              <Flashcard key={card.id} card={card} theme={theme} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-xs text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+                            Bloco 2 ({questoesEmpreendLote2.length} perguntas) - clique no enunciado para expandir a resposta.
+                          </p>
+                          <div className="space-y-2">
+                            {visibleQuestionsLote2.map((item) => (
+                              <QuestionAccordionItem
+                                key={item.id}
+                                item={item}
+                                isOpen={Boolean(openQuestionIdsLote2[item.id])}
+                                onToggle={() =>
+                                  setOpenQuestionIdsLote2((current) => ({
+                                    ...current,
+                                    [item.id]: !current[item.id],
+                                  }))
+                                }
+                                theme={theme}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {hasMoreToShowLote2 && (
+                        <div className="flex justify-center pt-1">
+                          <button
+                            type="button"
+                            onClick={handleLoadMoreLote2}
                             className="inline-flex items-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-700 dark:hover:bg-stone-100 dark:hover:text-stone-900 cyberpunk:border-cyan-400/35 cyberpunk:bg-cyan-400/10 cyberpunk:text-[#9cf8ff] cyberpunk:hover:border-cyan-300/60 cyberpunk:hover:text-white"
                           >
                             Carregar mais (+)
