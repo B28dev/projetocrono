@@ -222,7 +222,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
               />
               {/* Crono Lab — debug da Fase 1 da gamificação. Acessível apenas autenticado. */}
               <Route
-                path="/crono-lab"
+                path="/crono-lab/:section?"
                 element={
                   isAuthLoading
                     ? null

@@ -69,7 +69,7 @@
 
 /**
  * @typedef {'today' | 'backlog' | 'reinforcement'} MissionItemOrigin
- * @typedef {'pending' | 'completed' | 'skipped' | 'revealed_only'} MissionItemStatus
+ * @typedef {'pending' | 'in_progress' | 'completed' | 'skipped' | 'revealed_only'} MissionItemStatus
  *
  * @typedef {Object} MissionItem
  * @property {string}            id              - ID único
@@ -81,25 +81,55 @@
  * @property {boolean}           requiredForCleanDay - Obrigatório para dia limpo?
  * @property {MissionItemStatus} status          - Estado atual do item
  * @property {string|null}       completedAt     - ISO timestamp ou null
+ * @property {string|null}       lastAttemptAt   - ISO timestamp da última tentativa
+ * @property {number}            attemptCount    - Número de tentativas registradas
+ * @property {boolean}           needsSameDayReinforcement - Precisa reforço ainda hoje?
+ * @property {string|null}       reviewBucket    - Bucket futuro de revisão
+ * @property {string|null}       nextReviewAt    - Data futura de revisão
+ * @property {'easy'|'medium'|'hard'|null} difficultyRating - Gancho para dificuldade percebida
+ */
+
+/**
+ * @typedef {'validated' | 'partial' | 'invalid'} ValidationResultTier
+ * @typedef {'flashcard' | 'assisted_question'} ValidationKind
  */
 
 // ─── LAYER 3: EXECUÇÃO ──────────────────────────────────────────────────────
 
 /**
  * @typedef {'flashcard_flip' | 'assisted_question' | 'review_mark'} AttemptType
- * @typedef {'easy' | 'good' | 'hard' | 'failed'} SelfAssessment
+ * @typedef {'easy' | 'good' | 'hard' | 'failed' | 'partial' | 'revealed'} SelfAssessment
  *
  * @typedef {Object} AnswerAttempt
  * @property {string}           id                   - ID único
  * @property {string}           missionItemId        - Referência ao MissionItem
  * @property {string}           contentItemId        - Referência ao ContentItem
  * @property {AttemptType}      attemptType          - Tipo de tentativa
+ * @property {ValidationKind}   validationKind       - Fluxo que originou a tentativa
  * @property {boolean}          answeredBeforeReveal - Tentou antes de revelar?
  * @property {SelfAssessment}   selfAssessment       - Autoavaliação
  * @property {boolean}          detectedAsSpeedClick - Anti-exploit: clique rápido?
+ * @property {number}           thinkTimeMs          - Tempo entre abrir e submeter
  * @property {number}           xpGranted            - XP concedido nesta tentativa
  * @property {boolean}          needsReinforcement   - Deve voltar como reforço?
+ * @property {ValidationResultTier} resultTier       - Classificação operacional do resultado
+ * @property {string}           feedbackKey          - Chave da microcopy de feedback
  * @property {string}           attemptedAt          - ISO timestamp
+ */
+
+/**
+ * @typedef {'validation_success' | 'validation_partial' | 'validation_failed' | 'revealed_without_attempt' | 'speed_click' | 'mission_completed' | 'mission_progress'} MissionEventType
+ * @typedef {'success' | 'warning' | 'danger' | 'info'} ValidationFeedbackTone
+ *
+ * @typedef {Object} MissionInteractionResult
+ * @property {import('./types').AnswerAttempt | null} attempt
+ * @property {number} xpGranted
+ * @property {boolean} countedAsRealValidation
+ * @property {boolean} shouldCompleteItem
+ * @property {boolean} needsReinforcement
+ * @property {MissionEventType} eventType
+ * @property {ValidationFeedbackTone} tone
+ * @property {string} feedbackKey
  */
 
 // ─── LAYER 4: PROGRESSÃO ────────────────────────────────────────────────────
@@ -140,7 +170,7 @@
  */
 
 /**
- * @typedef {'validation' | 'streak_bonus' | 'level_bonus' | 'clean_day_bonus' | 'manual'} XpSourceType
+ * @typedef {'validation' | 'streak_bonus' | 'level_bonus' | 'clean_day_bonus' | 'daily_complete_bonus' | 'backlog_clear_bonus' | 'manual'} XpSourceType
  *
  * @typedef {Object} XpLedger
  * @property {string}      id          - ID único

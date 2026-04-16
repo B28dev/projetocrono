@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/set-state-in-effect */
 /**
  * @fileoverview Store — Progress Store (Context API)
  *
@@ -44,10 +45,9 @@ import {
 } from '../progression/backlogEngine.js';
 import {
   calculateXp,
-  getLevelProgress,
   createXpEntry,
-  XP_BONUS_CLEAN_DAY,
-  XP_BONUS_DAILY_COMPLETE,
+  createMissionBonusEntry,
+  getBonusXp,
 } from '../progression/xpEngine.js';
 import {
   getIsActiveDay,
@@ -165,7 +165,7 @@ export function ProgressStoreProvider({
         newLedger.push(
           createXpEntry({
             userId: prev.userProgress.userId,
-            reason: `${contentItem.title} — ${attempt.selfAssessment}`,
+            reason: `${contentItem.title} — ${attempt.feedbackKey ?? attempt.selfAssessment}`,
             amount: xpGranted,
             sourceType: 'validation',
             sourceId: attempt.id,
@@ -208,11 +208,12 @@ export function ProgressStoreProvider({
     setState((prev) => {
       if (!prev.userProgress) return prev;
 
-      const bonusMap = {
-        clean_day_bonus: XP_BONUS_CLEAN_DAY,
-        level_bonus: 0, // calculado externamente
-      };
-      const amount = bonusMap[sourceType] ?? XP_BONUS_DAILY_COMPLETE;
+      const alreadyGranted = prev.xpLedger.some(
+        (entry) => entry.sourceType === sourceType && entry.sourceId === sourceId,
+      );
+      if (alreadyGranted) return prev;
+
+      const amount = getBonusXp(sourceType);
       if (amount === 0) return prev;
 
       const newProgress = {
@@ -222,10 +223,8 @@ export function ProgressStoreProvider({
       };
       const newLedger = [
         ...prev.xpLedger,
-        createXpEntry({
+        createMissionBonusEntry({
           userId: prev.userProgress.userId,
-          reason: sourceType === 'clean_day_bonus' ? 'Bônus de Dia Limpo!' : 'Bônus de Sequência',
-          amount,
           sourceType,
           sourceId,
         }),

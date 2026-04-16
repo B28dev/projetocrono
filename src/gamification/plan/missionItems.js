@@ -8,6 +8,7 @@
  * - requiredForCleanDay = true nos itens 'today' e 'backlog'
  * - itens de 'reinforcement' somam XP mas não bloqueiam Dia Limpo
  * - status transitions: pending → in_progress → completed | skipped | revealed_only
+ * - itens podem carregar ganchos de reforço e revisão futura sem acoplar a UI
  *
  * @backend-ready: Trocar `generateMissionItems` por `api.get('/mission-items/today')`.
  */
@@ -55,6 +56,12 @@ export function createMissionItem({
     requiredForCleanDay: origin === 'reinforcement' ? false : requiredForCleanDay,
     status: 'pending',
     completedAt: null,
+    lastAttemptAt: null,
+    attemptCount: 0,
+    needsSameDayReinforcement: false,
+    reviewBucket: null,
+    nextReviewAt: null,
+    difficultyRating: null,
   };
 }
 
@@ -150,6 +157,13 @@ export function completeMissionItem(item) {
   };
 }
 
+export function startMissionItem(item) {
+  return {
+    ...item,
+    status: item.status === 'completed' ? 'completed' : 'in_progress',
+  };
+}
+
 /**
  * Marca como "revelado sem tentar" — NÃO conta como progresso real.
  * @param {import('../types').MissionItem} item
@@ -159,6 +173,18 @@ export function markRevealedOnly(item) {
   return {
     ...item,
     status: 'revealed_only',
+  };
+}
+
+export function applyAttemptToMissionItem(item, attempt, updates = {}) {
+  return {
+    ...item,
+    lastAttemptAt: attempt?.attemptedAt ?? item.lastAttemptAt ?? null,
+    attemptCount: (item.attemptCount ?? 0) + (attempt ? 1 : 0),
+    needsSameDayReinforcement: updates.needsSameDayReinforcement ?? item.needsSameDayReinforcement ?? false,
+    reviewBucket: updates.reviewBucket ?? item.reviewBucket ?? null,
+    nextReviewAt: updates.nextReviewAt ?? item.nextReviewAt ?? null,
+    difficultyRating: updates.difficultyRating ?? item.difficultyRating ?? null,
   };
 }
 

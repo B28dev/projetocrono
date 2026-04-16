@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAllowedUser() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.matches('^[^@]+@(somosicev\\.com|gmail\\.com)$');
+    }
+
+    // Avatares de perfil: leitura pública (necessário para <img src> carregar)
+    // Escrita restrita ao próprio usuário institucional autenticado
+    match /avatars/{userId} {
+      allow read: if true;
+
+      allow create, update: if isAllowedUser()
+        && request.auth.uid == userId
+        && request.resource != null
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType != null
+        && request.resource.contentType.matches('^image/.*$');
+
+      allow delete: if isAllowedUser()
+        && request.auth.uid == userId;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

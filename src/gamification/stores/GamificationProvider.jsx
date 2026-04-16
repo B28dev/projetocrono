@@ -16,11 +16,11 @@
  * Quando o userId for null (logout), os stores resetam automaticamente.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { StudyStoreProvider, useStudyStore } from './StudyStoreContext.jsx';
 import { ProgressStoreProvider } from './ProgressStoreContext.jsx';
 import { SessionStoreProvider } from './SessionStoreContext.jsx';
-import { readAnswerAttempts, writeAnswerAttempts } from '../persistence.js';
+import { AttemptStoreProvider, useAttemptStore } from './AttemptStoreContext.jsx';
 
 // ─── ANSWERS BRIDGE ──────────────────────────────────────────────────────────
 
@@ -32,20 +32,8 @@ import { readAnswerAttempts, writeAnswerAttempts } from '../persistence.js';
  */
 function ProgressBridge({ userId, children }) {
   const { missions, missionItems } = useStudyStore();
+  const { attempts } = useAttemptStore();
 
-  // Attempts vivem aqui — são partilhados entre StudyStore e ProgressStore
-  const [attempts, setAttempts] = useState(() => readAnswerAttempts());
-  const isMountedRef = useRef(true);
-
-  const addAttempt = useCallback((attempt) => {
-    setAttempts((prev) => {
-      const updated = [...prev, attempt];
-      writeAnswerAttempts(updated);
-      return updated;
-    });
-  }, []);
-
-  // todayMission = primeira missão cujo date é hoje
   const todayMission = useMemo(() => missions[0] ?? null, [missions]);
 
   return (
@@ -55,9 +43,6 @@ function ProgressBridge({ userId, children }) {
       missionItems={missionItems}
       todayMission={todayMission}
     >
-      {/* Injecta addAttempt no children através do contexto — mas a Fase 1
-          não precisa desta ligação direta pois o CronoLab usa ProgressStore direto.
-          Na Fase 2, o componente de Missão chamará addAttempt via SessionStore. */}
       {children}
     </ProgressStoreProvider>
   );
@@ -74,9 +59,11 @@ export function GamificationProvider({ userId, children }) {
   return (
     <SessionStoreProvider>
       <StudyStoreProvider userId={userId}>
-        <ProgressBridge userId={userId}>
-          {children}
-        </ProgressBridge>
+        <AttemptStoreProvider>
+          <ProgressBridge userId={userId}>
+            {children}
+          </ProgressBridge>
+        </AttemptStoreProvider>
       </StudyStoreProvider>
     </SessionStoreProvider>
   );

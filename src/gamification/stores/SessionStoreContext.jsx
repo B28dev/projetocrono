@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/purity */
 /**
  * @fileoverview Store — Session Store (Context API)
  *
@@ -69,6 +70,7 @@ export function SessionStoreProvider({ children }) {
     setRevealState('hidden');
     setSessionStartedAt(Date.now());
     setCooldownUntil(0);
+    setSessionAttempts([]);
   }, []);
 
   /**
@@ -86,12 +88,15 @@ export function SessionStoreProvider({ children }) {
    * @param {object} params
    * @param {string} params.contentItemId
    * @param {import('../types').AttemptType} params.attemptType
+   * @param {import('../types').ValidationKind} [params.validationKind]
    * @param {import('../types').SelfAssessment} params.selfAssessment
+   * @param {import('../types').ValidationResultTier} [params.resultTier]
+   * @param {string} [params.feedbackKey]
    * @param {boolean} [params.answeredBeforeReveal] - Padrão: revealState === 'hidden'
    * @returns {import('../types').AnswerAttempt | null}
    */
   const submitAttempt = useCallback(
-    ({ contentItemId, attemptType, selfAssessment, answeredBeforeReveal }) => {
+    ({ contentItemId, attemptType, validationKind, selfAssessment, resultTier, feedbackKey, answeredBeforeReveal }) => {
       if (!currentItemId) return null;
       if (isCoolingDown) return null;
 
@@ -106,9 +111,12 @@ export function SessionStoreProvider({ children }) {
         missionItemId: currentItemId,
         contentItemId,
         attemptType,
+        validationKind,
         answeredBeforeReveal: isBeforeReveal,
         selfAssessment,
         thinkTimeMs,
+        resultTier,
+        feedbackKey,
       });
 
       // Revela após a tentativa
