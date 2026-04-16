@@ -1,0 +1,19 @@
+services:
+  openclaude:
+    build: .
+    container_name: openclaude-cli
+    user: root
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      - C:\Users\bruno\Desktop\planner:/workspace # ← sua pasta aqui
+      - codex_config:/root/.codex
+    env_file:
+      - .env # ← adicione essa linha
+    environment:
+      - CLAUDE_CODE_USE_OPENAI=1
+      - OPENAI_MODEL=gpt-5.4
+
+volumes:
+  codex_config:

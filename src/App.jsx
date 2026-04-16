@@ -1,11 +1,14 @@
 import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { onAuthStateChanged as fbAuthStateChanged } from 'firebase/auth';
 import LoginModal from './components/LoginModal';
 import NamePromptModal from './components/NamePromptModal';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
 import SystemNotice from './components/SystemNotice';
 import Landing from './pages/Landing';
 import useAuth from './hooks/useAuth';
+import { GamificationProvider } from './gamification/stores/GamificationProvider.jsx';
+import { auth } from './firebase.js';
 
 const Navbar = lazy(() => import('./components/Navbar'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -13,6 +16,7 @@ const ArquiteturaPage = lazy(() => import('./pages/ArquiteturaPage'));
 const EngenhariaSoftwarePage = lazy(() => import('./pages/EngenhariaSoftwarePage'));
 const EmpreendedorismoPage = lazy(() => import('./pages/EmpreendedorismoPage'));
 const InglesPage = lazy(() => import('./pages/InglesPage'));
+const CronoLab = lazy(() => import('./pages/CronoLab'));
 
 const THEME_STORAGE_KEY = 'site-theme';
 const SHIFT_STORAGE_KEY = 'site-shift';
@@ -74,16 +78,32 @@ export default function App() {
     [shift],
   );
 
+  // userId para o GamificationProvider — usa Firebase Auth diretamente
+  // para não acoplar a lógica de gamificação ao useAuth
+  const [gamificationUserId, setGamificationUserId] = useState(() =>
+    auth?.currentUser?.uid ?? null,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const unsubscribe = fbAuthStateChanged(auth, (user) => {
+      setGamificationUserId(user?.uid ?? null);
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <div className={themeClass} data-theme={theme}>
       <BrowserRouter>
-        <AppShell
-          theme={theme}
-          shift={shift}
-          selectedShift={selectedShift}
-          onToggleTheme={cycleTheme}
-          onShiftChange={setShift}
-        />
+        <GamificationProvider userId={gamificationUserId}>
+          <AppShell
+            theme={theme}
+            shift={shift}
+            selectedShift={selectedShift}
+            onToggleTheme={cycleTheme}
+            onShiftChange={setShift}
+          />
+        </GamificationProvider>
       </BrowserRouter>
     </div>
   );
@@ -197,6 +217,17 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
                     ? null
                     : isAuthenticated
                     ? <InglesPage theme={theme} shift={shift} shiftLabel={selectedShift.label} />
+                    : <Navigate to="/" replace />
+                }
+              />
+              {/* Crono Lab — debug da Fase 1 da gamificação. Acessível apenas autenticado. */}
+              <Route
+                path="/crono-lab"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <CronoLab />
                     : <Navigate to="/" replace />
                 }
               />
