@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(grep -E \"\\(^|\\\\s\\)\\(planer|stock-flow\\)\\(/|$\\)\")",
+      "Bash(printf '\\\\n---UNSTAGED---\\\\n')",
+      "Bash(npm --prefix \"/workspace/stock-flow/frontend\" run build)"
+    ]
+  }
+}

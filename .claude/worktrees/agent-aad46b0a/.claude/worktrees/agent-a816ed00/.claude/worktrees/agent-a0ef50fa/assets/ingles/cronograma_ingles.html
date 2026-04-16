@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma Rel&acirc;mpago &mdash; Ingl&ecirc;s I (Eletiva) 06/04</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #fff; color: #1a1a1a; font-family: sans-serif; }
+.wrap { padding: 0.75rem; font-size: 14px; max-width: 680px; margin: 0 auto; }
+.header { margin-bottom: 1rem; }
+.title { font-size: 17px; font-weight: 500; margin-bottom: 6px; }
+.countdown { display: inline-block; background: #E8593C; color: #fff; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+.prog-wrap { margin-bottom: 1.2rem; }
+.prog-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px; }
+.prog-track { height: 7px; background: #f0f0f0; border-radius: 4px; border: 1px solid #ddd; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 4px; background: #1D9E75; transition: width .4s; }
+.day-card { border: 1px solid #ddd; border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+.day-card.today { border-color: #1D9E75; }
+.day-card.exam  { border-color: #E8593C; }
+.day-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; background: #f7f7f7; }
+.day-date  { font-size: 11px; font-weight: 500; color: #666; white-space: nowrap; width: 58px; flex-shrink: 0; }
+.day-title { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; line-height: 1.4; }
+.day-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+.badge-today { background:#FAEEDA; color:#854F0B; }
+.badge-rev   { background:#EEEDFE; color:#534AB7; }
+.badge-exam  { background:#FCEBEB; color:#A32D2D; }
+.day-arrow { font-size: 10px; color: #aaa; transition: transform .2s; flex-shrink: 0; }
+.day-arrow.open { transform: rotate(180deg); }
+.day-body { display: none; padding: 10px 12px 12px; border-top: 1px solid #eee; }
+.day-body.open { display: block; }
+.task { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+.task input[type=checkbox] { margin-top: 3px; cursor: pointer; accent-color: #1D9E75; flex-shrink: 0; width: 16px; height: 16px; }
+.task-text { font-size: 13px; line-height: 1.55; flex: 1; min-width: 0; }
+.task-text.checked { text-decoration: line-through; color: #aaa; }
+.st { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 5px; border-radius: 4px; margin-right: 4px; white-space: nowrap; }
+.st-skim  { background:#E6F1FB; color:#185FA5; }
+.st-voc   { background:#FAEEDA; color:#854F0B; }
+.st-gram  { background:#EEEDFE; color:#534AB7; }
+.st-exp   { background:#E1F5EE; color:#0F6E56; }
+.st-rev   { background:#F1EFE8; color:#5F5E5A; }
+.lk-btn { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 5px; background: #E6F1FB; color: #185FA5; text-decoration: none; }
+.lk-btn:hover { background: #B5D4F4; }
+.lk-pl { display: inline-block; margin-top: 3px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 5px; background: #EEEDFE; color: #534AB7; text-decoration: none; }
+.lk-pl:hover { background: #CECBF6; }
+.vid-section { margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+.vid-label { font-size: 11px; font-weight: 500; color: #666; margin-bottom: 6px; }
+.vid-row { display: flex; flex-direction: column; gap: 5px; }
+.tip { font-size: 12px; color: #555; background: #f7f7f7; border-radius: 6px; padding: 7px 10px; margin-top: 6px; border-left: 3px solid #ccc; line-height: 1.7; }
+.tip b { color: #222; }
+.tip-stela { border-left-color: #185FA5; }
+.tip-red { border-left-color: #E8593C; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.ref-table th { background: #f0f0f0; padding: 5px 8px; text-align: left; font-weight: 500; border: 1px solid #ddd; }
+.ref-table td { padding: 5px 8px; border: 1px solid #ddd; line-height: 1.5; }
+.ref-table tr:nth-child(even) td { background: #fafafa; }
+.stats { display: flex; gap: 8px; margin-top: 1rem; }
+.stat-box { background: #f7f7f7; border: 1px solid #ddd; border-radius: 10px; padding: 8px 10px; flex: 1; text-align: center; }
+.stat-num { font-size: 20px; font-weight: 500; color: #1D9E75; }
+.stat-lbl { font-size: 10px; color: #666; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="title">Cronograma Rel&acirc;mpago &mdash; Ingl&ecirc;s I (Eletiva) 06/04</div><br>
+  <div class="countdown" id="cd">calculando...</div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-label"><span>Progresso</span><span id="pct">0%</span></div>
+  <div class="prog-track"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+</div>
+
+<!-- TEMAS MAIS COBRADOS -->
+<div style="border:1px solid #ddd;border-radius:12px;margin-bottom:8px;overflow:hidden;">
+  <div onclick="togTemas()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#f7f7f7;">
+    <div style="font-size:13px;font-weight:500;flex:1;">Temas mais cobrados (2 provas analisadas)</div>
+    <div id="ar-temas" style="font-size:10px;color:#aaa;transition:transform .2s;">&#9660;</div>
+  </div>
+  <div id="db-temas" style="display:none;padding:12px 14px;border-top:1px solid #eee;">
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:11px;color:#555;">
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#E8593C;margin-right:4px;"></span>Caiu nas 2 provas</span>
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1D9E75;margin-right:4px;"></span>Caiu em 1 prova</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:160px;flex-shrink:0;line-height:1.3;">Scanning no abstract</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#E8593C;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">2/2 provas</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:160px;flex-shrink:0;line-height:1.3;">Escrever em ingl&ecirc;s</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#E8593C;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">2/2 provas</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:160px;flex-shrink:0;line-height:1.3;">Compreens&atilde;o em PT</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#E8593C;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">2/2 provas</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:160px;flex-shrink:0;line-height:1.3;">Express&otilde;es funcionais</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:50%;height:100%;background:#1D9E75;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">1/2 provas</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:160px;flex-shrink:0;line-height:1.3;">Vocabul&aacute;rio t&eacute;cnico</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:50%;height:100%;background:#1D9E75;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">1/2 provas</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:13px;font-weight:500;margin-bottom:10px;">O que cada prova cobrou</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+
+      <div style="border:1px solid #ddd;border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eee;">P1 &mdash; 2024 (Prof. Stela &bull; 4 quest&otilde;es &bull; 1h40)</div>
+        <div style="font-size:12px;color:#444;line-height:1.8;">
+          <b>Q1</b> Abstract sobre TDD &rarr; quais aspectos da qualidade de software s&atilde;o avaliados? Escreva a senten&ccedil;a em ingl&ecirc;s.<br>
+          <b>Q2</b> Texto sobre multilinguismo &rarr; descreva com suas palavras (PT) como o multilinguismo afeta a cogni&ccedil;&atilde;o.<br>
+          <b>Q3</b> Express&otilde;es funcionais: como discordar educadamente e expressar surpresa em ingl&ecirc;s?<br>
+          <b>Q4</b> Abstract sobre Agile-Scrum &rarr; como pequenas empresas podem se beneficiar? (scanning + resposta em PT)
+        </div>
+      </div>
+
+      <div style="border:1px solid #ddd;border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eee;">P1 &mdash; 2023 (Prof. Ney Rubens &bull; 4 quest&otilde;es)</div>
+        <div style="font-size:12px;color:#444;line-height:1.8;">
+          Texto sobre hist&oacute;ria da engenharia de software.<br>
+          <b>Q4</b> Who were key figures in the early days of software engineering? (scanning &rarr; resposta em ingl&ecirc;s)<br>
+          <b>Q5</b> What is the software development life cycle? (scanning &rarr; resposta em ingl&ecirc;s)
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:14px;font-size:12px;color:#555;background:#E6F1FB;border-radius:8px;padding:8px 10px;border-left:3px solid #185FA5;">
+      <b>Padr&atilde;o da Prof. Stela:</b> sempre um texto t&eacute;cnico em ingl&ecirc;s + 4 quest&otilde;es combinando scanning, compreens&atilde;o e produ&ccedil;&atilde;o em ingl&ecirc;s. O texto da prova provavelmente ser&aacute; o artigo do MIT sobre IA.
+    </div>
+  </div>
+</div>
+
+<!-- RESUMO RÁPIDO -->
+<div style="border:1px solid #ddd;border-radius:12px;margin-bottom:8px;overflow:hidden;">
+  <div onclick="togRes()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#f7f7f7;">
+    <div style="font-size:13px;font-weight:500;flex:1;">Resumo r&aacute;pido &mdash; cola de bolso</div>
+    <div id="ar-res" style="font-size:10px;color:#aaa;transition:transform .2s;">&#9660;</div>
+  </div>
+  <div id="db-res" style="display:none;padding:12px 14px;border-top:1px solid #eee;">
+
+    <!-- Skimming vs Scanning -->
+    <div style="font-size:12px;font-weight:500;color:#185FA5;margin-bottom:6px;">Skimming vs Scanning</div>
+    <table class="ref-table" style="margin-bottom:14px;">
+      <tr><th>T&eacute;cnica</th><th>Para que serve</th><th>Como fazer</th></tr>
+      <tr><td><b>Skimming</b></td><td>Pegar a ideia geral r&aacute;pido</td><td>L&ecirc; t&iacute;tulo, 1&ordm; par&aacute;grafo, 1&ordf; frase de cada par&aacute;grafo, &uacute;ltimo par&aacute;grafo</td></tr>
+      <tr><td><b>Scanning</b></td><td>Encontrar informa&ccedil;&atilde;o espec&iacute;fica</td><td>Procura palavra-chave da quest&atilde;o diretamente no texto, n&atilde;o l&ecirc; tudo</td></tr>
+    </table>
+
+    <!-- Expressões funcionais -->
+    <div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:6px;">Express&otilde;es funcionais (caiu em 2024!)</div>
+    <table class="ref-table" style="margin-bottom:14px;">
+      <tr><th>Situa&ccedil;&atilde;o</th><th>Express&otilde;es em ingl&ecirc;s</th></tr>
+      <tr><td>Concordar</td><td><i>I agree. / That's right. / Exactly. / Good point.</i></td></tr>
+      <tr><td>Discordar (educado)</td><td><i>I see your point, but... / I respectfully disagree. / That may be true, however...</i></td></tr>
+      <tr><td>Surpresa</td><td><i>Wow! / That's amazing! / I can't believe it! / Really?</i></td></tr>
+      <tr><td>Desculpa</td><td><i>I'm sorry. / I apologize. / Excuse me.</i></td></tr>
+    </table>
+
+    <!-- Sufixos comuns -->
+    <div style="font-size:12px;font-weight:500;color:#854F0B;margin-bottom:6px;">Sufixos comuns (Aula 5 &mdash; PPTX da Prof. Stela)</div>
+    <table class="ref-table" style="margin-bottom:14px;">
+      <tr><th>Sufixo</th><th>Significado</th><th>Exemplo</th></tr>
+      <tr><td>-tion / -sion</td><td>a&ccedil;&atilde;o, resultado</td><td>informa<b>tion</b>, adop<b>tion</b></td></tr>
+      <tr><td>-ity / -ty</td><td>qualidade, estado</td><td>productiv<b>ity</b>, qual<b>ity</b></td></tr>
+      <tr><td>-ment</td><td>resultado, processo</td><td>develop<b>ment</b>, manage<b>ment</b></td></tr>
+      <tr><td>-ness</td><td>estado, condi&ccedil;&atilde;o</td><td>useful<b>ness</b>, aware<b>ness</b></td></tr>
+      <tr><td>-er / -or</td><td>agente, pessoa</td><td>develop<b>er</b>, creat<b>or</b></td></tr>
+      <tr><td>-ive</td><td>caracter&iacute;stica, qualidade</td><td>effect<b>ive</b>, product<b>ive</b></td></tr>
+      <tr><td>-al</td><td>relativo a</td><td>technic<b>al</b>, digit<b>al</b></td></tr>
+      <tr><td>-ing</td><td>a&ccedil;&atilde;o continu ada / substantivo</td><td>learn<b>ing</b>, test<b>ing</b></td></tr>
+    </table>
+
+    <!-- Artigos -->
+    <div style="font-size:12px;font-weight:500;color:#534AB7;margin-bottom:6px;">Artigos &mdash; the / a / an</div>
+    <table class="ref-table" style="margin-bottom:14px;">
+      <tr><th>Artigo</th><th>Quando usar</th><th>Exemplo</th></tr>
+      <tr><td><b>the</b></td><td>Refer&ecirc;ncia espec&iacute;fica / j&aacute; mencionado</td><td><i><b>The</b> model is small.</i></td></tr>
+      <tr><td><b>a</b></td><td>1&ordf; men&ccedil;&atilde;o / n&atilde;o espec&iacute;fico (consoante)</td><td><i><b>A</b> small model.</i></td></tr>
+      <tr><td><b>an</b></td><td>1&ordf; men&ccedil;&atilde;o / n&atilde;o espec&iacute;fico (vogal)</td><td><i><b>An</b> AI tool.</i></td></tr>
+    </table>
+
+    <!-- Texto da prova: MIT AI Article -->
+    <div style="font-size:12px;font-weight:500;color:#E8593C;margin-bottom:6px;">Artigo do MIT &mdash; fatos-chave para a prova</div>
+    <div style="font-size:12px;color:#444;background:#FCEBEB;border-radius:6px;padding:8px 10px;border-left:3px solid #E8593C;line-height:1.8;">
+      <b>T&iacute;tulo:</b> "What's the right path for AI?" &mdash; MIT News, March 2026<br>
+      <b>Argumento principal:</b> A escala massiva de IA &eacute; desnecess&aacute;ria; modelos menores e espec&iacute;ficos s&atilde;o melhores.<br>
+      <b>Quem:</b> Karen Hao (jornalista, ex-WSJ e MIT Tech Review, autora "Empire of AI")<br>
+      <b>Exemplo positivo:</b> AlphaFold &mdash; modelo pequeno, espec&iacute;fico para dobramento de prote&iacute;nas, ganhou Pr&ecirc;mio Nobel<br>
+      <b>Problemas do AI em grande escala:</b> consumo enorme de energia, emiss&otilde;es, uso de &aacute;gua, impacto humano (gig workers)<br>
+      <b>Frase-chave:</b> <i>"This scale is unnecessary"</i> / <i>"If we really want AI to be broadly beneficial, we urgently need to shift away from this approach."</i>
+    </div>
+
+  </div>
+</div>
+
+<!-- PLAYLISTS -->
+<div style="border:1px solid #ddd;border-radius:12px;margin-bottom:8px;overflow:hidden;">
+  <div onclick="togPl()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#f7f7f7;">
+    <div style="font-size:13px;font-weight:500;flex:1;">Playlist de refer&ecirc;ncia (~1h total)</div>
+    <div id="ar-pl" style="font-size:10px;color:#aaa;transition:transform .2s;">&#9660;</div>
+  </div>
+  <div id="db-pl" style="display:none;padding:12px 14px;border-top:1px solid #eee;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div>
+        <div style="font-size:12px;color:#444;margin-bottom:2px;"><span style="color:#888;font-size:11px;">1.</span> Prof. Marta Garcia &mdash; <i>Skimming e Scanning nas provas de profici&ecirc;ncia</i></div>
+        <a class="lk-pl" href="https://www.youtube.com/watch?v=0I7Dw9zvQMU" target="_blank">&#9654; Assistir</a>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#444;margin-bottom:2px;"><span style="color:#888;font-size:11px;">2.</span> Curso Enem Gratuito &mdash; <i>Skimming e Scanning: exemplos pr&aacute;ticos</i></div>
+        <a class="lk-pl" href="https://www.youtube.com/watch?v=qdkVExqTpW4" target="_blank">&#9654; Assistir</a>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#444;margin-bottom:2px;"><span style="color:#888;font-size:11px;">3.</span> <i>Ingl&ecirc;s Instrumental: o que &eacute; e como aplicar estrat&eacute;gias de leitura</i></div>
+        <a class="lk-pl" href="https://www.youtube.com/watch?v=sjal7GW3KJA" target="_blank">&#9654; Assistir</a>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#444;margin-bottom:2px;"><span style="color:#888;font-size:11px;">4.</span> Easy with Iupi &mdash; <i>Instrumental English &mdash; vocabul&aacute;rio t&eacute;cnico e sufixos</i></div>
+        <a class="lk-pl" href="https://www.youtube.com/watch?v=UMdpjjccbKU" target="_blank">&#9654; Assistir</a>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#444;margin-bottom:2px;"><span style="color:#888;font-size:11px;">5.</span> Isabel Pauline &mdash; <i>Estrat&eacute;gias de Leitura &mdash; Ingl&ecirc;s Instrumental</i></div>
+        <a class="lk-pl" href="https://www.youtube.com/watch?v=wOZI0R40x6s" target="_blank">&#9654; Assistir</a>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:#555;background:#f7f7f7;border-radius:6px;padding:7px 10px;border-left:3px solid #ccc;">
+      Ordem recomendada: v&iacute;deo 1 &rarr; 2 &rarr; 3 &rarr; 4. Ap&oacute;s cada um, tente aplicar a t&eacute;cnica no artigo do MIT.
+    </div>
+  </div>
+</div>
+
+<!-- DIA 1 - HOJE -->
+<div class="day-card today">
+  <div class="day-header" onclick="tog(0)">
+    <div class="day-date">04/04 S&aacute;b</div>
+    <div class="day-title">Skimming, scanning e artigo do MIT</div>
+    <div class="day-badge badge-today">HOJE</div>
+    <div class="day-arrow open" id="ar0">&#9660;</div>
+  </div>
+  <div class="day-body open" id="db0">
+    <div class="task">
+      <input type="checkbox" id="cb0" onchange="upd()">
+      <div class="task-text" id="tb0"><span class="st st-skim">Skimming</span>Abrir o artigo do MIT e fazer skimming em 3 min: ler t&iacute;tulo, 1&ordm; par&aacute;grafo, 1&ordf; frase de cada par&aacute;grafo e &uacute;ltimo par&aacute;grafo &mdash; qual &eacute; a ideia central?</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb1" onchange="upd()">
+      <div class="task-text" id="tb1"><span class="st st-skim">Scanning</span>Usar scanning no artigo do MIT para localizar: (a) quem &eacute; Karen Hao, (b) o que &eacute; AlphaFold, (c) qual o argumento sobre escala de IA, (d) quais os problemas ambientais citados</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb2" onchange="upd()">
+      <div class="task-text" id="tb2"><span class="st st-skim">Pr&aacute;tica</span>Simular Q1 da prova: "De acordo com o texto, quais s&atilde;o os problemas da IA em larga escala? Escreva uma senten&ccedil;a em ingl&ecirc;s." &mdash; responder sem copiar palavra por palavra</div>
+    </div>
+    <div class="vid-section">
+      <div class="vid-label">V&iacute;deos para hoje (assista antes de praticar)</div>
+      <div class="vid-row">
+        <div><a class="lk-btn" href="https://www.youtube.com/watch?v=0I7Dw9zvQMU" target="_blank">&#9654; Prof. Marta Garcia &mdash; Skimming e Scanning (base)</a></div>
+        <div><a class="lk-btn" href="https://www.youtube.com/watch?v=qdkVExqTpW4" target="_blank">&#9654; Skimming e Scanning &mdash; exemplos pr&aacute;ticos</a></div>
+      </div>
+    </div>
+    <div class="tip tip-stela"><b>Estrat&eacute;gia-chave:</b> a prova nunca pede para traduzir tudo. Ela pede para localizar informa&ccedil;&atilde;o espec&iacute;fica (scanning) ou parafrasear em portugu&ecirc;s. Nunca leia o texto inteiro antes de ver as perguntas.</div>
+  </div>
+</div>
+
+<!-- DIA 2 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(1)">
+    <div class="day-date">05/04 Dom</div>
+    <div class="day-title">Express&otilde;es, sufixos, artigos e simula&ccedil;&atilde;o</div>
+    <div class="day-badge badge-rev">ESTUDO</div>
+    <div class="day-arrow" id="ar1">&#9660;</div>
+  </div>
+  <div class="day-body" id="db1">
+    <div class="task">
+      <input type="checkbox" id="cb3" onchange="upd()">
+      <div class="task-text" id="tb3"><span class="st st-exp">Express&otilde;es</span>Memorizar as express&otilde;es funcionais do resumo r&aacute;pido acima: concordar, discordar educadamente, surpresa e desculpa &mdash; caiu em 2024 e &eacute; o tipo mais f&aacute;cil de pontuar</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb4" onchange="upd()">
+      <div class="task-text" id="tb4"><span class="st st-voc">Sufixos</span>Revisar os sufixos do PPTX da Prof. Stela (-tion, -ity, -ment, -ness, -er, -ive, -al, -ing) &mdash; saber reconhecer a classe da palavra pelo sufixo ajuda no vocabul&aacute;rio da prova</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb5" onchange="upd()">
+      <div class="task-text" id="tb5"><span class="st st-gram">Artigos</span>Revisar the / a / an: the (j&aacute; conhecido/espec&iacute;fico), a (consoante, 1&ordf; vez), an (vogal, 1&ordf; vez) &mdash; pr&aacute;tica: identificar os artigos no artigo do MIT</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb6" onchange="upd()">
+      <div class="task-text" id="tb6"><span class="st st-skim">Simula&ccedil;&atilde;o</span>Simular a prova completa: abrir o artigo do MIT e responder 3 perguntas inventadas no modelo das provas anteriores &mdash; escrever no papel, com caneta</div>
+    </div>
+    <div class="vid-section">
+      <div class="vid-label">V&iacute;deos para hoje</div>
+      <div class="vid-row">
+        <div><a class="lk-btn" href="https://www.youtube.com/watch?v=sjal7GW3KJA" target="_blank">&#9654; Ingl&ecirc;s Instrumental: estrat&eacute;gias de leitura</a></div>
+        <div><a class="lk-btn" href="https://www.youtube.com/watch?v=UMdpjjccbKU" target="_blank">&#9654; Vocabul&aacute;rio t&eacute;cnico e sufixos</a></div>
+      </div>
+    </div>
+    <div class="tip"><b>Para a simula&ccedil;&atilde;o:</b> crie quest&otilde;es no modelo da 2024: "De acordo com o texto, descreva [conceito X]" e "Escreva uma senten&ccedil;a em ingl&ecirc;s sobre [info Y]." Depois corrija sozinho consultando o texto.</div>
+  </div>
+</div>
+
+<!-- PROVA -->
+<div class="day-card exam">
+  <div class="day-header" onclick="tog(2)">
+    <div class="day-date">06/04 Seg</div>
+    <div class="day-title">DIA DA PROVA &mdash; Eletiva I (Ingl&ecirc;s)</div>
+    <div class="day-badge badge-exam">PROVA</div>
+    <div class="day-arrow" id="ar2">&#9660;</div>
+  </div>
+  <div class="day-body" id="db2">
+    <div class="task">
+      <input type="checkbox" id="cb7" onchange="upd()">
+      <div class="task-text" id="tb7">Caneta azul ou preta (obrigat&oacute;rio) &bull; tempo: 1h40</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb8" onchange="upd()">
+      <div class="task-text" id="tb8">Ler TODAS as perguntas antes de come&ccedil;ar &mdash; identificar quais pedem scanning e quais pedem produ&ccedil;&atilde;o em ingl&ecirc;s</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb9" onchange="upd()">
+      <div class="task-text" id="tb9">Para quest&otilde;es de scanning: sublinhar a palavra-chave da pergunta e buscar no texto &mdash; n&atilde;o ler tudo antes de responder</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb10" onchange="upd()">
+      <div class="task-text" id="tb10">Para quest&otilde;es de express&otilde;es funcionais: usar as f&oacute;rmulas do resumo r&aacute;pido &mdash; n&atilde;o inventar, usar o que j&aacute; conhece</div>
+    </div>
+    <div class="tip tip-red"><b>Regra de ouro:</b> nas quest&otilde;es que pedem para "escrever em ingl&ecirc;s", voc&ecirc; pode e deve usar frases do pr&oacute;prio texto &mdash; a prova quer saber se voc&ecirc; localizou a informa&ccedil;&atilde;o certa. N&atilde;o precisa inventar. &bull; Boa prova!</div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat-box"><div class="stat-num" id="sDone">0</div><div class="stat-lbl">conclu&iacute;das</div></div>
+  <div class="stat-box"><div class="stat-num" id="sLeft">11</div><div class="stat-lbl">restantes</div></div>
+  <div class="stat-box"><div class="stat-num" id="sDays">2</div><div class="stat-lbl">dias</div></div>
+</div>
+
+</div>
+
+<script>
+const TOTAL = 11;
+const LS_KEY = 'cronograma_ingles_2026';
+
+function saveState() {
+  var state = {};
+  document.querySelectorAll('input[type=checkbox]').forEach(function(b) {
+    state[b.id] = b.checked;
+  });
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    var state = JSON.parse(raw);
+    document.querySelectorAll('input[type=checkbox]').forEach(function(b) {
+      if (state[b.id] !== undefined) {
+        b.checked = state[b.id];
+        var txt = document.getElementById('t' + b.id.slice(1));
+        if (txt) txt.classList.toggle('checked', b.checked);
+      }
+    });
+  } catch(e) {}
+}
+
+function togTemas() {
+  var b = document.getElementById('db-temas');
+  var a = document.getElementById('ar-temas');
+  var open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  a.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function togRes() {
+  var b = document.getElementById('db-res');
+  var a = document.getElementById('ar-res');
+  var open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  a.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function togPl() {
+  var b = document.getElementById('db-pl');
+  var a = document.getElementById('ar-pl');
+  var open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  a.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function tog(i) {
+  var b = document.getElementById('db'+i);
+  var a = document.getElementById('ar'+i);
+  var open = b.classList.toggle('open');
+  a.classList.toggle('open', open);
+}
+
+function upd() {
+  var boxes = document.querySelectorAll('input[type=checkbox]');
+  var done = 0;
+  boxes.forEach(function(b) {
+    if (b.checked) done++;
+    var tid = 't' + b.id.slice(1);
+    var txt = document.getElementById(tid);
+    if (txt) txt.classList.toggle('checked', b.checked);
+  });
+  var pct = Math.round(done / TOTAL * 100);
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('sDone').textContent = done;
+  document.getElementById('sLeft').textContent = Math.max(0, TOTAL - done);
+  saveState();
+}
+
+function updateCD() {
+  var exam = new Date('2026-04-06T08:00:00');
+  var now = new Date();
+  var diff = exam - now;
+  if (diff <= 0) { document.getElementById('cd').textContent = 'Dia da prova!'; return; }
+  var days = Math.floor(diff / 86400000);
+  var hrs = Math.floor((diff % 86400000) / 3600000);
+  document.getElementById('cd').textContent = days + 'd ' + hrs + 'h para a prova';
+  document.getElementById('sDays').textContent = days;
+}
+
+window.addEventListener('load', function() {
+  loadState();
+  upd();
+  updateCD();
+  setInterval(updateCD, 60000);
+});
+</script>
+</body>
+</html>
