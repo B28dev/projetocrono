@@ -224,7 +224,7 @@ export default function Dashboard({ shift = 'noturno-adele', userName = '' }) {
         <div>
           <h2 className="text-lg font-semibold text-zinc-100 dark:text-stone-950 cyberpunk:font-display cyberpunk:text-white">Materias</h2>
           <p className="text-sm text-zinc-500 mt-0.5 dark:text-stone-600 cyberpunk:text-white/65">
-            Arquitetura, Intro. Engenharia de Software, Empreendedorismo e Eletiva I (Ingles) estao disponiveis com progresso ativo.
+            Arquitetura, Intro. Engenharia de Software e Empreendedorismo estao com progresso ativo. Eletiva I (Ingles) ja aparece como finalizada.
           </p>
         </div>
 

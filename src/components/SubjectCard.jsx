@@ -7,7 +7,7 @@ const SUBJECT_BASE = [
   { id: 'matematica-discreta', name: 'Matematica Discreta', short: 'M.D', active: false, color: 'purple', progress: 0 },
   { id: 'algoritmos-programacao', name: 'Algoritmos e Programacao', short: 'ALG', active: false, color: 'amber', progress: 0 },
   { id: 'intro-eng-software', name: 'Intro. Engenharia de Software', short: 'IES', active: true, color: 'teal', progress: 0 },
-  { id: 'eletiva-ingles', name: 'Eletiva I (Ingles)', short: 'ING', active: true, color: 'green', progress: 0 },
+  { id: 'eletiva-ingles', name: 'Eletiva I (Ingles)', short: 'ING', active: true, color: 'green', progress: 0, status: 'completed' },
   { id: 'empreendedorismo', name: 'Empreendedorismo', short: 'EMP', active: true, color: 'rose', progress: 0 },
 ];
 
@@ -50,11 +50,12 @@ const colorMap = {
 
 export default function SubjectCard({ subject, metrics = null, shift = 'noturno-adele' }) {
   const navigate = useNavigate();
-  const { name, short, active, color, progress, examDate } = subject;
+  const { name, short, active, color, progress, examDate, status } = subject;
   const colors = colorMap[color] || colorMap.blue;
   const effectiveProgress = active && metrics ? metrics.progressPercent : progress;
   const countdownKey = `${shift}-${subject.id}-${examDate?.getTime?.() ?? examDate}`;
   const isIntroEngSoftware = subject.id === 'intro-eng-software';
+  const isCompleted = status === 'completed';
 
   const handleClick = () => {
     if (!active) return;
@@ -80,7 +81,7 @@ export default function SubjectCard({ subject, metrics = null, shift = 'noturno-
         </div>
         {active ? (
           <span className="rounded-full border border-[#34d399]/20 bg-[#34d399]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#34d399]">
-            ATIVO
+            {isCompleted ? 'FINALIZADO' : 'ATIVO'}
           </span>
         ) : (
           <span className="rounded-full bg-zinc-800/50 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-stone-200 dark:text-stone-600 cyberpunk:border cyberpunk:border-white/10 cyberpunk:bg-white/[0.04] cyberpunk:text-white/55">
