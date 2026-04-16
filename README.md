@@ -1,16 +1,27 @@
-# React + Vite
+# Painel de Turma
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação web desenvolvida para centralizar a organização de estudos da turma, reunindo cronogramas, conteúdos por matéria e acompanhamento de progresso em um único lugar.
 
-Currently, two official plugins are available:
+## Sobre o projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+O sistema funciona como um painel acadêmico com foco em revisão e preparação para avaliações. A proposta atual é facilitar o acesso aos materiais e ajudar no acompanhamento das tarefas de estudo por disciplina.
 
-## React Compiler
+No estado atual, o projeto oferece:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- autenticação com Firebase;
+- acesso restrito a usuários com domínio institucional permitido;
+- dashboard com visão geral de progresso;
+- organização por matérias, como Arquitetura, Engenharia de Software, Empreendedorismo e Inglês;
+- acompanhamento de tarefas e planejamento de estudo por turno.
 
-## Expanding the ESLint configuration
+## Tecnologias utilizadas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- Vite
+- Firebase
+- React Router
+- Tailwind CSS
+
+## Observação
+
+Este README ainda é uma descrição inicial do projeto e poderá ser atualizado novamente conforme novas features forem adicionadas.
