@@ -117,16 +117,43 @@ function getTodayTasks(groups) {
   })));
 }
 
+const STATUS_COPY = {
+  recuperacao: 'Modo de recuperação: a disciplina pede limpeza e retomada antes de ampliar o ritmo.',
+  acao_imediata: 'Modo de execução: há tarefa viva agora e a próxima frente já está destacada.',
+  consolidado: 'Modo de consolidação: a base foi organizada e o foco vira revisão fina.',
+  planejado: 'Modo de preparação: o laboratório já deixou a disciplina pronta para execução assistida.',
+};
+
+const NEXT_ACTION_MODE_CONFIG = {
+  backlog: {
+    kind: 'recuperação',
+    title: 'Limpeza imediata do atraso',
+    reason: 'Existe conteúdo aberto para trás. Primeiro limpa o que trava a disciplina, depois amplia.',
+    ctaLabel: 'Comece pela primeira etapa desta sequência.',
+  },
+  today: {
+    kind: 'execução de hoje',
+    title: 'Execução obrigatória do dia',
+    reason: 'Sem atraso crítico liderando. Agora o foco é proteger o ritmo e fechar o que vence hoje.',
+    ctaLabel: 'Siga a ordem abaixo e preserve o fluxo da disciplina.',
+  },
+  future: {
+    kind: 'próximo ciclo',
+    title: 'Próxima frente já preparada',
+    reason: 'Sem urgência crítica no momento. O laboratório já separou o melhor próximo passo para entrar depois.',
+    ctaLabel: 'Use esta sequência quando encerrar o bloco atual.',
+  },
+};
+
 export function getEntrepreneurshipPilotData({ shift = 'noturno-adele' } = {}) {
   const taskProgress = loadEntrepreneurshipTaskProgress();
   const groups = getGroupedStudyPlan(shift, taskProgress);
   const overdueTasks = getOverdueTasks(groups);
   const todayTasks = getTodayTasks(groups);
-  const completedTodayTasks = todayTasks.filter((task) => task.checked);
   const pendingTodayTasks = todayTasks.filter((task) => !task.checked);
   const metrics = getProgressMetrics(groups);
 
-  const nextActions = overdueTasks.length > 0
+  const nextActionItems = overdueTasks.length > 0
     ? overdueTasks.slice(0, 3)
     : pendingTodayTasks.length > 0
       ? pendingTodayTasks.slice(0, 3)
@@ -137,6 +164,13 @@ export function getEntrepreneurshipPilotData({ shift = 'noturno-adele' } = {}) {
           date: item.date,
         })));
 
+  const nextActionMode = overdueTasks.length > 0
+    ? 'backlog'
+    : pendingTodayTasks.length > 0
+      ? 'today'
+      : 'future';
+
+  const nextActionConfig = NEXT_ACTION_MODE_CONFIG[nextActionMode];
   const status = overdueTasks.length > 0
     ? 'recuperacao'
     : pendingTodayTasks.length > 0
@@ -146,39 +180,57 @@ export function getEntrepreneurshipPilotData({ shift = 'noturno-adele' } = {}) {
         : 'planejado';
 
   return {
-    pilotNotice: {
-      title: 'Piloto de disciplina no Crono-Lab',
-      body: 'Empreendedorismo foi trazida para o laboratório como simulação controlada do novo modelo do Crono. Esta organização pode ser removida, refeita ou expandida depois.',
-      label: 'piloto temporário',
-    },
     overview: {
       subjectId: 'empreendedorismo',
       title: 'Empreendedorismo',
-      subtitle: 'Disciplina-piloto adaptada para o novo modelo assistivo do Crono.',
+      subtitle: 'Disciplina-piloto reorganizada para testar clareza, sequência e leitura mais leve dentro do Crono-Lab.',
+      role: 'Aqui a disciplina vira um teste de UX assistiva: ação primeiro, contexto depois, biblioteca por último.',
       professor: 'Prof. Italo',
       period: '2026/1',
       examDate,
       status,
-      nextActionLabel: nextActions[0]?.text ?? 'Base revisada. Sem ação crítica imediata.',
+      statusCopy: STATUS_COPY[status],
+      nextActionLabel: nextActionItems[0]?.text ?? 'Base revisada. Sem ação crítica imediata.',
+      recoveryLabel: overdueTasks.length > 0
+        ? `${overdueTasks.length} pendência(s) crítica(s)`
+        : pendingTodayTasks.length > 0
+          ? `${pendingTodayTasks.length} item(ns) de hoje ainda aberto(s)`
+          : 'Fluxo limpo no momento',
       ...metrics,
+      pilotNotice: {
+        label: 'piloto temporário',
+        title: 'Formato em teste no laboratório',
+        body: 'Esta disciplina foi trazida para o Crono-Lab para validar organização e clareza. Pode ser removida, refeita ou expandida depois.',
+      },
     },
-    nextActions: {
-      title: 'O que fazer agora',
-      items: nextActions,
-      mode: overdueTasks.length > 0 ? 'backlog' : pendingTodayTasks.length > 0 ? 'today' : 'future',
+    nextAction: {
+      eyebrow: 'Próxima ação',
+      kind: nextActionConfig.kind,
+      title: nextActionConfig.title,
+      reason: nextActionConfig.reason,
+      ctaLabel: nextActionConfig.ctaLabel,
+      items: nextActionItems,
+      mode: nextActionMode,
     },
-    backlog: {
-      overdueTasks,
-      overdueDays: groups.overdue,
-      pendingTodayTasks,
-      completedTodayTasks,
-    },
-    highFrequencyTopics: topics,
-    resources: {
-      videoSections: referenceVideoSections,
-      pdfs: referencePdfMaterials,
+    recovery: {
+      eyebrow: 'Recuperação / pendências',
+      title: overdueTasks.length > 0 ? 'O que ficou para trás' : 'Painel de limpeza leve',
+      description: overdueTasks.length > 0
+        ? 'Este bloco existe para limpar o que ficou aberto sem roubar o centro da próxima ação.'
+        : pendingTodayTasks.length > 0
+          ? 'Sem atraso antigo no momento. Só existem pendências leves de hoje para não deixar acumular.'
+          : 'Nenhum atraso crítico encontrado. A disciplina pode seguir para treino e apoio com mais clareza.',
+      isActive: overdueTasks.length > 0,
+      overdueCount: overdueTasks.length,
+      pendingTodayCount: pendingTodayTasks.length,
+      items: overdueTasks.slice(0, 4),
+      pendingTodayPreview: pendingTodayTasks.slice(0, 3),
     },
     activeStudy: {
+      eyebrow: 'Estudo ativo',
+      title: 'Onde o treino acontece',
+      description: 'Treino separado por intenção. Primeiro base, depois prova e pegadinha, sem virar biblioteca bagunçada.',
+      priorityTopics: topics.slice(0, 4),
       blocks: [
         {
           id: 'empreendedorismo-base',
@@ -196,9 +248,21 @@ export function getEntrepreneurshipPilotData({ shift = 'noturno-adele' } = {}) {
         },
       ],
     },
-    summaries: {
-      modelSummaries,
-      examCoverage,
+    resources: {
+      eyebrow: 'Recursos e apoio',
+      title: 'Onde aprofundar ou revisar',
+      description: 'Playlists e PDFs ficam fora da linha principal de execução. Abra só quando precisar de apoio real.',
+      videoSections: referenceVideoSections,
+      pdfs: referencePdfMaterials,
+    },
+    extraContext: {
+      eyebrow: 'Contexto extra',
+      title: 'Consolidação e leitura complementar',
+      description: 'Bloco final para revisão rápida e leitura de prova. Entra depois que ação, limpeza e treino já ficaram claros.',
+      summaries: {
+        modelSummaries,
+        examCoverage,
+      },
     },
   };
 }

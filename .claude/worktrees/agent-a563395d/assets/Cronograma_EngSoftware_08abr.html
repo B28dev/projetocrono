@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma &mdash; Eng. de Software &mdash; Prova 08/04</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #fff; color: #1a1a1a; font-family: sans-serif; }
+.wrap { padding: 0.75rem; font-size: 14px; max-width: 680px; margin: 0 auto; }
+.header { margin-bottom: 1rem; }
+.title { font-size: 17px; font-weight: 500; margin-bottom: 6px; }
+.countdown { display: inline-block; background: #E8593C; color: #fff; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+.prog-wrap { margin-bottom: 1.2rem; }
+.prog-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px; }
+.prog-track { height: 7px; background: #f0f0f0; border-radius: 4px; border: 1px solid #ddd; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 4px; background: #1D9E75; transition: width .4s; }
+.day-card { border: 1px solid #ddd; border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+.day-card.today { border-color: #1D9E75; }
+.day-card.exam  { border-color: #E8593C; }
+.day-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; background: #f7f7f7; }
+.day-date  { font-size: 11px; font-weight: 500; color: #666; white-space: nowrap; width: 58px; flex-shrink: 0; }
+.day-title { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; line-height: 1.4; }
+.day-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+.badge-today { background:#FAEEDA; color:#854F0B; }
+.badge-rev   { background:#EEEDFE; color:#534AB7; }
+.badge-exam  { background:#FCEBEB; color:#A32D2D; }
+.day-arrow { font-size: 10px; color: #aaa; transition: transform .2s; flex-shrink: 0; }
+.day-arrow.open { transform: rotate(180deg); }
+.day-body { display: none; padding: 10px 12px 12px; border-top: 1px solid #eee; }
+.day-body.open { display: block; }
+.task { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+.task input[type=checkbox] { margin-top: 3px; cursor: pointer; accent-color: #1D9E75; flex-shrink: 0; width: 16px; height: 16px; }
+.task-text { font-size: 13px; line-height: 1.55; flex: 1; min-width: 0; }
+.task-text.checked { text-decoration: line-through; color: #aaa; }
+.st { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 5px; border-radius: 4px; margin-right: 4px; white-space: nowrap; }
+.st-intro { background:#E6F1FB; color:#185FA5; }
+.st-mit   { background:#FAEEDA; color:#854F0B; }
+.st-proc  { background:#E1F5EE; color:#0F6E56; }
+.st-mod   { background:#EEEDFE; color:#534AB7; }
+.st-agil  { background:#FAECE7; color:#993C1D; }
+.st-req   { background:#EAF3DE; color:#3B6D11; }
+.st-rev   { background:#F1EFE8; color:#5F5E5A; }
+.tip { font-size: 12px; color: #555; background: #f7f7f7; border-radius: 6px; padding: 7px 10px; margin-top: 6px; border-left: 3px solid #ccc; line-height: 1.7; }
+.tip b { color: #222; }
+.tip-prof { border-left-color: #D85A30; }
+.stats { display: flex; gap: 8px; margin-top: 1rem; }
+.stat-box { background: #f7f7f7; border: 1px solid #ddd; border-radius: 10px; padding: 8px 10px; flex: 1; text-align: center; }
+.stat-num { font-size: 20px; font-weight: 500; color: #1D9E75; }
+.stat-lbl { font-size: 10px; color: #666; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="title">Cronograma &mdash; Eng. de Software &mdash; Prova 08/04</div><br>
+  <div class="countdown" id="cd">calculando...</div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-label"><span>Progresso</span><span id="pct">0%</span></div>
+  <div class="prog-track"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+</div>
+
+<!-- TEMAS MAIS COBRADOS -->
+<div style="border:1px solid #ddd;border-radius:12px;margin-bottom:8px;overflow:hidden;">
+  <div onclick="togTemas()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#f7f7f7;">
+    <div style="font-size:13px;font-weight:500;flex:1;">Temas mais cobrados nas provas</div>
+    <div id="ar-temas" style="font-size:10px;color:#aaa;transition:transform .2s;">&#9660;</div>
+  </div>
+  <div id="db-temas" style="display:none;padding:12px 14px;border-top:1px solid #eee;">
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:11px;color:#555;">
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#E8593C;margin-right:4px;"></span>Muito frequente (3 provas)</span>
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#EF9F27;margin-right:4px;"></span>Frequente (2 provas)</span>
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1D9E75;margin-right:4px;"></span>Apareceu (1 prova)</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px;">
+
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:155px;flex-shrink:0;line-height:1.3;">Manifesto &Aacute;gil vs Tradicionais</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#E8593C;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">3/3 provas</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:155px;flex-shrink:0;line-height:1.3;">Modelos de Processo</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#E8593C;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">3/3 provas</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:155px;flex-shrink:0;line-height:1.3;">Requisitos de Software</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#E8593C;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">3/3 provas</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:155px;flex-shrink:0;line-height:1.3;">Natureza / Manuten&ccedil;&atilde;o</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:66%;height:100%;background:#EF9F27;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">2/3 provas</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;width:155px;flex-shrink:0;line-height:1.3;">Ger&ecirc;ncia (Lei de Brooks)</div>
+        <div style="flex:1;background:#eee;border-radius:5px;height:20px;overflow:hidden;">
+          <div style="width:33%;height:100%;background:#1D9E75;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff;">1/3 provas</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="font-size:13px;font-weight:500;margin-bottom:10px;">O que cada prova cobrou</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+
+      <div style="border:1px solid #ddd;border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eee;">P1 &mdash; Abr/2023</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+          <span style="font-size:11px;background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:5px;">Obsolesc&ecirc;ncia (Pressman)</span>
+          <span style="font-size:11px;background:#EEEDFE;color:#534AB7;padding:2px 7px;border-radius:5px;">Modelo incremental</span>
+          <span style="font-size:11px;background:#FAECE7;color:#993C1D;padding:2px 7px;border-radius:5px;">&Aacute;gil: ciclos curtos</span>
+          <span style="font-size:11px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:5px;">Requisitos impl&iacute;citos</span>
+          <span style="font-size:11px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:5px;">T&eacute;cnicas observacionais</span>
+        </div>
+      </div>
+
+      <div style="border:1px solid #ddd;border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eee;">P1 &mdash; Abr/2024 (Turma Ada)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+          <span style="font-size:11px;background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:5px;">Lei de Brooks</span>
+          <span style="font-size:11px;background:#EEEDFE;color:#534AB7;padding:2px 7px;border-radius:5px;">Modelo cascata</span>
+          <span style="font-size:11px;background:#FAECE7;color:#993C1D;padding:2px 7px;border-radius:5px;">&Aacute;gil: mudan&ccedil;as de req.</span>
+          <span style="font-size:11px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:5px;">Requisitos legais</span>
+          <span style="font-size:11px;background:#EEEDFE;color:#534AB7;padding:2px 7px;border-radius:5px;">Modelos 4&ordf; gera&ccedil;&atilde;o</span>
+        </div>
+      </div>
+
+      <div style="border:1px solid #ddd;border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eee;">P1 &mdash; Abr/2024 (Turma Hopper)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+          <span style="font-size:11px;background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:5px;">Manuten&ccedil;&atilde;o de software</span>
+          <span style="font-size:11px;background:#EEEDFE;color:#534AB7;padding:2px 7px;border-radius:5px;">Modelo espiral</span>
+          <span style="font-size:11px;background:#FAECE7;color:#993C1D;padding:2px 7px;border-radius:5px;">&Aacute;gil: organiza&ccedil;&atilde;o da equipe</span>
+          <span style="font-size:11px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:5px;">Requisitos legais</span>
+          <span style="font-size:11px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:5px;">Req. funcionais vs n&atilde;o-func.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RESUMO RÁPIDO -->
+<div style="border:1px solid #ddd;border-radius:12px;margin-bottom:8px;overflow:hidden;">
+  <div onclick="togResumo()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#f7f7f7;">
+    <div style="font-size:13px;font-weight:500;flex:1;">&#9889; Resumo R&aacute;pido &mdash; o que mais caiu</div>
+    <div id="ar-resumo" style="font-size:10px;color:#aaa;transition:transform .2s;">&#9660;</div>
+  </div>
+  <div id="db-resumo" style="display:none;padding:12px 14px;border-top:1px solid #eee;">
+
+    <!-- MANIFESTO ÁGIL -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:600;color:#993C1D;background:#FAECE7;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:7px;">&#9733; Manifesto &Aacute;gil &mdash; 3/3 provas</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAECE7;color:#993C1D;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Entregas</span>Software funcional em ciclos curtos e frequentes &gt; documenta&ccedil;&atilde;o extensa</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAECE7;color:#993C1D;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Mudan&ccedil;as</span>&Aacute;gil abraza mudan&ccedil;as de requisitos; tradicional resiste e congela o escopo</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAECE7;color:#993C1D;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Equipe</span>&Aacute;gil: equipe autogerenci&aacute;da, pap&eacute;is flex&iacute;veis; tradicional: hier&aacute;rquica, pap&eacute;is r&iacute;gidos</div>
+      <div style="font-size:12px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAECE7;color:#993C1D;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Cliente</span>Colabora&ccedil;&atilde;o cont&iacute;nua com o cliente durante todo o projeto</div>
+    </div>
+
+    <!-- MODELOS DE PROCESSO -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:600;color:#534AB7;background:#EEEDFE;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:7px;">&#9733; Modelos de Processo &mdash; 3/3 provas</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EEEDFE;color:#534AB7;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Cascata</span>Fases sequenciais e r&iacute;gidas. S&oacute; funciona se os requisitos j&aacute; s&atilde;o bem conhecidos</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EEEDFE;color:#534AB7;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Incremental</span>Entrega em partes. Ideal quando os requisitos <b>n&atilde;o</b> s&atilde;o totalmente conhecidos</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EEEDFE;color:#534AB7;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Espiral</span>Ciclos iterativos com an&aacute;lise de riscos. Incompat&iacute;vel com cronograma fechado no in&iacute;cio</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EEEDFE;color:#534AB7;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Prototipagem</span>Gera vers&otilde;es r&aacute;pidas para valida&ccedil;&atilde;o. &Uacute;til quando o cliente n&atilde;o sabe o que quer</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EEEDFE;color:#534AB7;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">4&ordf; Gera&ccedil;&atilde;o</span>Ferramentas automatizadas. Vantagem: rapidez. Desvantagem: depend&ecirc;ncia e limita&ccedil;&otilde;es</div>
+      <div style="font-size:12px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EEEDFE;color:#534AB7;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Codifica-Remenda</span>Anti-modelo: codifica sem planejamento e "remenda" erros. Gera caos e d&iacute;vida t&eacute;cnica</div>
+    </div>
+
+    <!-- REQUISITOS -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:600;color:#3B6D11;background:#EAF3DE;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:7px;">&#9733; Requisitos de Software &mdash; 3/3 provas</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EAF3DE;color:#3B6D11;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Funcionais</span>O que o sistema <b>faz</b>. Ex: "o sistema deve permitir login com e-mail"</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EAF3DE;color:#3B6D11;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">N&atilde;o-Funcionais</span>Como o sistema <b>se comporta</b>. Ex: desempenho, seguran&ccedil;a, disponibilidade</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EAF3DE;color:#3B6D11;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Impl&iacute;citos</span>N&atilde;o documentados, causam retrabalho e conflito. Solu&ccedil;&atilde;o: elicita&ccedil;&atilde;o detalhada</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EAF3DE;color:#3B6D11;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Legais</span>N&atilde;o podem ser ignorados mesmo que o cliente pe&ccedil;a. A responsabilidade &eacute; da equipe</div>
+      <div style="font-size:12px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#EAF3DE;color:#3B6D11;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Observacionais</span>T&eacute;cnicas mais realistas. Prós: captura o real. Contras: demorado, pode constranger</div>
+    </div>
+
+    <!-- NATUREZA / MANUTENÇÃO -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:600;color:#854F0B;background:#FAEEDA;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:7px;">&#9650; Natureza do Software &mdash; 2/3 provas</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAEEDA;color:#854F0B;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">N&atilde;o desgasta</span>Software n&atilde;o se deteriora pelo uso, mas torna-se obsoleto por evolu&ccedil;&atilde;o do ambiente</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAEEDA;color:#854F0B;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Manuten&ccedil;&atilde;o</span>O trabalho do engenheiro <b>n&atilde;o termina</b> com a entrega: manuten&ccedil;&atilde;o, evolu&ccedil;&atilde;o e suporte continuam</div>
+      <div style="font-size:12px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#FAEEDA;color:#854F0B;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Sob encomenda</span>A maior parte do software &eacute; desenvolvida sob demanda, n&atilde;o como produto de prateleira</div>
+    </div>
+
+    <!-- LEI DE BROOKS -->
+    <div>
+      <div style="font-size:11px;font-weight:600;color:#0F6E56;background:#E1F5EE;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:7px;">&#9679; Gerenciamento &mdash; 1/3 provas</div>
+      <div style="font-size:12px;margin-bottom:4px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#E1F5EE;color:#0F6E56;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Lei de Brooks</span>Adicionar pessoas a um projeto atrasado o atrasa ainda mais &mdash; curva de aprendizado + sobrecarga de comunica&ccedil;&atilde;o</div>
+      <div style="font-size:12px;padding:5px 8px;background:#f7f7f7;border-radius:5px;line-height:1.6;"><span style="background:#E1F5EE;color:#0F6E56;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:5px;">Mitos</span>Gerente: "mais gente = mais r&aacute;pido". Engenheiro: "entreguei, acabei". Cliente: "requisito geral basta"</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DIA 1 - HOJE -->
+<div class="day-card today">
+  <div class="day-header" onclick="tog(0)">
+    <div class="day-date">01/04 Qua</div>
+    <div class="day-title">Introdu&ccedil;&atilde;o &mdash; Software, Tipos e Caracter&iacute;sticas</div>
+    <div class="day-badge badge-today">HOJE</div>
+    <div class="day-arrow open" id="ar0">&#9660;</div>
+  </div>
+  <div class="day-body open" id="db0">
+    <div class="task">
+      <input type="checkbox" id="cb0" onchange="upd()">
+      <div class="task-text" id="tb0"><span class="st st-intro">Introdu&ccedil;&atilde;o</span>Estudar o que &eacute; Engenharia de Software e por que ela existe &mdash; diferenciar de simples programa&ccedil;&atilde;o</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb1" onchange="upd()">
+      <div class="task-text" id="tb1"><span class="st st-intro">Tipos</span>Memorizar os 5 tipos de software: Uso pessoal, Comercial/Neg&oacute;cios, Engenharia/Cient&iacute;fico, De sistema, Embarcado &mdash; com um exemplo de cada</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb2" onchange="upd()">
+      <div class="task-text" id="tb2"><span class="st st-intro">Caracter&iacute;sticas</span>Entender as 3 caracter&iacute;sticas: n&atilde;o desgasta, n&atilde;o &eacute; fabricado, maior parte &eacute; feito sob encomenda &mdash; saber explicar cada uma com argumenta&ccedil;&atilde;o</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb3" onchange="upd()">
+      <div class="task-text" id="tb3"><span class="st st-intro">Pr&aacute;tica</span>Escrever &agrave; m&atilde;o um par&aacute;grafo dissertativo: defini&ccedil;&atilde;o de software + por que ele se torna obsoleto mesmo sem desgastar</div>
+    </div>
+    <div class="tip"><b>Aten&ccedil;&atilde;o:</b> Obsolesc&ecirc;ncia de software caiu na prova de 2023 citando Pressman. Saiba explicar por que o software n&atilde;o desgasta, mas se torna obsoleto, e quais as consequ&ecirc;ncias disso para o engenheiro.</div>
+  </div>
+</div>
+
+<!-- DIA 2 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(1)">
+    <div class="day-date">02/04 Qui</div>
+    <div class="day-title">Mitos da Engenharia de Software</div>
+    <div class="day-badge" style="background:#FAEEDA;color:#854F0B;">MITOS</div>
+    <div class="day-arrow" id="ar1">&#9660;</div>
+  </div>
+  <div class="day-body" id="db1">
+    <div class="task">
+      <input type="checkbox" id="cb4" onchange="upd()">
+      <div class="task-text" id="tb4"><span class="st st-mit">Gerente</span>Estudar os mitos do <b>gerente</b>: ex. "adicionar mais programadores a qualquer momento acelera o projeto" &mdash; conectar com a Lei de Brooks (caiu em 2024!)</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb5" onchange="upd()">
+      <div class="task-text" id="tb5"><span class="st st-mit">Engenheiro</span>Estudar os mitos do <b>engenheiro</b>: ex. "ao terminar o c&oacute;digo, o trabalho do engenheiro acabou" &mdash; saber rebater com manuten&ccedil;&atilde;o e evolu&ccedil;&atilde;o (caiu em 2024!)</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb6" onchange="upd()">
+      <div class="task-text" id="tb6"><span class="st st-mit">Cliente</span>Estudar os mitos do <b>cliente</b>: ex. "um enunciado geral &eacute; suficiente para come&ccedil;ar" e "o que importa &eacute; entender o que se vai codificar"</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb7" onchange="upd()">
+      <div class="task-text" id="tb7"><span class="st st-mit">Pr&aacute;tica</span>Treinar: escrever a refuta&ccedil;&atilde;o de cada mito em 2&ndash;3 frases como se fosse uma quest&atilde;o dissertativa da prova</div>
+    </div>
+    <div class="tip tip-prof"><b>Dica da prova:</b> A quest&atilde;o da 2024 perguntou se adicionar desenvolvedores "a qualquer momento" acelera o projeto &mdash; a resposta &eacute; n&atilde;o, e voc&ecirc; precisa explicar por qu&ecirc; (curva de aprendizado, comunica&ccedil;&atilde;o, Lei de Brooks). Treine essa argumenta&ccedil;&atilde;o.</div>
+  </div>
+</div>
+
+<!-- DIA 3 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(2)">
+    <div class="day-date">03/04 Sex</div>
+    <div class="day-title">Processo de Software &mdash; Defini&ccedil;&atilde;o e Atividades</div>
+    <div class="day-badge" style="background:#E1F5EE;color:#0F6E56;">PROCESSO</div>
+    <div class="day-arrow" id="ar2">&#9660;</div>
+  </div>
+  <div class="day-body" id="db2">
+    <div class="task">
+      <input type="checkbox" id="cb8" onchange="upd()">
+      <div class="task-text" id="tb8"><span class="st st-proc">Defini&ccedil;&atilde;o</span>Entender o que &eacute; um processo de software e por que seguir um processo &eacute; essencial (diferen&ccedil;a entre codificar sem processo vs. seguir um processo estruturado)</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb9" onchange="upd()">
+      <div class="task-text" id="tb9"><span class="st st-proc">Atividades</span>Memorizar as 6 atividades do processo na ordem: An&aacute;lise de Requisitos &rarr; Projeto de Software &rarr; Implementa&ccedil;&atilde;o &rarr; Verifica&ccedil;&atilde;o e Valida&ccedil;&atilde;o &rarr; Entrega &mdash; e o que acontece em cada etapa</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb10" onchange="upd()">
+      <div class="task-text" id="tb10"><span class="st st-proc">V &amp; V</span>Entender a diferen&ccedil;a entre Verifica&ccedil;&atilde;o ("estamos construindo certo?") e Valida&ccedil;&atilde;o ("estamos construindo o produto certo para o cliente?")</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb11" onchange="upd()">
+      <div class="task-text" id="tb11"><span class="st st-proc">Pr&aacute;tica</span>Escrever o fluxo das atividades de mem&oacute;ria e explicar cada etapa em 1 frase &mdash; treino de escrita dissertativa</div>
+    </div>
+    <div class="tip"><b>Conex&atilde;o com prova:</b> A quest&atilde;o sobre o modelo espiral perguntou se preparar um cronograma de entregas fechado no in&iacute;cio &eacute; compat&iacute;vel &mdash; isso exige entender como as atividades se encadeiam de forma diferente em cada modelo.</div>
+  </div>
+</div>
+
+<!-- DIA 4 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(3)">
+    <div class="day-date">04/04 S&aacute;b</div>
+    <div class="day-title">Modelos Tradicionais &mdash; Cascata, Prototipagem e Incremental</div>
+    <div class="day-badge" style="background:#EEEDFE;color:#534AB7;">MODELOS</div>
+    <div class="day-arrow" id="ar3">&#9660;</div>
+  </div>
+  <div class="day-body" id="db3">
+    <div class="task">
+      <input type="checkbox" id="cb12" onchange="upd()">
+      <div class="task-text" id="tb12"><span class="st st-mod">Cascata</span>Estudar o Modelo Cascata: fases sequenciais r&iacute;gidas, quando &eacute; indicado (requisitos bem definidos), e por que falha quando os requisitos n&atilde;o s&atilde;o conhecidos &mdash; caiu em 2024!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb13" onchange="upd()">
+      <div class="task-text" id="tb13"><span class="st st-mod">Prototipagem</span>Estudar Prototipagem: quando o cliente n&atilde;o sabe bem o que quer, gera&ccedil;&atilde;o r&aacute;pida de vers&otilde;es para valida&ccedil;&atilde;o antes do desenvolvimento final</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb14" onchange="upd()">
+      <div class="task-text" id="tb14"><span class="st st-mod">Incremental</span>Estudar Modelo Incremental: entrega em partes (incrementos), adequado quando os requisitos n&atilde;o s&atilde;o totalmente conhecidos desde o in&iacute;cio &mdash; caiu em 2023!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb15" onchange="upd()">
+      <div class="task-text" id="tb15"><span class="st st-mod">Codifica-Remenda</span>Entender o modelo Codifica-Remenda: o "anti-modelo", sem planejamento, por que ele &eacute; problem&aacute;tico e gera d&iacute;vida t&eacute;cnica</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb16" onchange="upd()">
+      <div class="task-text" id="tb16"><span class="st st-mod">Pr&aacute;tica</span>Treinar a resposta dissertativa: "Elisa usa Cascata. Os requisitos n&atilde;o s&atilde;o bem conhecidos. O processo &eacute; adequado? Qual deveria usar?" &mdash; responder em par&aacute;grafo</div>
+    </div>
+    <div class="tip tip-prof"><b>Quest&atilde;o-padr&atilde;o do professor:</b> Nas 3 provas analisadas, apareceu a situa&ccedil;&atilde;o "Elisa usa modelo X, mas os requisitos n&atilde;o s&atilde;o bem conhecidos." Treine a resposta para Cascata, Incremental e Espiral separadamente.</div>
+  </div>
+</div>
+
+<!-- DIA 5 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(4)">
+    <div class="day-date">05/04 Dom</div>
+    <div class="day-title">Modelos Espiral, 4&ordf; Gera&ccedil;&atilde;o/RAD e revis&atilde;o geral dos modelos</div>
+    <div class="day-badge" style="background:#EEEDFE;color:#534AB7;">MODELOS</div>
+    <div class="day-arrow" id="ar4">&#9660;</div>
+  </div>
+  <div class="day-body" id="db4">
+    <div class="task">
+      <input type="checkbox" id="cb17" onchange="upd()">
+      <div class="task-text" id="tb17"><span class="st st-mod">Espiral</span>Estudar o Modelo Espiral: ciclos iterativos com an&aacute;lise de riscos em cada volta. Por que um cronograma fechado no in&iacute;cio &eacute; incompat&iacute;vel com ele? &mdash; caiu em 2024!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb18" onchange="upd()">
+      <div class="task-text" id="tb18"><span class="st st-mod">4&ordf; Gera&ccedil;&atilde;o</span>Estudar modelos de 4&ordf; gera&ccedil;&atilde;o/RAD: uso de ferramentas automatizadas de desenvolvimento, quais as vantagens (rapidez, menos c&oacute;digo manual) e desvantagens (depend&ecirc;ncia, limita&ccedil;&otilde;es) &mdash; caiu em 2024!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb19" onchange="upd()">
+      <div class="task-text" id="tb19"><span class="st st-mod">Revis&atilde;o</span>Revisar todos os 6 modelos juntos: Cascata, Prototipagem, Incremental, Espiral, 4&ordf; Gera&ccedil;&atilde;o/RAD, Codifica-Remenda &mdash; e saber indicar o mais adequado para cada cen&aacute;rio</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb20" onchange="upd()">
+      <div class="task-text" id="tb20"><span class="st st-mod">Pr&aacute;tica</span>Simular: "Elisa usa Espiral. O cliente pede cronograma fechado no in&iacute;cio. &Eacute; compat&iacute;vel? Para qual outro modelo ela deveria mudar?" &mdash; escrever em par&aacute;grafo completo</div>
+    </div>
+    <div class="tip"><b>Todos os modelos caem:</b> Modelos de processo apareceram nas 3 provas analisadas, sempre com cen&aacute;rios pr&aacute;ticos. Conhecer as vantagens, limita&ccedil;&otilde;es e cen&aacute;rios de uso de cada um &eacute; fundamental.</div>
+  </div>
+</div>
+
+<!-- DIA 6 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(5)">
+    <div class="day-date">06/04 Seg</div>
+    <div class="day-title">M&eacute;todos &Aacute;geis &mdash; Manifesto e diferen&ccedil;as com processos tradicionais</div>
+    <div class="day-badge" style="background:#FAECE7;color:#993C1D;">&Aacute;GIL</div>
+    <div class="day-arrow" id="ar5">&#9660;</div>
+  </div>
+  <div class="day-body" id="db5">
+    <div class="task">
+      <input type="checkbox" id="cb21" onchange="upd()">
+      <div class="task-text" id="tb21"><span class="st st-agil">Manifesto</span>Estudar os 4 valores do Manifesto &Aacute;gil e os princ&iacute;pios mais cobrados: entregas frequentes de software em funcionamento, ciclos curtos, colabora&ccedil;&atilde;o com o cliente, resposta &agrave;s mudan&ccedil;as</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb22" onchange="upd()">
+      <div class="task-text" id="tb22"><span class="st st-agil">Mudan&ccedil;as</span>Comparar &aacute;gil vs tradicional quanto a <b>mudan&ccedil;as de requisitos</b>: &aacute;gil abraza mudan&ccedil;as, tradicional resiste a elas &mdash; caiu na prova 2024 turma Ada!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb23" onchange="upd()">
+      <div class="task-text" id="tb23"><span class="st st-agil">Equipe</span>Comparar &aacute;gil vs tradicional quanto &agrave; <b>organiza&ccedil;&atilde;o da equipe</span>: equipe autogerenci&aacute;vel vs hier&aacute;rquica, pap&eacute;is fixos vs flex&iacute;veis &mdash; caiu na prova 2024 turma Hopper!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb24" onchange="upd()">
+      <div class="task-text" id="tb24"><span class="st st-agil">Pr&aacute;tica</span>Escrever 2 respostas dissertativas simulando as quest&otilde;es das provas anteriores sobre o Manifesto &Aacute;gil (uma sobre mudan&ccedil;as de requisitos, outra sobre entregas frequentes)</div>
+    </div>
+    <div class="tip tip-prof"><b>Tema mais cobrado de todos:</b> &Aacute;gil apareceu nas 3 provas. O professor adora perguntar como o &aacute;gil se diferencia dos tradicionais em um aspecto espec&iacute;fico (requisitos, entrega, equipe, ciclos). Esteja pronto para qualquer &acirc;ngulo.</div>
+  </div>
+</div>
+
+<!-- DIA 7 -->
+<div class="day-card">
+  <div class="day-header" onclick="tog(6)">
+    <div class="day-date">07/04 Ter</div>
+    <div class="day-title">Requisitos de Software + Revis&atilde;o Geral</div>
+    <div class="day-badge badge-rev">REVIS&Atilde;O</div>
+    <div class="day-arrow" id="ar6">&#9660;</div>
+  </div>
+  <div class="day-body" id="db6">
+    <div class="task">
+      <input type="checkbox" id="cb25" onchange="upd()">
+      <div class="task-text" id="tb25"><span class="st st-req">Func. vs N&atilde;o-Func.</span>Estudar requisitos funcionais (o que o sistema faz) vs n&atilde;o-funcionais (como o sistema se comporta) &mdash; definir, diferenciar e dar 2 exemplos de cada &mdash; caiu em 2024!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb26" onchange="upd()">
+      <div class="task-text" id="tb26"><span class="st st-req">Impl&iacute;citos</span>Estudar requisitos impl&iacute;citos: o que s&atilde;o, por que s&atilde;o problem&aacute;ticos (n&atilde;o documentados, causam retrabalho) e como evit&aacute;-los &mdash; caiu em 2023!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb27" onchange="upd()">
+      <div class="task-text" id="tb27"><span class="st st-req">Legais</span>Estudar requisitos legais/normativos: o que acontece quando o cliente sugere ignorar? Quem &eacute; o respons&aacute;vel pelo n&atilde;o atendimento? &mdash; caiu nas 2 provas de 2024!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb28" onchange="upd()">
+      <div class="task-text" id="tb28"><span class="st st-req">Levantamento</span>Revisar t&eacute;cnicas de levantamento de requisitos: t&eacute;cnicas observacionais (mais realistas, prós e contras) vs entrevistas &mdash; caiu em 2023!</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb29" onchange="upd()">
+      <div class="task-text" id="tb29"><span class="st st-rev">Revis&atilde;o Geral</span>Reler todos os resumos da semana na ordem: Software &rarr; Mitos &rarr; Processo &rarr; Modelos &rarr; &Aacute;gil &rarr; Requisitos</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb30" onchange="upd()">
+      <div class="task-text" id="tb30"><span class="st st-rev">Revis&atilde;o</span>Dormir bem &mdash; nada de madrugada estudando! O c&eacute;rebro consolida mem&oacute;ria durante o sono.</div>
+    </div>
+    <div class="tip tip-prof"><b>Dica extra &mdash; escrita dissertativa:</b> Use: introdu&ccedil;&atilde;o (defini&ccedil;&atilde;o) + desenvolvimento (como funciona / diferen&ccedil;as) + conclus&atilde;o (impacto ou exemplo). 3 par&aacute;grafos s&atilde;o suficientes. O professor desconta por falta de organiza&ccedil;&atilde;o e erros de portugu&ecirc;s.</div>
+  </div>
+</div>
+
+<!-- PROVA -->
+<div class="day-card exam">
+  <div class="day-header" onclick="tog(7)">
+    <div class="day-date">08/04 Qua</div>
+    <div class="day-title">DIA DA PROVA</div>
+    <div class="day-badge badge-exam">PROVA</div>
+    <div class="day-arrow" id="ar7">&#9660;</div>
+  </div>
+  <div class="day-body" id="db7">
+    <div class="task">
+      <input type="checkbox" id="cb31" onchange="upd()">
+      <div class="task-text" id="tb31">Caneta azul ou preta (obrigat&oacute;rio pela regra da prova)</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb32" onchange="upd()">
+      <div class="task-text" id="tb32">Ler todas as 5 quest&otilde;es antes de come&ccedil;ar a responder &mdash; identificar quais domina e come&ccedil;ar por elas</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb33" onchange="upd()">
+      <div class="task-text" id="tb33">Em cada resposta: introdu&ccedil;&atilde;o + desenvolvimento + conclus&atilde;o. Evitar par&aacute;grafo &uacute;nico e erros de portugu&ecirc;s (professor desconta!)</div>
+    </div>
+    <div class="task">
+      <input type="checkbox" id="cb34" onchange="upd()">
+      <div class="task-text" id="tb34">Gerenciar o tempo: 5 quest&otilde;es em 1h40 = ~20 min por quest&atilde;o. N&atilde;o travar em uma s&oacute;</div>
+    </div>
+    <div class="tip tip-prof"><b>Regras:</b> Tempo m&iacute;nimo para sair = 30 min &bull; Total = 1h40 &bull; Erros de portugu&ecirc;s s&atilde;o descontados &bull; Total da atividade = 4 pontos &bull; Boa prova!</div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat-box"><div class="stat-num" id="sDone">0</div><div class="stat-lbl">conclu&iacute;das</div></div>
+  <div class="stat-box"><div class="stat-num" id="sLeft">35</div><div class="stat-lbl">restantes</div></div>
+  <div class="stat-box"><div class="stat-num" id="sDays">7</div><div class="stat-lbl">dias</div></div>
+</div>
+
+</div>
+
+<script>
+const TOTAL = 35;
+const LS_KEY = 'cronograma_es_2026';
+
+function saveState() {
+  var state = {};
+  document.querySelectorAll('input[type=checkbox]').forEach(function(b) {
+    state[b.id] = b.checked;
+  });
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    var state = JSON.parse(raw);
+    document.querySelectorAll('input[type=checkbox]').forEach(function(b) {
+      if (state[b.id] !== undefined) {
+        b.checked = state[b.id];
+        var txt = document.getElementById('t' + b.id.slice(1));
+        if (txt) txt.classList.toggle('checked', b.checked);
+      }
+    });
+  } catch(e) {}
+}
+
+function togResumo() {
+  var b = document.getElementById('db-resumo');
+  var a = document.getElementById('ar-resumo');
+  var open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  a.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function togTemas() {
+  var b = document.getElementById('db-temas');
+  var a = document.getElementById('ar-temas');
+  var open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  a.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function tog(i) {
+  var b = document.getElementById('db'+i);
+  var a = document.getElementById('ar'+i);
+  var open = b.classList.toggle('open');
+  a.classList.toggle('open', open);
+}
+
+function upd() {
+  var boxes = document.querySelectorAll('input[type=checkbox]');
+  var done = 0;
+  boxes.forEach(function(b) {
+    if (b.checked) done++;
+    var tid = 't' + b.id.slice(1);
+    var txt = document.getElementById(tid);
+    if (txt) txt.classList.toggle('checked', b.checked);
+  });
+  var pct = Math.round(done / TOTAL * 100);
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('sDone').textContent = done;
+  document.getElementById('sLeft').textContent = Math.max(0, TOTAL - done);
+  saveState();
+}
+
+function updateCD() {
+  var exam = new Date('2026-04-08T08:00:00');
+  var now = new Date();
+  var diff = exam - now;
+  if (diff <= 0) { document.getElementById('cd').textContent = 'Dia da prova!'; return; }
+  var days = Math.floor(diff / 86400000);
+  var hrs = Math.floor((diff % 86400000) / 3600000);
+  document.getElementById('cd').textContent = days + 'd ' + hrs + 'h';
+  document.getElementById('sDays').textContent = days;
+}
+
+window.addEventListener('load', function() {
+  loadState();
+  upd();
+  updateCD();
+  setInterval(updateCD, 60000);
+});
+</script>
+</body>
+</html>

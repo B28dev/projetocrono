@@ -1,15 +1,22 @@
-export default function CurrentStudyCyclePanel({ currentCycle }) {
+export default function CurrentStudyCyclePanel({ currentCycle, upcomingItems }) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-        Ciclo atual
-      </p>
-      <h3 className="mt-2 text-lg font-semibold text-white">
-        {currentCycle.title}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        {currentCycle.objective}
-      </p>
+    <section className="lab-card rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-300">
+            Ciclo em andamento
+          </p>
+          <h3 className="mt-2 text-lg font-semibold text-white">
+            {currentCycle.title}
+          </h3>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">
+            {currentCycle.objective}
+          </p>
+        </div>
+        <span className="inline-flex w-fit items-center rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-100">
+          {upcomingItems.length} frente(s) depois
+        </span>
+      </div>
 
       <div className="mt-5 space-y-3">
         {currentCycle.items.map((item) => (
@@ -26,6 +33,6 @@ export default function CurrentStudyCyclePanel({ currentCycle }) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,14 +1,14 @@
 export default function AlgorithmReviewPanel({ reviewItems }) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
+    <section className="lab-card h-full rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-fuchsia-300">
-        Revisão e consolidação
+        Contexto extra
       </p>
       <h3 className="mt-2 text-lg font-semibold text-white">
-        Onde eu reviso
+        Onde revisar e consolidar
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Este bloco fecha a matéria sem depender de calendário. Aqui entram revisão guiada e simulado.
+        Este bloco fecha a disciplina com revisão guiada e simulado. Ele fica por último para não disputar atenção com a liberação atual.
       </p>
       <div className="mt-5 space-y-3">
         {reviewItems.map((review) => (
@@ -27,6 +27,6 @@ export default function AlgorithmReviewPanel({ reviewItems }) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

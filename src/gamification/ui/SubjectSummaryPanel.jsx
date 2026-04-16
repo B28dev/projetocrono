@@ -1,16 +1,18 @@
 import SummaryAccordion from '../../components/SummaryAccordion.jsx';
 
-export default function SubjectSummaryPanel({ summaries }) {
+export default function SubjectSummaryPanel({ extraContext }) {
+  const { summaries } = extraContext;
+
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
+    <section className="lab-card h-full rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-        Consolidação e revisão
+        {extraContext.eyebrow}
       </p>
       <h3 className="mt-2 text-lg font-semibold text-white">
-        Onde consolidar rápido antes da prova
+        {extraContext.title}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Este bloco existe para revisão rápida, não para execução bruta. Entra aqui quando a base já foi organizada.
+        {extraContext.description}
       </p>
 
       <div className="mt-5 space-y-6">
@@ -23,6 +25,6 @@ export default function SubjectSummaryPanel({ summaries }) {
           <SummaryAccordion summaries={summaries.examCoverage} />
         </div>
       </div>
-    </div>
+    </section>
   );
 }

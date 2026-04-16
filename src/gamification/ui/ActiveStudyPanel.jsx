@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import TopicChip from '../../components/TopicChip.jsx';
 
 function FlashcardPreview({ card }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -35,20 +36,43 @@ export default function ActiveStudyPanel({ activeStudy }) {
   const [activeBlockId, setActiveBlockId] = useState(activeStudy.blocks[0]?.id ?? null);
   const [activeTab, setActiveTab] = useState('flashcards');
 
-  const activeBlock = activeStudy.blocks.find((block) => block.id === activeBlockId) ?? activeStudy.blocks[0];
+  const activeBlock = useMemo(
+    () => activeStudy.blocks.find((block) => block.id === activeBlockId) ?? activeStudy.blocks[0],
+    [activeBlockId, activeStudy.blocks],
+  );
   const items = activeTab === 'flashcards' ? activeBlock.flashcards.slice(0, 6) : activeBlock.questions.slice(0, 4);
 
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-        Estudo ativo
-      </p>
-      <h3 className="mt-2 text-lg font-semibold text-white">
-        Onde o treino acontece
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Blocos organizados por intenção de treino. Primeiro base, depois prova e pegadinha.
-      </p>
+    <section className="lab-card rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
+      <div className="max-w-3xl">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
+          {activeStudy.eyebrow}
+        </p>
+        <h3 className="mt-2 text-lg font-semibold text-white">
+          {activeStudy.title}
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+          {activeStudy.description}
+        </p>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">
+              Prioridade de prova
+            </p>
+            <p className="mt-2 text-sm text-zinc-400">
+              Temas mais cobrados já foram puxados para dentro do treino para reduzir adivinhação.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {activeStudy.priorityTopics.map((topic) => (
+            <TopicChip key={topic.id} topic={topic} />
+          ))}
+        </div>
+      </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {activeStudy.blocks.map((block) => (
@@ -67,7 +91,7 @@ export default function ActiveStudyPanel({ activeStudy }) {
         <p className="text-sm font-semibold text-white">{activeBlock.title}</p>
         <p className="mt-1 text-xs text-zinc-500">{activeBlock.subtitle}</p>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           <button type="button" onClick={() => setActiveTab('flashcards')} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${activeTab === 'flashcards' ? 'border-cyan-400/25 bg-cyan-500/10 text-cyan-200' : 'border-white/10 bg-white/[0.03] text-zinc-400'}`}>
             Flashcards
           </button>
@@ -84,6 +108,6 @@ export default function ActiveStudyPanel({ activeStudy }) {
             : <QuestionPreview key={item.id} question={item} />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

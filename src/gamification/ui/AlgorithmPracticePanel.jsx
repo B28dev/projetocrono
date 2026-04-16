@@ -1,14 +1,14 @@
 export default function AlgorithmPracticePanel({ practiceItems }) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
+    <section className="lab-card rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-        Prática
+        Estudo ativo
       </p>
       <h3 className="mt-2 text-lg font-semibold text-white">
         Onde o treino acontece
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Exercício primeiro, teoria como apoio. O bloco de prática existe para execução, não contemplação.
+        Exercício primeiro, teoria como apoio. Este bloco existe para prática real e resistência de execução.
       </p>
       <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
         {practiceItems.map((item) => (
@@ -21,6 +21,6 @@ export default function AlgorithmPracticePanel({ practiceItems }) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,0 +1,280 @@
+{
+  "product": {
+    "currentName": "StockFlow",
+    "isProvisional": true,
+    "description": "Sistema interno de controle de materiais e estoque que controla o saldo atual dos itens e documenta movimentações operacionais com leitura clara para operação e gestão."
+  },
+  "inventoryModel": {
+    "primaryConcept": "O estoque é controlado por movimentações registradas no histórico operacional.",
+    "currentBalanceField": "quantidadeAtual",
+    "currentBalanceBehavior": "quantidadeAtual é um saldo materializado para leitura simples da interface, embora o saldo conceitual derive das movimentações.",
+    "operationalHistoryIsCore": true
+  },
+  "profiles": [
+    {
+      "id": "deposito",
+      "name": "Funcionário do depósito",
+      "primary": true
+    },
+    {
+      "id": "recepcao",
+      "name": "Recepção",
+      "primary": false
+    },
+    {
+      "id": "gestor",
+      "name": "Gestor",
+      "primary": false
+    }
+  ],
+  "categories": [
+    "Limpeza",
+    "Higiene",
+    "Escritório",
+    "Copa",
+    "Descartáveis",
+    "Manutenção",
+    "Outros"
+  ],
+  "units": [
+    "un",
+    "cx",
+    "pct",
+    "rol",
+    "kg",
+    "lt"
+  ],
+  "productFields": [
+    {
+      "name": "id",
+      "type": "string",
+      "required": true,
+      "description": "Identificador único do produto."
+    },
+    {
+      "name": "nome",
+      "type": "string",
+      "required": true,
+      "description": "Nome curto e objetivo do material."
+    },
+    {
+      "name": "categoria",
+      "type": "string",
+      "required": true,
+      "description": "Classificação operacional do item."
+    },
+    {
+      "name": "unidade",
+      "type": "string",
+      "required": true,
+      "description": "Unidade de controle do item."
+    },
+    {
+      "name": "quantidadeAtual",
+      "type": "number",
+      "required": true,
+      "description": "Saldo atual materializado para leitura rápida da interface."
+    },
+    {
+      "name": "estoqueMinimo",
+      "type": "number",
+      "required": true,
+      "description": "Quantidade mínima aceitável antes de alerta."
+    },
+    {
+      "name": "observacoes",
+      "type": "string",
+      "required": false,
+      "description": "Contexto operacional complementar."
+    },
+    {
+      "name": "ativo",
+      "type": "boolean",
+      "required": true,
+      "description": "Indica se o item continua ativo na operação."
+    },
+    {
+      "name": "createdAt",
+      "type": "datetime",
+      "required": true,
+      "description": "Data de criação do registro do produto."
+    },
+    {
+      "name": "updatedAt",
+      "type": "datetime",
+      "required": true,
+      "description": "Data da última atualização do produto."
+    }
+  ],
+  "movementTypes": [
+    "entrada",
+    "saida",
+    "ajuste",
+    "cadastro",
+    "remocao"
+  ],
+  "movementFields": [
+    {
+      "name": "id",
+      "type": "string",
+      "required": true,
+      "description": "Identificador único da movimentação."
+    },
+    {
+      "name": "productId",
+      "type": "string",
+      "required": true,
+      "description": "Produto afetado pela movimentação."
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "required": true,
+      "description": "Tipo oficial da movimentação na V1."
+    },
+    {
+      "name": "quantityChanged",
+      "type": "number",
+      "required": true,
+      "description": "Quantidade alterada na operação."
+    },
+    {
+      "name": "previousQuantity",
+      "type": "number",
+      "required": true,
+      "description": "Saldo anterior ao registro."
+    },
+    {
+      "name": "resultingQuantity",
+      "type": "number",
+      "required": true,
+      "description": "Saldo resultante após a movimentação."
+    },
+    {
+      "name": "reason",
+      "type": "string",
+      "required": false,
+      "description": "Motivo objetivo da movimentação."
+    },
+    {
+      "name": "note",
+      "type": "string",
+      "required": false,
+      "description": "Observação complementar da operação."
+    },
+    {
+      "name": "createdAt",
+      "type": "datetime",
+      "required": true,
+      "description": "Data e hora do registro da movimentação."
+    },
+    {
+      "name": "companyId",
+      "type": "string",
+      "required": false,
+      "description": "Campo previsto para multiempresa no futuro.",
+      "phase": "future"
+    },
+    {
+      "name": "performedBy",
+      "type": "string",
+      "required": false,
+      "description": "Campo previsto para registrar responsável no futuro.",
+      "phase": "future"
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "required": false,
+      "description": "Campo previsto para identificar origem da operação no futuro.",
+      "phase": "future"
+    }
+  ],
+  "movementOperationRules": {
+    "incrementButton": "entrada",
+    "decrementButton": "saida",
+    "manualEdit": "ajuste"
+  },
+  "productMovementRelationship": {
+    "productRole": "O produto guarda o estado atual operacional visível para uso rápido.",
+    "movementRole": "A movimentação guarda a trilha histórica que explica como o estado do item foi formado.",
+    "currentBalanceDerivation": "O saldo atual do item é entendido a partir de entradas, saídas e ajustes acumulados.",
+    "dashboardDependency": "O dashboard futuro depende das movimentações para consolidar fluxo e leitura gerencial.",
+    "historyDependency": "O histórico futuro exibe essa trilha operacional ao gestor e à operação."
+  },
+  "lowStockRule": {
+    "expression": "quantidadeAtual <= estoqueMinimo",
+    "includesZeroAsCritical": true
+  },
+  "navigation": [
+    {
+      "id": "estoque",
+      "label": "Estoque",
+      "purpose": "Listagem, busca e ações rápidas sobre saldo atual com conexão futura ao registro de movimentações."
+    },
+    {
+      "id": "cadastrar",
+      "label": "Cadastrar",
+      "purpose": "Cadastro de novos produtos com os campos obrigatórios da V1 e preparo para eventos de cadastro e remoção."
+    },
+    {
+      "id": "historico",
+      "label": "Histórico",
+      "purpose": "Consulta cronológica das movimentações operacionais e alterações relevantes do estoque."
+    },
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "purpose": "Resumo gerencial e operacional do saldo atual e do fluxo de movimentações do estoque."
+    }
+  ],
+  "actions": [
+    {
+      "id": "cadastrar_produto",
+      "label": "Cadastrar produto",
+      "recordsMovementType": "cadastro"
+    },
+    {
+      "id": "buscar_produto",
+      "label": "Buscar produto"
+    },
+    {
+      "id": "registrar_entrada",
+      "label": "Registrar entrada",
+      "recordsMovementType": "entrada"
+    },
+    {
+      "id": "registrar_saida",
+      "label": "Registrar saída",
+      "recordsMovementType": "saida"
+    },
+    {
+      "id": "registrar_ajuste_manual",
+      "label": "Registrar ajuste manual",
+      "recordsMovementType": "ajuste"
+    },
+    {
+      "id": "remover_produto",
+      "label": "Remover produto",
+      "recordsMovementType": "remocao"
+    },
+    {
+      "id": "ver_historico",
+      "label": "Ver histórico"
+    }
+  ],
+  "outOfScope": [
+    "login",
+    "perfis de acesso",
+    "múltiplos depósitos",
+    "relatórios avançados",
+    "exportação complexa",
+    "notificações automáticas",
+    "controle por usuário responsável"
+  ],
+  "futureReady": {
+    "authenticationPlanned": true,
+    "ownershipTrackingPlanned": true,
+    "multiLocationPlanned": true
+  }
+}

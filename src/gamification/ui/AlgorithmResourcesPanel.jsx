@@ -1,6 +1,6 @@
 export default function AlgorithmResourcesPanel({ resourceItems }) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
+    <section className="lab-card h-full rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
         Recursos e apoio
       </p>
@@ -8,7 +8,7 @@ export default function AlgorithmResourcesPanel({ resourceItems }) {
         Onde buscar apoio
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Os materiais ainda estão como referências do laboratório, mas já separados da execução principal.
+        Materiais de referência ficam fora da linha principal de execução. Eles servem como apoio, não como centro da disciplina.
       </p>
       <div className="mt-5 space-y-3">
         {resourceItems.map((item) => (
@@ -25,6 +25,6 @@ export default function AlgorithmResourcesPanel({ resourceItems }) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -10,7 +10,7 @@ export default function HighFrequencyTopicsPanel({ topics }) {
         O que merece atenção primeiro
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Este bloco existe para reduzir adivinhação. A prioridade já vem recortada pela recorrência da prova.
+        Este bloco foi mantido apenas como fallback visual. No piloto principal, a prioridade já aparece dentro do estudo ativo.
       </p>
       <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {topics.map((topic) => (

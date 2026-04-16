@@ -5,15 +5,15 @@ export default function StudyResourcesPanel({ resources }) {
   const [isPdfOpen, setIsPdfOpen] = useState(true);
 
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 lg:p-6 backdrop-blur-xl shadow-lg">
+    <section className="lab-card h-full rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-lg backdrop-blur-xl lg:p-6">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-        Recursos e apoio
+        {resources.eyebrow}
       </p>
       <h3 className="mt-2 text-lg font-semibold text-white">
-        Onde aprofundar ou revisar
+        {resources.title}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        Biblioteca separada da execução. Aqui entram playlists e PDFs — apoio, não distração.
+        {resources.description}
       </p>
 
       <div className="mt-5 space-y-3">
@@ -33,7 +33,7 @@ export default function StudyResourcesPanel({ resources }) {
                 <span className="text-xs text-cyan-300">{isOpen ? '−' : '+'}</span>
               </button>
               {isOpen ? (
-                <div className="border-t border-white/10 px-4 py-3 space-y-2">
+                <div className="space-y-2 border-t border-white/10 px-4 py-3">
                   {section.items.map((video) => (
                     <a
                       key={video.id}
@@ -70,7 +70,7 @@ export default function StudyResourcesPanel({ resources }) {
             <span className="text-xs text-cyan-300">{isPdfOpen ? '−' : '+'}</span>
           </button>
           {isPdfOpen ? (
-            <div className="border-t border-white/10 px-4 py-3 space-y-2">
+            <div className="space-y-2 border-t border-white/10 px-4 py-3">
               {resources.pdfs.map((pdf) => (
                 <a
                   key={pdf.id}
@@ -92,6 +92,6 @@ export default function StudyResourcesPanel({ resources }) {
           ) : null}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
