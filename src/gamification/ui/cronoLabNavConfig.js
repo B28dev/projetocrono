@@ -20,8 +20,8 @@ export const CRONO_LAB_NAV_ITEMS = [
     label: 'Disciplinas',
     icon: '📚',
     title: 'Disciplinas',
-    description: 'Módulo laboratorial reservado para organizar a camada acadêmica por matéria.',
-    hasLiveContent: false,
+    description: 'Camada laboratorial para testar disciplinas-piloto organizadas por intenção de estudo.',
+    hasLiveContent: true,
   },
   {
     id: 'arena',
