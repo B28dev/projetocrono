@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   getAlgorithmPilotData,
   readAlgorithmPilotProgress,
   toggleAlgorithmPilotItem,
 } from '../pilots/algorithmPilot.js';
+import StudyCycleExplanationCard from './StudyCycleExplanationCard.jsx';
+import CycleProgressHeader from './CycleProgressHeader.jsx';
 import AlgorithmSubjectOverview from './AlgorithmSubjectOverview.jsx';
-import CurrentStudyCyclePanel from './CurrentStudyCyclePanel.jsx';
 import EligibleContentPanel from './EligibleContentPanel.jsx';
 import AlgorithmPracticePanel from './AlgorithmPracticePanel.jsx';
 import AlgorithmReviewPanel from './AlgorithmReviewPanel.jsx';
@@ -15,24 +16,47 @@ export default function CronoLabAlgorithmPilot() {
   const [progressSnapshot, setProgressSnapshot] = useState(() => readAlgorithmPilotProgress());
   const pilot = useMemo(() => getAlgorithmPilotData(progressSnapshot), [progressSnapshot]);
 
-  const handleToggle = (itemId) => {
+  const handleToggle = useCallback((itemId) => {
     const next = toggleAlgorithmPilotItem(itemId);
     setProgressSnapshot(next);
-  };
+  }, []);
+
+  const { subject, currentCycle, studyCycles, eligibleItems, comingNextItems, lockedItems, pilotNotice } = pilot;
 
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <div className="space-y-5 lg:space-y-6">
+
+      {/* 1 — Explicação do ciclo */}
+      <StudyCycleExplanationCard variant="content-based" />
+
+      {/* 2 — Identidade da disciplina */}
       <AlgorithmSubjectOverview
-        subject={pilot.subject}
-        notice={pilot.pilotNotice}
-        currentCycle={pilot.currentCycle}
-        upcomingItems={pilot.upcomingItems}
+        subject={subject}
+        notice={pilotNotice}
       />
-      <EligibleContentPanel eligibleItems={pilot.eligibleItems} currentCycle={pilot.currentCycle} onToggle={handleToggle} />
-      <CurrentStudyCyclePanel currentCycle={pilot.currentCycle} upcomingItems={pilot.upcomingItems} />
+
+      {/* 3 — Header de progresso do ciclo */}
+      <CycleProgressHeader
+        currentCycle={currentCycle}
+        totalCycles={studyCycles.length}
+        progressPercent={subject.progressPercent}
+        subjectStatus={subject.status}
+        subjectRotationHint={subject.subjectRotationHint}
+      />
+
+      {/* 4 — Painel de conteúdos (3 zonas) */}
+      <EligibleContentPanel
+        eligibleItems={eligibleItems}
+        comingNextItems={comingNextItems}
+        lockedItems={lockedItems}
+        currentCycle={currentCycle}
+        onToggle={handleToggle}
+      />
+
+      {/* 5 — Prática + Recursos / Revisão */}
       <AlgorithmPracticePanel practiceItems={pilot.practiceItems} />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         <div className="xl:col-span-6">
           <AlgorithmResourcesPanel resourceItems={pilot.resourceItems} />
         </div>

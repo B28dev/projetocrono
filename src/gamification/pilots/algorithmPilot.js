@@ -1,4 +1,23 @@
-export const ALGORITHM_PILOT_STORAGE_KEY = 'algoritmo-pilot-progress-v1';
+/**
+ * @fileoverview algorithmPilot.js — Dados e engine do piloto de Algoritmo e Programação
+ *
+ * Usa o cycleEngine compartilhado para enriquecer os items com isEligibleNow,
+ * isComingNext, isLocked, completedAt, recommendedWeight e subjectRotationHint.
+ */
+
+import {
+  enrichCycleItems,
+  getCurrentCycle,
+  getSubjectRotationHint,
+  calcProgressMetrics,
+  getComingNextItems,
+  getEligibleNowItems,
+  getLockedItems,
+} from '../cycles/cycleEngine.js';
+
+export const ALGORITHM_PILOT_STORAGE_KEY = 'algoritmo-pilot-progress-v2';
+
+// ─── CICLOS ───────────────────────────────────────────────────────────────────
 
 const STUDY_CYCLES = [
   {
@@ -45,9 +64,12 @@ const STUDY_CYCLES = [
   },
 ];
 
+// ─── ITEMS DO CICLO ───────────────────────────────────────────────────────────
+
 const CYCLE_ITEMS = [
   {
     id: 'alg-vetores-revisao',
+    cycleId: 'alg-cycle-1',
     subjectId: 'algoritmos-programacao',
     title: 'Revisão de vetores',
     description: 'Declaração, índice, inicialização, leitura, impressão, soma, média, maior e menor elemento.',
@@ -60,6 +82,7 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-vetores-pratica',
+    cycleId: 'alg-cycle-1',
     subjectId: 'algoritmos-programacao',
     title: 'Vetores na prática',
     description: 'Implementar vetor de notas, média e filtragem de positivos em C.',
@@ -72,6 +95,7 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-vetores-beecrowd',
+    cycleId: 'alg-cycle-2',
     subjectId: 'algoritmos-programacao',
     title: 'Vetores + Beecrowd',
     description: 'Resolver problemas iniciais de vetor e aprender com o feedback do juiz.',
@@ -84,9 +108,10 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-intro-matrizes',
+    cycleId: 'alg-cycle-3',
     subjectId: 'algoritmos-programacao',
     title: 'Introdução a matrizes',
-    description: 'Matriz como vetor bidimensional, notação [i][j], leitura e impressão 3x3.',
+    description: 'Matriz como vetor bidimensional, notação [i][j], leitura e impressão 3×3.',
     kind: 'theory',
     order: 4,
     cycle: 3,
@@ -96,6 +121,7 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-for-aninhado-diagonais',
+    cycleId: 'alg-cycle-4',
     subjectId: 'algoritmos-programacao',
     title: 'For aninhado + diagonais',
     description: 'Percorrer linhas e colunas, diagonal principal i == j e secundária i + j == N - 1.',
@@ -108,6 +134,7 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-operacoes-matrizes',
+    cycleId: 'alg-cycle-5',
     subjectId: 'algoritmos-programacao',
     title: 'Operações com matrizes',
     description: 'Multiplicar por escalar, filtrar elementos e gerar matrizes derivadas.',
@@ -120,6 +147,7 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-trilha-pratica',
+    cycleId: 'alg-cycle-6',
     subjectId: 'algoritmos-programacao',
     title: 'Trilha prática completa',
     description: 'Situações I, III e V com multiplicação, diagonal principal e transformação ao quadrado.',
@@ -132,6 +160,7 @@ const CYCLE_ITEMS = [
   },
   {
     id: 'alg-revisao-simulado',
+    cycleId: 'alg-cycle-7',
     subjectId: 'algoritmos-programacao',
     title: 'Revisão + simulado',
     description: 'Fechamento do ciclo com questões objetivas e simulado sem consulta.',
@@ -143,6 +172,8 @@ const CYCLE_ITEMS = [
     dependsOn: ['alg-trilha-pratica'],
   },
 ];
+
+// ─── ITEMS DE PRÁTICA ─────────────────────────────────────────────────────────
 
 const PRACTICE_ITEMS = [
   {
@@ -168,8 +199,8 @@ const PRACTICE_ITEMS = [
   },
   {
     id: 'alg-practice-matriz-3x3',
-    title: 'Leitura e impressão de matriz 3x3',
-    description: 'Declarar, ler e imprimir matriz 3x3 com entrada do usuário.',
+    title: 'Leitura e impressão de matriz 3×3',
+    description: 'Declarar, ler e imprimir matriz 3×3 com entrada do usuário.',
     cycle: 3,
     resourceType: 'exercise',
   },
@@ -203,6 +234,8 @@ const PRACTICE_ITEMS = [
   },
 ];
 
+// ─── ITEMS DE REVISÃO ─────────────────────────────────────────────────────────
+
 const REVIEW_ITEMS = [
   {
     id: 'alg-review-questions',
@@ -213,17 +246,19 @@ const REVIEW_ITEMS = [
     items: [
       { id: 'alg-q1', prompt: 'Forma correta de declarar um vetor de 5 inteiros em C.', answer: 'int vetor[5];', explanation: 'Em C, arrays usam colchetes e o tipo vem antes do nome.' },
       { id: 'alg-q2', prompt: 'Valor de v[3] em {10,20,30,40,50}.', answer: '40', explanation: 'Índices em C começam em 0; v[3] é o quarto elemento.' },
-      { id: 'alg-q3', prompt: 'Forma correta de declarar uma matriz 3x3.', answer: 'int matriz[3][3];', explanation: 'Cada dimensão precisa do seu próprio par de colchetes.' },
-      { id: 'alg-q4', prompt: 'Posições da diagonal principal em uma matriz 4x4.', answer: 'm[0][0], m[1][1], m[2][2], m[3][3]', explanation: 'Diagonal principal é onde i == j.' },
+      { id: 'alg-q3', prompt: 'Forma correta de declarar uma matriz 3×3.', answer: 'int matriz[3][3];', explanation: 'Cada dimensão precisa do seu próprio par de colchetes.' },
+      { id: 'alg-q4', prompt: 'Posições da diagonal principal em uma matriz 4×4.', answer: 'm[0][0], m[1][1], m[2][2], m[3][3]', explanation: 'Diagonal principal é onde i == j.' },
       { id: 'alg-q5', prompt: 'Estrutura ideal para percorrer todos os elementos de uma matriz.', answer: 'Dois for aninhados', explanation: 'O for externo percorre linhas e o interno colunas.' },
       { id: 'alg-q6', prompt: 'Resultado de v[0] + v[3] no vetor {5,10,15,20}.', answer: '25', explanation: '5 + 20 = 25.' },
       { id: 'alg-q7', prompt: 'Condição correta para diagonal secundária de ordem N.', answer: 'i + j == N - 1', explanation: 'Essa condição pega a diagonal que vai do canto superior direito ao inferior esquerdo.' },
-      { id: 'alg-q8', prompt: 'Quantas vezes o scanf executa numa matriz 3x3 com for aninhado.', answer: '9', explanation: 'Uma vez por elemento; 3 x 3 = 9.' },
+      { id: 'alg-q8', prompt: 'Quantas vezes o scanf executa numa matriz 3×3 com for aninhado.', answer: '9', explanation: 'Uma vez por elemento; 3 × 3 = 9.' },
       { id: 'alg-q9', prompt: 'Erro em acessar v[3] num vetor int v[3].', answer: 'Acesso fora dos limites', explanation: 'Os índices válidos vão de 0 a 2.' },
       { id: 'alg-q10', prompt: 'O que ocorre ao usar v[2] sem inicializar int v[5] local.', answer: 'Lixo de memória', explanation: 'Variáveis locais não inicializadas contêm valor imprevisível.' },
     ],
   },
 ];
+
+// ─── RECURSOS ─────────────────────────────────────────────────────────────────
 
 const RESOURCE_ITEMS = [
   {
@@ -264,6 +299,8 @@ const RESOURCE_ITEMS = [
   },
 ];
 
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+
 export function readAlgorithmPilotProgress() {
   if (typeof window === 'undefined') return {};
   try {
@@ -283,55 +320,58 @@ export function writeAlgorithmPilotProgress(progress) {
   }
 }
 
+/**
+ * Alterna o estado de um item. Salva timestamp ISO quando marcando como feito.
+ */
 export function toggleAlgorithmPilotItem(itemId) {
   const current = readAlgorithmPilotProgress();
-  const next = { ...current, [itemId]: !current[itemId] };
+  const isCurrentlyDone = Boolean(current[itemId]);
+  const next = {
+    ...current,
+    [itemId]: isCurrentlyDone ? false : new Date().toISOString(),
+  };
   writeAlgorithmPilotProgress(next);
   return next;
 }
 
-function withStatus(items, progress) {
-  return items.map((item) => ({
-    ...item,
-    status: progress[item.id] ? 'completed' : 'pending',
-  }));
-}
-
-function isEligible(item, itemsById) {
-  return item.dependsOn.every((depId) => itemsById[depId]?.status === 'completed');
-}
+// ─── DATA GETTER ──────────────────────────────────────────────────────────────
 
 export function getAlgorithmPilotData(progressOverride) {
   const progress = progressOverride ?? readAlgorithmPilotProgress();
-  const cycleItems = withStatus(CYCLE_ITEMS, progress);
-  const itemsById = Object.fromEntries(cycleItems.map((item) => [item.id, item]));
 
-  const currentCycle = STUDY_CYCLES.find((cycle) => {
-    const items = cycleItems.filter((item) => item.cycle === cycle.order && item.isCore);
-    return items.some((item) => item.status !== 'completed');
-  }) ?? STUDY_CYCLES[STUDY_CYCLES.length - 1];
+  // Enriquecer items via engine
+  const cycleItems = enrichCycleItems(CYCLE_ITEMS, STUDY_CYCLES, progress);
+  const currentCycle = getCurrentCycle(cycleItems, STUDY_CYCLES);
+  const { completedCount, totalCount, progressPercent } = calcProgressMetrics(cycleItems);
 
-  const eligibleItems = cycleItems.filter((item) => item.cycle === currentCycle.order && item.status !== 'completed' && isEligible(item, itemsById));
-  const cycleItemsCurrent = cycleItems.filter((item) => item.cycle === currentCycle.order);
-  const upcomingItems = cycleItems.filter((item) => item.cycle > currentCycle.order).slice(0, 4);
-  const completedCount = cycleItems.filter((item) => item.status === 'completed').length;
-  const progressPercent = Math.round((completedCount / cycleItems.length) * 100);
+  const eligibleItems = getEligibleNowItems(cycleItems);
+  const comingNextItems = getComingNextItems(cycleItems, 3);
+  const lockedItems = getLockedItems(cycleItems, 4);
+  const subjectRotationHint = getSubjectRotationHint(progressPercent);
+
+  const cycleItemsCurrent = cycleItems.filter((i) => i.cycle === currentCycle.order);
 
   return {
     pilotNotice: {
       title: 'Piloto de Algoritmo e Programação no Crono-Lab',
-      body: 'Esta disciplina foi reorganizada por ciclos de conteúdo, não por datas. A estrutura está em validação e pode ser retrabalhada, removida ou expandida depois.',
+      body: 'Esta disciplina foi reorganizada por ciclos de conteúdo, não por datas. A estrutura está em validação.',
       label: 'piloto temporário',
     },
     subject: {
       id: 'algoritmos-programacao',
       title: 'Algoritmo e Programação',
       subtitle: 'Disciplina-piloto adaptada para ciclos guiados por conteúdo e progressão pedagógica.',
-      status: completedCount === cycleItems.length ? 'consolidado' : eligibleItems.length > 0 ? 'em_execucao' : 'travado',
+      status:
+        completedCount === totalCount
+          ? 'consolidado'
+          : eligibleItems.length > 0
+          ? 'em_execucao'
+          : 'travado',
       progressPercent,
       completedCount,
-      totalCount: cycleItems.length,
-      nextStep: eligibleItems[0]?.title ?? 'Sem conteúdo elegível imediato.',
+      totalCount,
+      nextStep: eligibleItems[0]?.title ?? comingNextItems[0]?.title ?? 'Todos os ciclos concluídos.',
+      subjectRotationHint,
     },
     studyCycles: STUDY_CYCLES,
     currentCycle: {
@@ -339,7 +379,9 @@ export function getAlgorithmPilotData(progressOverride) {
       items: cycleItemsCurrent,
     },
     eligibleItems,
-    upcomingItems,
+    comingNextItems,
+    lockedItems,
+    allCycleItems: cycleItems,
     practiceItems: PRACTICE_ITEMS,
     reviewItems: REVIEW_ITEMS,
     resourceItems: RESOURCE_ITEMS,
