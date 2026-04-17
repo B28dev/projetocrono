@@ -17,6 +17,7 @@ import CronoLabMissionPanel from '../gamification/ui/CronoLabMissionPanel.jsx';
 import CronoLabDebugControls from '../gamification/ui/CronoLabDebugControls.jsx';
 import CronoLabEntrepreneurshipPilot from '../gamification/ui/CronoLabEntrepreneurshipPilot.jsx';
 import CronoLabAlgorithmPilot from '../gamification/ui/CronoLabAlgorithmPilot.jsx';
+import DisciplineCatalogPage from '../gamification/ui/DisciplineCatalogPage.jsx';
 import {
   CRONO_LAB_DEFAULT_SECTION,
   CRONO_LAB_NAV_ITEMS,
@@ -321,8 +322,7 @@ function DashboardTopbar({ momentum, dateLabel, onOpenSidebar, sectionTitle }) {
 
 export default function CronoLab() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activePilotSubject, setActivePilotSubject] = useState('algoritmo');
-  const { section } = useParams();
+  const { section, slug } = useParams();
   const resolvedSectionId = section ?? CRONO_LAB_DEFAULT_SECTION;
   const activeSection = getCronoLabSection(resolvedSectionId);
   const isInvalidSection = !isValidCronoLabSection(resolvedSectionId);
@@ -550,41 +550,19 @@ export default function CronoLab() {
     }
 
     if (activeSection.id === 'disciplinas') {
-      return (
-        <div className="space-y-6 lg:space-y-8">
-          <div className="lab-card overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-6 lg:p-8 backdrop-blur-xl shadow-xl">
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
-              Disciplinas piloto
-            </p>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-white">
-              Biblioteca assistiva do laboratório
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400">
-              Aqui o Crono testa como uma disciplina antiga se comporta quando sai do formato empilhado e entra numa organização mais guiada. Você pode alternar entre os pilotos sem tocar no dashboard principal.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setActivePilotSubject('algoritmo')}
-                className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${activePilotSubject === 'algoritmo' ? 'border-cyan-400/25 bg-cyan-500/10 text-cyan-200' : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white'}`}
-              >
-                Algoritmo e Programação
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePilotSubject('empreendedorismo')}
-                className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${activePilotSubject === 'empreendedorismo' ? 'border-fuchsia-400/25 bg-fuchsia-500/10 text-fuchsia-200' : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white'}`}
-              >
-                Empreendedorismo
-              </button>
-            </div>
-          </div>
+      if (!slug) {
+        return <DisciplineCatalogPage />;
+      }
 
-          {activePilotSubject === 'algoritmo'
-            ? <CronoLabAlgorithmPilot />
-            : <CronoLabEntrepreneurshipPilot />}
-        </div>
-      );
+      if (slug === 'algoritmo') {
+        return <CronoLabAlgorithmPilot />;
+      }
+
+      if (slug === 'empreendedorismo') {
+        return <CronoLabEntrepreneurshipPilot />;
+      }
+
+      return <Navigate to="/crono-lab/disciplinas" replace />;
     }
 
     return <PlaceholderSection section={activeSection} />;

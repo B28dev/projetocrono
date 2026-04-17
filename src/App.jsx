@@ -222,7 +222,7 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
               />
               {/* Crono Lab — debug da Fase 1 da gamificação. Acessível apenas autenticado. */}
               <Route
-                path="/crono-lab/:section?"
+                path="/crono-lab/:section"
                 element={
                   isAuthLoading
                     ? null
@@ -230,6 +230,20 @@ function AppShell({ theme, shift, selectedShift, onToggleTheme, onShiftChange })
                     ? <CronoLab />
                     : <Navigate to="/" replace />
                 }
+              />
+              <Route
+                path="/crono-lab/:section/:slug"
+                element={
+                  isAuthLoading
+                    ? null
+                    : isAuthenticated
+                    ? <CronoLab />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route
+                path="/crono-lab"
+                element={<Navigate to="/crono-lab/dashboard" replace />}
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
