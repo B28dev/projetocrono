@@ -1,37 +1,35 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
   getAlgorithmPilotData,
+  getMotherSubjectsWithContent,
   readAlgorithmPilotProgress,
   toggleAlgorithmPilotItem,
 } from '../pilots/algorithmPilot.js';
 import DisciplineStudyLayout from './DisciplineStudyLayout.jsx';
+import DisciplineTopicContents from './DisciplineTopicContents.jsx';
 import StudyCycleExplanationCard from './StudyCycleExplanationCard.jsx';
 import CycleProgressHeader from './CycleProgressHeader.jsx';
 import AlgorithmSubjectOverview from './AlgorithmSubjectOverview.jsx';
-import EligibleContentPanel from './EligibleContentPanel.jsx';
-import AlgorithmPracticePanel from './AlgorithmPracticePanel.jsx';
-import AlgorithmReviewPanel from './AlgorithmReviewPanel.jsx';
-import AlgorithmResourcesPanel from './AlgorithmResourcesPanel.jsx';
 
+// Apenas 2 abas no primeiro nível — Prática e Recursos vivem dentro de cada tópico
 const TABS = [
   { id: 'overview', icon: '🧭', label: 'Visão Geral' },
   { id: 'contents', icon: '📚', label: 'Conteúdos' },
-  { id: 'practice', icon: '⚡', label: 'Prática' },
-  { id: 'resources', icon: '🗂️', label: 'Recursos' },
 ];
 
 export default function CronoLabAlgorithmPilot() {
   const [progressSnapshot, setProgressSnapshot] = useState(() => readAlgorithmPilotProgress());
   const [activeTab, setActiveTab] = useState('overview');
-  
+
   const pilot = useMemo(() => getAlgorithmPilotData(progressSnapshot), [progressSnapshot]);
+  const motherSubjects = useMemo(() => getMotherSubjectsWithContent(progressSnapshot), [progressSnapshot]);
 
   const handleToggle = useCallback((itemId) => {
     const next = toggleAlgorithmPilotItem(itemId);
     setProgressSnapshot(next);
   }, []);
 
-  const { subject, currentCycle, studyCycles, eligibleItems, comingNextItems, lockedItems, pilotNotice } = pilot;
+  const { subject, currentCycle, studyCycles, pilotNotice } = pilot;
 
   return (
     <DisciplineStudyLayout
@@ -41,6 +39,7 @@ export default function CronoLabAlgorithmPilot() {
       activeTab={activeTab}
       onChangeTab={setActiveTab}
     >
+      {/* ── ABA: VISÃO GERAL ── */}
       {activeTab === 'overview' && (
         <div className="space-y-5 lg:space-y-6" style={{ animation: 'fadeIn 0.4s ease-out both' }}>
           <StudyCycleExplanationCard variant="content-based" />
@@ -55,29 +54,13 @@ export default function CronoLabAlgorithmPilot() {
         </div>
       )}
 
+      {/* ── ABA: CONTEÚDOS — navegação por tópico com teoria + prática + recursos integrados ── */}
       {activeTab === 'contents' && (
-        <div style={{ animation: 'fadeIn 0.4s ease-out both' }}>
-          <EligibleContentPanel
-            eligibleItems={eligibleItems}
-            comingNextItems={comingNextItems}
-            lockedItems={lockedItems}
-            currentCycle={currentCycle}
-            onToggle={handleToggle}
-          />
-        </div>
-      )}
-
-      {activeTab === 'practice' && (
-        <div style={{ animation: 'fadeIn 0.4s ease-out both' }}>
-          <AlgorithmPracticePanel practiceItems={pilot.practiceItems} />
-        </div>
-      )}
-
-      {activeTab === 'resources' && (
-        <div className="space-y-5 lg:space-y-6" style={{ animation: 'fadeIn 0.4s ease-out both' }}>
-          <AlgorithmResourcesPanel resourceItems={pilot.resourceItems} />
-          <AlgorithmReviewPanel reviewItems={pilot.reviewItems} />
-        </div>
+        <DisciplineTopicContents
+          motherSubjects={motherSubjects}
+          progressSnapshot={progressSnapshot}
+          onToggle={handleToggle}
+        />
       )}
     </DisciplineStudyLayout>
   );

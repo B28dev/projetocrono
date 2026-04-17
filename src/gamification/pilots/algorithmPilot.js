@@ -336,6 +336,114 @@ export function toggleAlgorithmPilotItem(itemId) {
 
 // ─── DATA GETTER ──────────────────────────────────────────────────────────────
 
+/**
+ * Retorna os "Conteúdos-Mãe" da disciplina (estilo cebola).
+ * Cada Mother Subject encapsula um ou mais ciclos, agrupando Teoria e Prática daquele bloco maior.
+ */
+export function getMotherSubjectsWithContent(progressOverride) {
+  const progress = progressOverride ?? readAlgorithmPilotProgress();
+  const cycleItems = enrichCycleItems(CYCLE_ITEMS, STUDY_CYCLES, progress);
+
+  const MOTHER_SUBJECTS = [
+    {
+      id: 'ms-vetores',
+      order: 1,
+      title: 'Vetores',
+      description: 'Fundamentos de vetores: declaração, índices, varredura com for, cálculos comuns (média, soma) e primeiros contatos com problemas no juiz online (Beecrowd).',
+      cycleIds: [1, 2],
+    },
+    {
+      id: 'ms-matrizes',
+      order: 2,
+      title: 'Matrizes',
+      description: 'Vetores bidimensionais: leitura e impressão com for aninhado, manipulação de diagonais, operações entre matrizes e simulação prática de desafios reais.',
+      cycleIds: [3, 4, 5, 6],
+    },
+    {
+      id: 'ms-revisao-simulado',
+      order: 3,
+      title: 'Consolidação e Simulado',
+      description: 'Fechamento do módulo com revisão cruzada e simulado sem consulta para medir retenção.',
+      cycleIds: [7], // Cycle 7 isolado como Conteúdo-mãe de fechamento
+    }
+  ];
+
+  return MOTHER_SUBJECTS.map((ms) => {
+    // 1. Filtrar os items do ciclo que pertencem a este MotherSubject
+    const items = cycleItems.filter((i) => ms.cycleIds.includes(i.cycle));
+    
+    // 2. Extrair informações de status e progresso agregados
+    const totalCount = items.length;
+    const completedCount = items.filter((i) => i.isCompleted).length;
+    const isUnlocked = items.some((i) => i.isEligibleNow || i.isComingNext || i.isCompleted);
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    
+    const status = 
+      completedCount === totalCount ? 'concluido'
+      : isUnlocked ? 'em_execucao'
+      : 'bloqueado';
+
+    // 3. Separar por "camadas"
+    // Camada Teoria/Subtópicos: CycleItems de kind 'theory' ou 'review'
+    const theoryItems = items
+      .filter((i) => i.kind === 'theory' || i.kind === 'review')
+      .map((i) => ({ ...i, theoryPoints: buildTheoryPoints(i) }));
+      
+    // Camada Prática: CycleItems de kind 'practice' (aninhando os exercícios reais)
+    const practiceCycleItems = items
+      .filter((i) => i.kind === 'practice')
+      .map((i) => {
+         const exercises = PRACTICE_ITEMS.filter((p) => p.cycle === i.cycle);
+         return { ...i, exercises };
+      });
+
+    // Camada Recursos: Fixados diretamente pela relevância (Cycle proximity mapping)
+    const resourceItems = RESOURCE_ITEMS.filter((r) => {
+      if (ms.id === 'ms-vetores') return ['alg-resource-beecrowd'].includes(r.id);
+      if (ms.id === 'ms-matrizes') return ['alg-resource-pdf-matrizes', 'alg-resource-pdf-trilha', 'alg-resource-playlist'].includes(r.id);
+      return false;
+    });
+
+    return {
+      ...ms,
+      status,
+      progressPercent,
+      completedCount,
+      totalCount,
+      isUnlocked,
+      theoryItems,
+      practiceCycleItems,
+      resourceItems,
+    };
+  });
+}
+
+function buildTheoryPoints(item) {
+  const MAP = {
+    'alg-vetores-revisao': [
+      'Declaração: `int v[10];` — reserva 10 posições de memória contíguas.',
+      'Acessos via índice começam em 0 e vão até `N-1`. Cuidado com lixo de memória.',
+      'Varredura padrão requer o par: laço de repetição + índice linear.',
+      'Soma e contagem: sempre inicialize o acumulador fora do laço.',
+    ],
+    'alg-intro-matrizes': [
+      'Matriz em C: `int m[linhas][colunas];`.',
+      'Leitura padrão: dois laços `for` aninhados (i para linha, j para coluna).',
+      'Acesso seguro à memória: percorrer as colunas da linha i antes de ir para a i+1 otimiza cache.',
+    ],
+    'alg-for-aninhado-diagonais': [
+      'Diagonal principal: a linha é igual à coluna (`i == j`).',
+      'Diagonal secundária: a soma das coordenadas dá a dimensão máxima (`i + j == N - 1`).',
+      'Filtragem nas diagonais permite evitar loops excessivos usando um for linear indexado por i.',
+    ],
+    'alg-revisao-simulado': [
+      'Aplicações conjuntas exigem que o estudante entenda qual laço coordena a matriz original ou auxiliar.',
+      'Saber declarar o escopo das variáveis previne a poluição estadais em grandes funções.',
+    ]
+  };
+  return MAP[item.id] ?? [`Pontos principais sobre "${item.title}".`];
+}
+
 export function getAlgorithmPilotData(progressOverride) {
   const progress = progressOverride ?? readAlgorithmPilotProgress();
 

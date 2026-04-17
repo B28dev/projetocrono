@@ -120,7 +120,7 @@ export default function DisciplineStudyLayout({ subject, slug, tabs, activeTab, 
 
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
-        <div className="w-full max-w-6xl mx-auto px-4 py-20 lg:p-12 space-y-6 lg:space-y-8">
+        <div className="w-full max-w-none px-4 py-20 lg:py-8 lg:px-6 xl:px-8 space-y-6 lg:space-y-8">
           {children}
           
           <div className="mt-16 text-center opacity-40 pb-10">
