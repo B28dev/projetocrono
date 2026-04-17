@@ -1,6 +1,13 @@
 import { memo } from 'react';
 
-const AlgorithmSubjectOverview = memo(function AlgorithmSubjectOverview({ subject, notice, recommendedItem, explorationProgress }) {
+const AlgorithmSubjectOverview = memo(function AlgorithmSubjectOverview({
+  subject,
+  notice,
+  recommendedItem,
+  nextRecommendedAction,
+  disciplineProgress,
+  explorationProgress,
+}) {
   return (
     <div
       className="lab-card rounded-[28px] border border-white/[0.06] bg-[#0A0A12]/80 p-5 shadow-xl backdrop-blur-xl lg:p-7"
@@ -46,10 +53,36 @@ const AlgorithmSubjectOverview = memo(function AlgorithmSubjectOverview({ subjec
               </p>
               <p className="mt-1 text-base font-semibold text-white">{recommendedItem.title}</p>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
-                {recommendedItem.isCompletedOutOfSequence
-                  ? 'Você já explorou este conteúdo. Agora ele precisa de validação oficial para mover a trilha principal.'
-                  : 'Siga por aqui para manter a progressão oficial da disciplina sem perder a ordem principal.'}
+                {nextRecommendedAction?.supportText
+                  ?? (recommendedItem.isCompletedOutOfSequence
+                    ? 'Você já explorou este conteúdo. Agora ele precisa de validação oficial para mover a trilha principal.'
+                    : 'Siga por aqui para manter a progressão oficial da disciplina sem perder a ordem principal.')}
               </p>
+              {nextRecommendedAction?.recommendedReasonLabel && (
+                <div className="mt-3 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
+                  {nextRecommendedAction.recommendedReasonLabel}
+                </div>
+              )}
+            </div>
+          )}
+
+          {disciplineProgress && (
+            <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Camadas oficiais</p>
+                <p className="mt-2 text-2xl font-black text-white">{disciplineProgress.official.completedCount}</p>
+                <p className="mt-1 text-[11px] text-zinc-500">de {disciplineProgress.official.totalCount} já validadas</p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Exploração livre</p>
+                <p className="mt-2 text-2xl font-black text-white">{disciplineProgress.exploration.exploredOnlyCount}</p>
+                <p className="mt-1 text-[11px] text-zinc-500">camadas fora da ordem oficial</p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Missão futura</p>
+                <p className="mt-2 text-sm font-semibold leading-relaxed text-white">{disciplineProgress.nextRecommendedLayerTitle ?? 'Sem pendências na trilha oficial'}</p>
+                <p className="mt-1 text-[11px] text-zinc-500">Contrato pronto para alimentar a Missão Diária na Sprint 3.</p>
+              </div>
             </div>
           )}
         </div>
@@ -61,22 +94,22 @@ const AlgorithmSubjectOverview = memo(function AlgorithmSubjectOverview({ subjec
           <div className="mt-3 flex items-end justify-between gap-4">
             <div>
               <p className="text-3xl font-black text-white">
-                {subject.officialProgressPercent}%
+                {disciplineProgress?.official.progressPercent ?? subject.officialProgressPercent}%
               </p>
               <p className="mt-1 text-xs text-zinc-500">
-                {subject.completedCount}/{subject.totalCount} blocos validados
+                {disciplineProgress?.official.completedCount ?? subject.completedCount}/{disciplineProgress?.official.totalCount ?? subject.totalCount} blocos validados
               </p>
             </div>
             <div className="text-right">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-300">Exploração extra</p>
-              <p className="mt-1 text-lg font-black text-white">{explorationProgress?.exploredOnlyCount ?? 0}</p>
+              <p className="mt-1 text-lg font-black text-white">{disciplineProgress?.exploration.exploredOnlyCount ?? explorationProgress?.exploredOnlyCount ?? 0}</p>
             </div>
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/5">
             <div
               className="h-full rounded-full transition-all duration-700 ease-out"
               style={{
-                width: `${subject.officialProgressPercent}%`,
+                width: `${disciplineProgress?.official.progressPercent ?? subject.officialProgressPercent}%`,
                 background: 'linear-gradient(90deg, #ff3ea5, #00e8ff)',
                 boxShadow: '0 0 10px rgba(0,232,255,0.3)',
               }}

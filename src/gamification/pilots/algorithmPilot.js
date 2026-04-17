@@ -18,6 +18,7 @@ import {
 } from '../cycles/cycleEngine.js';
 
 export const ALGORITHM_PILOT_STORAGE_KEY = 'algoritmo-pilot-progress-v3';
+export const ALGORITHM_PILOT_PROGRESS_EVENT = 'algorithm-pilot-progress-changed';
 const ALGORITHM_PILOT_LEGACY_STORAGE_KEY = 'algoritmo-pilot-progress-v2';
 
 const VISUAL_STATE = {
@@ -412,7 +413,11 @@ export function readAlgorithmPilotProgress() {
 export function writeAlgorithmPilotProgress(progress) {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(ALGORITHM_PILOT_STORAGE_KEY, JSON.stringify(normalizeAlgorithmPilotProgress(progress)));
+    const normalized = normalizeAlgorithmPilotProgress(progress);
+    window.localStorage.setItem(ALGORITHM_PILOT_STORAGE_KEY, JSON.stringify(normalized));
+    window.dispatchEvent(new CustomEvent(ALGORITHM_PILOT_PROGRESS_EVENT, {
+      detail: normalized,
+    }));
   } catch {
     // noop
   }
@@ -453,16 +458,17 @@ export function toggleAlgorithmPilotFreeExplorationItem(itemId) {
 
 // ─── DERIVAÇÕES ────────────────────────────────────────────────────────────────
 
-function getExplorationVisualState(item, primaryRecommendedItemId) {
-  const isOfficialCompleted = item.status === 'completed';
-  const isCompletedOutOfSequence = Boolean(item.isCompletedOutOfSequence);
+const RECOMMENDED_REASON_LABEL = {
+  [ELIGIBLE_REASON.RECOMMENDED_NOW]: 'Recomendado agora',
+  [ELIGIBLE_REASON.CURRENT_CYCLE]: 'Etapa atual da trilha',
+  [ELIGIBLE_REASON.EXPLORATION_OPEN]: 'Exploração livre disponível',
+  [ELIGIBLE_REASON.NEXT_OFFICIAL]: 'Próxima camada oficial',
+  [ELIGIBLE_REASON.LOCKED_CONTEXTUALLY]: 'Fora da sequência oficial',
+  [ELIGIBLE_REASON.ALREADY_COMPLETED]: 'Já concluído oficialmente',
+};
 
-  if (isOfficialCompleted) return VISUAL_STATE.COMPLETED_OFFICIALLY;
-  if (item.id === primaryRecommendedItemId) return VISUAL_STATE.RECOMMENDED_NOW;
-  if (isCompletedOutOfSequence) return VISUAL_STATE.COMPLETED_OUT_OF_SEQUENCE;
-  if (item.isComingNext) return VISUAL_STATE.COMING_NEXT;
-  if (item.isLocked) return VISUAL_STATE.LOCKED_CONTEXTUALLY;
-  return VISUAL_STATE.AVAILABLE_FOR_EXPLORATION;
+function getProgressPercent(completedCount, totalCount) {
+  return totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 }
 
 function getEligibleReason(item, primaryRecommendedItemId) {
@@ -474,35 +480,181 @@ function getEligibleReason(item, primaryRecommendedItemId) {
   return ELIGIBLE_REASON.EXPLORATION_OPEN;
 }
 
+function getCompletionMode(item, explorationCompletedAt) {
+  if (item.status === 'completed' && explorationCompletedAt) return 'official_after_exploration';
+  if (item.status === 'completed') return 'official';
+  if (explorationCompletedAt) return 'out_of_sequence';
+  return 'pending';
+}
+
+function getMotherSubjectByCycle(cycle) {
+  return MOTHER_SUBJECTS.find((subject) => subject.cycleIds.includes(cycle)) ?? null;
+}
+
+export function getLayerStatus(layer) {
+  if (!layer) return VISUAL_STATE.AVAILABLE_FOR_EXPLORATION;
+  if (layer.isCompletedOfficially || layer.isOfficialCompleted || layer.status === 'completed') {
+    return VISUAL_STATE.COMPLETED_OFFICIALLY;
+  }
+  if (layer.isRecommendedNow) return VISUAL_STATE.RECOMMENDED_NOW;
+  if (layer.isCompletedOutOfSequence) return VISUAL_STATE.COMPLETED_OUT_OF_SEQUENCE;
+  if (layer.isComingNext) return VISUAL_STATE.COMING_NEXT;
+  if (layer.isLocked) return VISUAL_STATE.LOCKED_CONTEXTUALLY;
+  return VISUAL_STATE.AVAILABLE_FOR_EXPLORATION;
+}
+
+function getLayerHint(layer) {
+  if (layer.isRecommendedNow && layer.isCompletedOutOfSequence) {
+    return 'Você já explorou este bloco. Agora falta validar na trilha oficial para mover a disciplina.';
+  }
+  if (layer.isRecommendedNow) {
+    return 'Próxima camada recomendada. Siga por aqui para manter a progressão oficial.';
+  }
+  if (layer.isCompletedOfficially) {
+    return 'Progressão validada. A trilha oficial já reconheceu este bloco.';
+  }
+  if (layer.isCompletedOutOfSequence) {
+    return 'Conteúdo consultado antes da hora. Isso não substitui a próxima ação principal.';
+  }
+  if (layer.isComingNext) {
+    return 'Está logo depois da etapa atual. Pode explorar, mas a recomendação principal continua no bloco anterior.';
+  }
+  if (layer.isLocked) {
+    return 'Exploração liberada sem bloquear você, mas este bloco ainda está fora da sequência oficial.';
+  }
+  return 'Disponível para exploração. O progresso principal continua separado da navegação livre.';
+}
+
+function getLayerBadges(layer) {
+  const badges = [];
+
+  if (layer.isRecommendedNow) {
+    badges.push({ key: 'recommended_now', label: 'Recomendado agora', tone: 'recommended' });
+  }
+  if (layer.isCompletedOfficially) {
+    badges.push({ key: 'completed_officially', label: 'Progressão validada', tone: 'official' });
+  }
+  if (layer.isCompletedOutOfSequence) {
+    badges.push({ key: 'completed_out_of_sequence', label: 'Exploração antecipada', tone: 'exploration' });
+  }
+  if (!layer.isRecommendedNow && layer.isComingNext && !layer.isCompletedOfficially) {
+    badges.push({ key: 'coming_next', label: 'Próxima da fila', tone: 'upcoming' });
+  }
+  if (!layer.isCompletedOfficially && !layer.isCompletedOutOfSequence && !layer.isRecommendedNow && !layer.isComingNext && !layer.isLocked) {
+    badges.push({ key: 'available_for_exploration', label: 'Exploração livre', tone: 'neutral' });
+  }
+  if (!layer.isCompletedOfficially && !layer.isCompletedOutOfSequence && layer.isLocked) {
+    badges.push({ key: 'locked_contextually', label: 'Fora da sequência', tone: 'muted' });
+  }
+
+  return badges;
+}
+
+function getLayerPrimaryAction(layer) {
+  if (layer.isCompletedOfficially) {
+    return {
+      kind: 'none',
+      label: 'Progressão validada',
+      icon: '✓',
+      tone: 'official',
+      disabled: true,
+    };
+  }
+
+  if (layer.isRecommendedNow) {
+    return {
+      kind: 'complete_official',
+      label: layer.isCompletedOutOfSequence ? 'Validar na trilha oficial' : 'Concluir na trilha oficial',
+      icon: layer.isCompletedOutOfSequence ? '↺' : '⚡',
+      tone: 'recommended',
+      disabled: false,
+    };
+  }
+
+  if (layer.isEligibleNow) {
+    return {
+      kind: 'complete_official',
+      label: 'Concluir nesta etapa',
+      icon: '◎',
+      tone: 'current',
+      disabled: false,
+    };
+  }
+
+  if (layer.isCompletedOutOfSequence) {
+    return {
+      kind: 'none',
+      label: 'Exploração registrada',
+      icon: '↗',
+      tone: 'exploration',
+      disabled: true,
+    };
+  }
+
+  return {
+    kind: 'toggle_exploration',
+    label: layer.isComingNext ? 'Explorar antecipadamente' : layer.isLocked ? 'Explorar fora da sequência' : 'Marcar como explorado',
+    icon: '↗',
+    tone: layer.isComingNext ? 'upcoming' : 'neutral',
+    disabled: false,
+  };
+}
+
 function decorateCycleItems(cycleItems, freeExplorationProgress, primaryRecommendedItemId) {
   return cycleItems.map((item) => {
     const explorationCompletedAt = freeExplorationProgress[item.id] ?? null;
-    const isOfficialCompleted = item.status === 'completed';
-    const isCompletedOutOfSequence = !isOfficialCompleted && Boolean(explorationCompletedAt);
-    const isExplored = isOfficialCompleted || isCompletedOutOfSequence;
+    const isCompletedOfficially = item.status === 'completed';
+    const isCompletedOutOfSequence = !isCompletedOfficially && Boolean(explorationCompletedAt);
+    const isExplored = isCompletedOfficially || isCompletedOutOfSequence;
     const isRecommendedNow = item.id === primaryRecommendedItemId;
-    const visualState = getExplorationVisualState({ ...item, isCompletedOutOfSequence }, primaryRecommendedItemId);
+    const motherSubject = getMotherSubjectByCycle(item.cycle);
+    const recommendedReason = getEligibleReason(item, primaryRecommendedItemId);
 
-    return {
+    const decoratedItem = {
       ...item,
+      motherSubjectId: motherSubject?.id ?? null,
+      motherSubjectTitle: motherSubject?.title ?? null,
       sequenceOrder: item.order,
-      motherSubjectOrder: getMotherSubjectOrder(item.cycle),
+      motherSubjectOrder: motherSubject?.order ?? 0,
+      layerType: item.kind,
       layerOrder: item.order,
-      isOfficialCompleted,
-      isCompletedOutOfSequence,
       isExplored,
+      isCompletedOfficially,
+      isOfficialCompleted: isCompletedOfficially,
+      isCompletedOutOfSequence,
       isRecommendedNow,
-      progressType: isOfficialCompleted ? 'official' : isCompletedOutOfSequence ? 'exploration' : 'official',
-      visualState,
-      eligibleReason: getEligibleReason(item, primaryRecommendedItemId),
+      isAvailableForExploration: !isCompletedOfficially,
+      completionMode: getCompletionMode(item, explorationCompletedAt),
+      progressType: isCompletedOfficially ? 'official' : isCompletedOutOfSequence ? 'exploration' : 'pending',
+      recommendedReason,
+      recommendedReasonLabel: RECOMMENDED_REASON_LABEL[recommendedReason],
       explorationCompletedAt,
       officialCompletedAt: item.completedAt,
+      completedAt: item.completedAt ?? explorationCompletedAt ?? null,
+    };
+
+    const layerStatus = getLayerStatus(decoratedItem);
+
+    return {
+      ...decoratedItem,
+      layerStatus,
+      visualState: layerStatus,
+      stateHint: getLayerHint({ ...decoratedItem, layerStatus }),
+      badges: getLayerBadges({ ...decoratedItem, layerStatus }),
+      primaryAction: getLayerPrimaryAction({ ...decoratedItem, layerStatus }),
     };
   });
 }
 
-function getMotherSubjectOrder(cycle) {
-  return MOTHER_SUBJECTS.find((subject) => subject.cycleIds.includes(cycle))?.order ?? 0;
+function buildExplorationProgressFromItems(cycleItems) {
+  const exploredOnlyCount = cycleItems.filter((item) => item.isCompletedOutOfSequence).length;
+  const totalCount = cycleItems.length;
+
+  return {
+    exploredOnlyCount,
+    totalCount,
+    progressPercent: getProgressPercent(exploredOnlyCount, totalCount),
+  };
 }
 
 function buildDecoratedCycleData(progressState) {
@@ -517,22 +669,496 @@ function buildDecoratedCycleData(progressState) {
   };
 }
 
+function buildMotherSubjectResourceItems(motherSubjectId) {
+  if (motherSubjectId === 'ms-vetores') {
+    return RESOURCE_ITEMS.filter((resource) => ['alg-resource-beecrowd'].includes(resource.id));
+  }
+
+  if (motherSubjectId === 'ms-matrizes') {
+    return RESOURCE_ITEMS.filter((resource) => ['alg-resource-pdf-matrizes', 'alg-resource-pdf-trilha', 'alg-resource-playlist'].includes(resource.id));
+  }
+
+  return [];
+}
+
+function buildMotherSubjectsFromCycleItems(cycleItems, primaryRecommendedItem) {
+  return MOTHER_SUBJECTS.map((motherSubject) => {
+    const layers = cycleItems
+      .filter((item) => motherSubject.cycleIds.includes(item.cycle))
+      .sort((a, b) => a.order - b.order);
+
+    const totalCount = layers.length;
+    const officialCompletedCount = layers.filter((item) => item.isCompletedOfficially).length;
+    const exploredOutOfSequenceCount = layers.filter((item) => item.isCompletedOutOfSequence).length;
+    const containsRecommendedNow = layers.some((item) => item.isRecommendedNow);
+    const isUnlocked = layers.some((item) => item.isEligibleNow || item.isComingNext || item.isExplored);
+    const officialProgressPercent = getProgressPercent(officialCompletedCount, totalCount);
+    const explorationProgressPercent = getProgressPercent(exploredOutOfSequenceCount, totalCount);
+
+    const nextRecommendedLayer = layers.find((item) => item.isRecommendedNow)
+      ?? layers.find((item) => item.isEligibleNow && !item.isCompletedOfficially)
+      ?? layers.find((item) => item.isComingNext && !item.isCompletedOfficially)
+      ?? null;
+
+    const status =
+      officialCompletedCount === totalCount ? 'concluido'
+      : isUnlocked ? 'em_execucao'
+      : 'bloqueado';
+
+    const theoryItems = layers
+      .filter((item) => item.kind === 'theory' || item.kind === 'review')
+      .map((item) => ({ ...item, theoryPoints: buildTheoryPoints(item) }));
+
+    const practiceCycleItems = layers
+      .filter((item) => item.kind === 'practice')
+      .map((item) => ({
+        ...item,
+        exercises: PRACTICE_ITEMS.filter((practiceItem) => practiceItem.cycle === item.cycle),
+      }));
+
+    return {
+      ...motherSubject,
+      status,
+      layers,
+      progressPercent: officialProgressPercent,
+      officialProgressPercent,
+      explorationProgressPercent,
+      officialCompletedCount,
+      exploredOutOfSequenceCount,
+      completedCount: officialCompletedCount,
+      totalCount,
+      isUnlocked,
+      containsRecommendedNow,
+      nextRecommendedLayerId: nextRecommendedLayer?.id ?? null,
+      nextRecommendedLayerTitle: nextRecommendedLayer?.title ?? null,
+      nextRecommendedLayer,
+      theoryItems,
+      practiceCycleItems,
+      resourceItems: buildMotherSubjectResourceItems(motherSubject.id),
+      isRecommendedMotherSubject: containsRecommendedNow && primaryRecommendedItem != null,
+    };
+  });
+}
+
 export function getRecommendedLayer(progressOverride) {
   const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
   return buildDecoratedCycleData(progress).primaryRecommendedItem;
 }
 
 export function getNextRecommendedAction(progressOverride) {
-  const recommendedItem = getRecommendedLayer(progressOverride);
-  if (!recommendedItem) return null;
+  const recommendedLayer = getRecommendedLayer(progressOverride);
+  if (!recommendedLayer) return null;
 
   return {
-    itemId: recommendedItem.id,
-    title: recommendedItem.title,
-    visualState: recommendedItem.visualState,
-    cycle: recommendedItem.cycle,
-    eligibleReason: recommendedItem.eligibleReason,
+    itemId: recommendedLayer.id,
+    motherSubjectId: recommendedLayer.motherSubjectId,
+    motherSubjectTitle: recommendedLayer.motherSubjectTitle,
+    title: recommendedLayer.title,
+    visualState: recommendedLayer.visualState,
+    layerType: recommendedLayer.layerType,
+    cycle: recommendedLayer.cycle,
+    completionMode: recommendedLayer.completionMode,
+    recommendedReason: recommendedLayer.recommendedReason,
+    recommendedReasonLabel: recommendedLayer.recommendedReasonLabel,
+    supportText: recommendedLayer.stateHint,
+    actionLabel: recommendedLayer.primaryAction?.label ?? 'Continuar',
   };
+}
+
+export function getAlgorithmMissionCandidates(progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const pilot = getAlgorithmPilotData(progress);
+  const primaryAction = pilot.recommendedLayer
+    ? {
+        ...pilot.recommendedLayer,
+        missionRole: 'primary',
+        priority: 1,
+        isOfficial: true,
+        generatedFrom: 'recommended_now',
+        reason: pilot.nextRecommendedAction?.supportText ?? pilot.recommendedLayer.stateHint,
+      }
+    : null;
+
+  const pendingActions = pilot.eligibleItems
+    .filter((item) => item.id !== primaryAction?.id && !item.isCompletedOfficially)
+    .map((item, index) => ({
+      ...item,
+      missionRole: 'pending',
+      priority: 20 + index,
+      isOfficial: true,
+      generatedFrom: 'official_pending',
+      reason: item.stateHint,
+    }));
+
+  const reinforcementActions = pilot.allCycleItems
+    .filter((item) => item.isCompletedOfficially && item.kind !== 'review')
+    .slice(-2)
+    .reverse()
+    .map((item, index) => ({
+      ...item,
+      missionRole: 'reinforcement',
+      priority: 40 + index,
+      isOfficial: false,
+      generatedFrom: 'official_reinforcement',
+      reason: `Reforce ${item.title.toLowerCase()} para consolidar o ciclo atual sem roubar o foco da ação principal.`,
+    }));
+
+  return {
+    disciplineId: pilot.subject.id,
+    primaryAction,
+    pendingActions,
+    reinforcementActions,
+    recommendedAction: pilot.nextRecommendedAction,
+    officialProgress: pilot.officialProgress,
+    explorationProgress: pilot.explorationProgress,
+    missionReady: primaryAction != null || pendingActions.length > 0 || reinforcementActions.length > 0,
+  };
+}
+
+export function getAlgorithmMissionContentItems(progressOverride) {
+  const { primaryAction, pendingActions, reinforcementActions } = getAlgorithmMissionCandidates(progressOverride);
+  const allActions = [primaryAction, ...pendingActions, ...reinforcementActions].filter(Boolean);
+
+  return allActions.map((action) => ({
+    id: `alg-mission-${action.id}`,
+    subjectId: 'algoritmos-programacao',
+    moduleId: action.motherSubjectId ?? 'algoritmo-daily-mission',
+    kind: action.layerType === 'practice' ? 'assisted_question' : 'flashcard',
+    title: action.title,
+    front: action.layerType === 'practice' ? null : action.description,
+    back: action.layerType === 'practice' ? null : action.reason,
+    prompt: action.layerType === 'practice' ? action.description : null,
+    answerModel: action.reason,
+    mustIncludePoints: [],
+    difficulty: action.difficulty ?? 'medium',
+    xpProfileId: action.layerType === 'practice' ? 'assisted_medium' : 'flashcard_medium',
+    isActive: true,
+    missionMetadata: {
+      layerId: action.id,
+      motherSubjectId: action.motherSubjectId,
+      missionRole: action.missionRole,
+      generatedFrom: action.generatedFrom,
+      isOfficial: action.isOfficial,
+      priority: action.priority,
+      reason: action.reason,
+    },
+  }));
+}
+
+export function completeAlgorithmMissionLayer(layerId, progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  if (!layerId) return progress;
+  if (progress.officialProgress[layerId]) return progress;
+
+  const next = {
+    ...progress,
+    officialProgress: {
+      ...progress.officialProgress,
+      [layerId]: new Date().toISOString(),
+    },
+  };
+
+  writeAlgorithmPilotProgress(next);
+  return next;
+}
+
+export function toggleAlgorithmMissionReinforcement(layerId, progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  if (!layerId) return progress;
+
+  const next = {
+    ...progress,
+    freeExplorationProgress: toggleProgressEntry(progress.freeExplorationProgress, layerId),
+  };
+
+  writeAlgorithmPilotProgress(next);
+  return next;
+}
+
+export function isAlgorithmMissionContentItem(contentItemId) {
+  return typeof contentItemId === 'string' && contentItemId.startsWith('alg-mission-');
+}
+
+export function getAlgorithmLayerIdFromMissionContentItem(contentItemId) {
+  if (!isAlgorithmMissionContentItem(contentItemId)) return null;
+  return contentItemId.replace('alg-mission-', '');
+}
+
+export function getAlgorithmLayerById(layerId, progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const { cycleItems } = buildDecoratedCycleData(progress);
+  return cycleItems.find((item) => item.id === layerId) ?? null;
+}
+
+export function getAlgorithmMissionMissionItemPatch(missionItem, progressOverride) {
+  const layerId = getAlgorithmLayerIdFromMissionContentItem(missionItem?.contentItemId ?? '');
+  const layer = getAlgorithmLayerById(layerId, progressOverride);
+  if (!layer) return null;
+
+  return {
+    sourceDisciplineId: 'algoritmos-programacao',
+    missionRole: missionItem?.missionRole ?? layer.missionRole ?? 'pending',
+    priority: missionItem?.priority ?? 99,
+    motherSubjectId: layer.motherSubjectId,
+    layerId: layer.id,
+    layerTitle: layer.title,
+    isRecommended: layer.isRecommendedNow,
+    isOfficial: missionItem?.isOfficial ?? true,
+    generatedFrom: missionItem?.generatedFrom ?? 'algorithm_engine',
+    reason: missionItem?.reason ?? layer.stateHint,
+  };
+}
+
+export function getAlgorithmMissionState(progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const candidates = getAlgorithmMissionCandidates(progress);
+  const officialMissionItems = [candidates.primaryAction, ...candidates.pendingActions].filter(Boolean);
+  const completedMissionItems = officialMissionItems.filter((item) => item.isCompletedOfficially);
+  const missionProgressPercent = officialMissionItems.length > 0
+    ? Math.round((completedMissionItems.length / officialMissionItems.length) * 100)
+    : 0;
+
+  return {
+    id: `alg-daily-mission-${new Date().toISOString().slice(0, 10)}`,
+    sourceDisciplineId: 'algoritmos-programacao',
+    primaryAction: candidates.primaryAction,
+    pendingActions: candidates.pendingActions,
+    reinforcementActions: candidates.reinforcementActions,
+    officialMissionItems,
+    completedMissionItems,
+    missionProgressPercent,
+    isCompleted: officialMissionItems.length > 0 && completedMissionItems.length === officialMissionItems.length,
+  };
+}
+
+export function getAlgorithmMissionSummaryStatus(progressOverride) {
+  const missionState = getAlgorithmMissionState(progressOverride);
+  if (missionState.isCompleted) return 'completed';
+  if (missionState.completedMissionItems.length > 0) return 'in_progress';
+  return missionState.pendingActions.length > 0 || missionState.reinforcementActions.length > 0 ? 'pending' : 'failed';
+}
+
+export function getAlgorithmMissionProgress(progressOverride) {
+  const missionState = getAlgorithmMissionState(progressOverride);
+  return {
+    completedCount: missionState.completedMissionItems.length,
+    totalCount: missionState.officialMissionItems.length,
+    percent: missionState.missionProgressPercent,
+  };
+}
+
+export function getAlgorithmMissionCompletionState(progressOverride) {
+  const missionState = getAlgorithmMissionState(progressOverride);
+  return {
+    isCompleted: missionState.isCompleted,
+    summaryStatus: getAlgorithmMissionSummaryStatus(progressOverride),
+  };
+}
+
+export function getPrimaryMissionAction(progressOverride) {
+  return getAlgorithmMissionCandidates(progressOverride).primaryAction;
+}
+
+export function getPendingMissionItems(progressOverride) {
+  return getAlgorithmMissionCandidates(progressOverride).pendingActions;
+}
+
+export function getReinforcementMissionItems(progressOverride) {
+  return getAlgorithmMissionCandidates(progressOverride).reinforcementActions;
+}
+
+export function generateDailyMission(progressOverride) {
+  return getAlgorithmMissionState(progressOverride);
+}
+
+export function getMissionProgress(progressOverride) {
+  return getAlgorithmMissionProgress(progressOverride);
+}
+
+export function getMissionCompletionState(progressOverride) {
+  return getAlgorithmMissionCompletionState(progressOverride);
+}
+
+export function getMissionSummaryStatus(progressOverride) {
+  return getAlgorithmMissionSummaryStatus(progressOverride);
+}
+
+export function getAlgorithmMissionSnapshot(progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const mission = getAlgorithmMissionState(progress);
+  const candidates = getAlgorithmMissionCandidates(progress);
+
+  return {
+    progress,
+    mission,
+    candidates,
+    contentItems: getAlgorithmMissionContentItems(progress),
+    summaryStatus: getAlgorithmMissionSummaryStatus(progress),
+    progressState: getAlgorithmMissionProgress(progress),
+  };
+}
+
+export function buildAlgorithmMissionMetadata(progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  return {
+    sourceDisciplineId: 'algoritmos-programacao',
+    primaryActionId: snapshot.candidates.primaryAction?.id ?? null,
+    pendingCount: snapshot.candidates.pendingActions.length,
+    reinforcementCount: snapshot.candidates.reinforcementActions.length,
+    missionProgressPercent: snapshot.progressState.percent,
+    missionSummaryStatus: snapshot.summaryStatus,
+  };
+}
+
+export function buildAlgorithmMissionTitle(progressOverride) {
+  const primaryAction = getPrimaryMissionAction(progressOverride);
+  if (!primaryAction) return 'Missão diária sem ação oficial aberta';
+  return `Hoje o foco é ${primaryAction.title}`;
+}
+
+export function buildAlgorithmMissionSubtitle(progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  if (snapshot.candidates.primaryAction) {
+    return snapshot.candidates.primaryAction.reason;
+  }
+  if (snapshot.candidates.pendingActions.length > 0) {
+    return 'Sem ação principal nova. Resolva as pendências oficiais abertas para manter a trilha limpa.';
+  }
+  return 'A trilha oficial do piloto está limpa por hoje.';
+}
+
+export function getMissionPanelState(progressOverride) {
+  const metadata = buildAlgorithmMissionMetadata(progressOverride);
+  return {
+    ...metadata,
+    title: buildAlgorithmMissionTitle(progressOverride),
+    subtitle: buildAlgorithmMissionSubtitle(progressOverride),
+  };
+}
+
+export function getMissionItemPriorityLabel(missionRole) {
+  if (missionRole === 'primary') return 'Ação principal';
+  if (missionRole === 'pending') return 'Pendência';
+  if (missionRole === 'reinforcement') return 'Reforço';
+  return 'Missão';
+}
+
+export function getMissionItemReason(missionRole, progressOverride) {
+  if (missionRole === 'primary') return buildAlgorithmMissionSubtitle(progressOverride);
+  if (missionRole === 'pending') return 'Pendência oficial aberta da trilha atual.';
+  if (missionRole === 'reinforcement') return 'Reforço complementar do dia.';
+  return 'Item da missão diária.';
+}
+
+export function getMissionRoleByLayerId(layerId, progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  if (snapshot.candidates.primaryAction?.id === layerId) return 'primary';
+  if (snapshot.candidates.pendingActions.some((item) => item.id === layerId)) return 'pending';
+  if (snapshot.candidates.reinforcementActions.some((item) => item.id === layerId)) return 'reinforcement';
+  return null;
+}
+
+export function getMissionPriorityByLayerId(layerId, progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  const action = [snapshot.candidates.primaryAction, ...snapshot.candidates.pendingActions, ...snapshot.candidates.reinforcementActions]
+    .filter(Boolean)
+    .find((item) => item.id === layerId);
+  return action?.priority ?? null;
+}
+
+export function getMissionGeneratedFromByLayerId(layerId, progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  const action = [snapshot.candidates.primaryAction, ...snapshot.candidates.pendingActions, ...snapshot.candidates.reinforcementActions]
+    .filter(Boolean)
+    .find((item) => item.id === layerId);
+  return action?.generatedFrom ?? null;
+}
+
+export function getMissionIsOfficialByLayerId(layerId, progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  const action = [snapshot.candidates.primaryAction, ...snapshot.candidates.pendingActions, ...snapshot.candidates.reinforcementActions]
+    .filter(Boolean)
+    .find((item) => item.id === layerId);
+  return Boolean(action?.isOfficial);
+}
+
+export function getMissionReasonByLayerId(layerId, progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  const action = [snapshot.candidates.primaryAction, ...snapshot.candidates.pendingActions, ...snapshot.candidates.reinforcementActions]
+    .filter(Boolean)
+    .find((item) => item.id === layerId);
+  return action?.reason ?? null;
+}
+
+export function getMissionLayerMetadataById(layerId, progressOverride) {
+  if (!layerId) return null;
+  return {
+    missionRole: getMissionRoleByLayerId(layerId, progressOverride),
+    priority: getMissionPriorityByLayerId(layerId, progressOverride),
+    generatedFrom: getMissionGeneratedFromByLayerId(layerId, progressOverride),
+    isOfficial: getMissionIsOfficialByLayerId(layerId, progressOverride),
+    reason: getMissionReasonByLayerId(layerId, progressOverride),
+  };
+}
+
+export function getMissionStateByLayerId(layerId, progressOverride) {
+  const layer = getAlgorithmLayerById(layerId, progressOverride);
+  if (!layer) return null;
+  return {
+    ...layer,
+    ...getMissionLayerMetadataById(layerId, progressOverride),
+  };
+}
+
+export function getMissionItemLabelByLayerId(layerId, progressOverride) {
+  const state = getMissionStateByLayerId(layerId, progressOverride);
+  if (!state) return null;
+  return `${getMissionItemPriorityLabel(state.missionRole)} · ${state.title}`;
+}
+
+export function getMissionSummary(progressOverride) {
+  const snapshot = getAlgorithmMissionSnapshot(progressOverride);
+  return {
+    title: buildAlgorithmMissionTitle(progressOverride),
+    subtitle: buildAlgorithmMissionSubtitle(progressOverride),
+    primaryAction: snapshot.candidates.primaryAction,
+    pendingActions: snapshot.candidates.pendingActions,
+    reinforcementActions: snapshot.candidates.reinforcementActions,
+    missionProgress: snapshot.progressState,
+    missionSummaryStatus: snapshot.summaryStatus,
+  };
+}
+
+export function getMissionOfficialItems(progressOverride) {
+  return getAlgorithmMissionState(progressOverride).officialMissionItems;
+}
+
+export function getCompletedMissionItems(progressOverride) {
+  return getAlgorithmMissionState(progressOverride).completedMissionItems;
+}
+
+export function getMissionSourceDisciplineId() {
+  return 'algoritmos-programacao';
+}
+
+export function getMissionDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function getNextRecommendedLayerByMotherSubject(progressOverride) {
+  return Object.fromEntries(
+    getMotherSubjectsWithContent(progressOverride).map((motherSubject) => [
+      motherSubject.id,
+      motherSubject.nextRecommendedLayer
+        ? {
+            id: motherSubject.nextRecommendedLayer.id,
+            title: motherSubject.nextRecommendedLayer.title,
+            layerStatus: motherSubject.nextRecommendedLayer.layerStatus,
+            recommendedReason: motherSubject.nextRecommendedLayer.recommendedReason,
+          }
+        : null,
+    ]),
+  );
 }
 
 export function getOfficialProgress(progressOverride) {
@@ -541,18 +1167,40 @@ export function getOfficialProgress(progressOverride) {
   return calcProgressMetrics(cycleItems);
 }
 
+export function getOfficialProgressByDiscipline(progressOverride) {
+  return getOfficialProgress(progressOverride);
+}
+
+export function getOfficialProgressByMotherSubject(progressOverride) {
+  return Object.fromEntries(
+    getMotherSubjectsWithContent(progressOverride).map((motherSubject) => [
+      motherSubject.id,
+      {
+        completedCount: motherSubject.officialCompletedCount,
+        totalCount: motherSubject.totalCount,
+        progressPercent: motherSubject.officialProgressPercent,
+      },
+    ]),
+  );
+}
+
 export function getExplorationProgress(progressOverride) {
   const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
   const { cycleItems } = buildDecoratedCycleData(progress);
-  const exploredOnlyCount = cycleItems.filter((item) => item.isCompletedOutOfSequence).length;
-  const totalCount = cycleItems.length;
-  const progressPercent = totalCount > 0 ? Math.round((exploredOnlyCount / totalCount) * 100) : 0;
+  return buildExplorationProgressFromItems(cycleItems);
+}
 
-  return {
-    exploredOnlyCount,
-    totalCount,
-    progressPercent,
-  };
+export function getExplorationProgressByMotherSubject(progressOverride) {
+  return Object.fromEntries(
+    getMotherSubjectsWithContent(progressOverride).map((motherSubject) => [
+      motherSubject.id,
+      {
+        exploredOnlyCount: motherSubject.exploredOutOfSequenceCount,
+        totalCount: motherSubject.totalCount,
+        progressPercent: motherSubject.explorationProgressPercent,
+      },
+    ]),
+  );
 }
 
 export function isOutOfSequenceCompletion(item) {
@@ -568,62 +1216,7 @@ export function isOutOfSequenceCompletion(item) {
 export function getMotherSubjectsWithContent(progressOverride) {
   const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
   const { cycleItems, primaryRecommendedItem } = buildDecoratedCycleData(progress);
-
-  return MOTHER_SUBJECTS.map((ms) => {
-    const items = cycleItems.filter((item) => ms.cycleIds.includes(item.cycle));
-
-    const totalCount = items.length;
-    const officialCompletedCount = items.filter((item) => item.isOfficialCompleted).length;
-    const exploredOutOfSequenceCount = items.filter((item) => item.isCompletedOutOfSequence).length;
-    const containsRecommendedNow = items.some((item) => item.isRecommendedNow);
-    const isUnlocked = items.some((item) => item.isEligibleNow || item.isComingNext || item.isExplored);
-    const officialProgressPercent = totalCount > 0 ? Math.round((officialCompletedCount / totalCount) * 100) : 0;
-
-    const status =
-      officialCompletedCount === totalCount ? 'concluido'
-      : isUnlocked ? 'em_execucao'
-      : 'bloqueado';
-
-    const theoryItems = items
-      .filter((item) => item.kind === 'theory' || item.kind === 'review')
-      .map((item) => ({ ...item, theoryPoints: buildTheoryPoints(item) }));
-
-    const practiceCycleItems = items
-      .filter((item) => item.kind === 'practice')
-      .map((item) => ({
-        ...item,
-        exercises: PRACTICE_ITEMS.filter((practiceItem) => practiceItem.cycle === item.cycle),
-      }));
-
-    const resourceItems = RESOURCE_ITEMS.filter((resource) => {
-      if (ms.id === 'ms-vetores') return ['alg-resource-beecrowd'].includes(resource.id);
-      if (ms.id === 'ms-matrizes') return ['alg-resource-pdf-matrizes', 'alg-resource-pdf-trilha', 'alg-resource-playlist'].includes(resource.id);
-      return false;
-    });
-
-    const nextOfficialLayer = items.find((item) => item.isRecommendedNow)
-      ?? items.find((item) => item.isEligibleNow && !item.isOfficialCompleted)
-      ?? items.find((item) => item.isComingNext && !item.isOfficialCompleted)
-      ?? null;
-
-    return {
-      ...ms,
-      status,
-      progressPercent: officialProgressPercent,
-      officialProgressPercent,
-      officialCompletedCount,
-      exploredOutOfSequenceCount,
-      completedCount: officialCompletedCount,
-      totalCount,
-      isUnlocked,
-      containsRecommendedNow,
-      nextOfficialLayerTitle: nextOfficialLayer?.title ?? null,
-      theoryItems,
-      practiceCycleItems,
-      resourceItems,
-      isRecommendedMotherSubject: containsRecommendedNow && primaryRecommendedItem != null,
-    };
-  });
+  return buildMotherSubjectsFromCycleItems(cycleItems, primaryRecommendedItem);
 }
 
 function buildTheoryPoints(item) {
@@ -655,9 +1248,10 @@ function buildTheoryPoints(item) {
 export function getAlgorithmPilotData(progressOverride) {
   const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
   const { cycleItems, primaryRecommendedItem, recommendedNowItems } = buildDecoratedCycleData(progress);
+  const motherSubjects = buildMotherSubjectsFromCycleItems(cycleItems, primaryRecommendedItem);
   const currentCycle = getCurrentCycle(cycleItems, STUDY_CYCLES);
   const officialProgress = calcProgressMetrics(cycleItems);
-  const explorationProgress = getExplorationProgress(progress);
+  const explorationProgress = buildExplorationProgressFromItems(cycleItems);
 
   const eligibleItems = getEligibleNowItems(cycleItems);
   const comingNextItems = getComingNextItems(cycleItems, 3);
@@ -689,10 +1283,20 @@ export function getAlgorithmPilotData(progressOverride) {
       totalCount: officialProgress.totalCount,
       exploredCount: explorationProgress.exploredOnlyCount,
       nextStep: primaryRecommendedItem?.title ?? 'Todos os ciclos concluídos.',
-      nextStepSupport: primaryRecommendedItem
-        ? 'Siga por aqui para manter a progressão oficial da disciplina.'
-        : 'A trilha oficial desta disciplina já foi concluída.',
+      nextStepSupport: nextRecommendedAction?.supportText ?? 'A trilha oficial desta disciplina já foi concluída.',
       subjectRotationHint,
+    },
+    disciplineProgress: {
+      official: officialProgress,
+      exploration: explorationProgress,
+      nextRecommendedLayerId: primaryRecommendedItem?.id ?? null,
+      nextRecommendedLayerTitle: primaryRecommendedItem?.title ?? null,
+      status:
+        officialProgress.completedCount === officialProgress.totalCount
+          ? 'consolidado'
+          : primaryRecommendedItem
+          ? 'em_execucao'
+          : 'travado',
     },
     studyCycles: STUDY_CYCLES,
     currentCycle: {
@@ -700,8 +1304,10 @@ export function getAlgorithmPilotData(progressOverride) {
       items: cycleItemsCurrent,
     },
     primaryRecommendedItem,
+    recommendedLayer: primaryRecommendedItem,
     recommendedNowItems,
     nextRecommendedAction,
+    motherSubjects,
     eligibleItems,
     comingNextItems,
     lockedItems,

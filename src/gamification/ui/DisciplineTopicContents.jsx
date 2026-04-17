@@ -54,92 +54,59 @@ function getDefaultSubjectId(motherSubjects, recommendedItemId) {
   return recommendedSubject?.id ?? motherSubjects[0]?.id ?? null;
 }
 
+function getBadgeAppearance(badge) {
+  if (badge?.key && ITEM_BADGE_CONFIG[badge.key]) return ITEM_BADGE_CONFIG[badge.key];
+  return {
+    label: badge?.label ?? 'Estado',
+    className: 'border-white/10 bg-white/5 text-zinc-300',
+  };
+}
+
+function getActionAppearance(action) {
+  switch (action?.tone) {
+    case 'official':
+      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+    case 'recommended':
+      return 'border-cyan-400 bg-cyan-400/20 text-cyan-200 shadow-[0_0_18px_rgba(0,232,255,0.14)] ring-1 ring-cyan-400/50';
+    case 'current':
+      return 'border-cyan-500/25 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20';
+    case 'exploration':
+      return 'border-amber-500/30 bg-amber-500/10 text-amber-300';
+    default:
+      return 'border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10';
+  }
+}
+
+function getActionHandler(item, action, onCompleteOfficial, onToggleExploration) {
+  if (action?.disabled || action?.kind === 'none') return undefined;
+  if (action?.kind === 'complete_official') return () => onCompleteOfficial(item.id);
+  if (action?.kind === 'toggle_exploration') return () => onToggleExploration(item.id);
+  return undefined;
+}
+
+function getHintAppearance(item) {
+  if (item.isRecommendedNow) return 'border-cyan-400/20 bg-cyan-500/[0.07] text-cyan-100/85';
+  if (item.isCompletedOutOfSequence) return 'border-amber-400/20 bg-amber-500/[0.07] text-amber-100/85';
+  return 'border-white/[0.08] bg-white/[0.03] text-zinc-400';
+}
+
 function getItemBadges(item) {
-  const badges = [];
-
-  if (item.isRecommendedNow) badges.push(ITEM_BADGE_CONFIG.recommended_now);
-  if (item.isOfficialCompleted) badges.push(ITEM_BADGE_CONFIG.completed_officially);
-  if (item.isCompletedOutOfSequence) badges.push(ITEM_BADGE_CONFIG.completed_out_of_sequence);
-  if (!item.isRecommendedNow && item.isComingNext && !item.isOfficialCompleted) badges.push(ITEM_BADGE_CONFIG.coming_next);
-  if (!item.isOfficialCompleted && !item.isCompletedOutOfSequence && !item.isRecommendedNow && !item.isComingNext && !item.isLocked) {
-    badges.push(ITEM_BADGE_CONFIG.available_for_exploration);
-  }
-  if (!item.isOfficialCompleted && !item.isCompletedOutOfSequence && item.isLocked) {
-    badges.push(ITEM_BADGE_CONFIG.locked_contextually);
-  }
-
-  return badges;
+  return (item.badges ?? []).map(getBadgeAppearance);
 }
 
 function getItemHint(item) {
-  if (item.isRecommendedNow && item.isCompletedOutOfSequence) {
-    return 'Você já explorou este bloco. Agora falta validar na trilha oficial para mover a disciplina.';
-  }
-  if (item.isRecommendedNow) {
-    return 'Próxima camada recomendada. Siga por aqui para manter a progressão oficial.';
-  }
-  if (item.isOfficialCompleted) {
-    return 'Progressão validada. A trilha oficial já reconheceu este bloco.';
-  }
-  if (item.isCompletedOutOfSequence) {
-    return 'Conteúdo consultado antes da hora. Isso não substitui a próxima ação principal.';
-  }
-  if (item.isComingNext) {
-    return 'Está logo depois da etapa atual. Pode explorar, mas a recomendação principal continua no bloco anterior.';
-  }
-  if (item.isLocked) {
-    return 'Exploração liberada sem bloquear você, mas este bloco ainda está fora da sequência oficial.';
-  }
-  return 'Disponível para exploração. O progresso principal continua separado da navegação livre.';
+  return item.stateHint;
 }
 
 function getItemAction(item, onCompleteOfficial, onToggleExploration) {
-  if (item.isOfficialCompleted) {
-    return {
-      label: 'Progressão validada',
-      icon: '✓',
-      onClick: null,
-      disabled: true,
-      className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-    };
-  }
-
-  if (item.isRecommendedNow) {
-    return {
-      label: item.isCompletedOutOfSequence ? 'Validar na trilha oficial' : 'Concluir na trilha oficial',
-      icon: item.isCompletedOutOfSequence ? '↺' : '⚡',
-      onClick: () => onCompleteOfficial(item.id),
-      disabled: false,
-      className: 'border-cyan-400 bg-cyan-400/20 text-cyan-200 shadow-[0_0_18px_rgba(0,232,255,0.14)] ring-1 ring-cyan-400/50',
-    };
-  }
-
-  if (item.isEligibleNow) {
-    return {
-      label: 'Concluir nesta etapa',
-      icon: '◎',
-      onClick: () => onCompleteOfficial(item.id),
-      disabled: false,
-      className: 'border-cyan-500/25 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20',
-    };
-  }
-
-  if (item.isCompletedOutOfSequence) {
-    return {
-      label: 'Exploração registrada',
-      icon: '↗',
-      onClick: null,
-      disabled: true,
-      className: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-    };
-  }
+  const action = item.primaryAction ?? { label: 'Marcar como explorado', icon: '↗', tone: 'neutral', kind: 'toggle_exploration', disabled: false };
 
   return {
-    label: item.isComingNext ? 'Explorar antecipadamente' : 'Marcar como explorado',
-    icon: '↗',
-    onClick: () => onToggleExploration(item.id),
-    disabled: false,
-    className: 'border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10',
+    label: action.label,
+    icon: action.icon,
+    onClick: getActionHandler(item, action, onCompleteOfficial, onToggleExploration),
+    disabled: Boolean(action.disabled),
+    className: getActionAppearance(action),
   };
 }
 
@@ -164,13 +131,7 @@ const ItemStateBlock = memo(function ItemStateBlock({ item, onCompleteOfficial, 
         ))}
       </div>
 
-      <div className={`rounded-2xl border px-4 py-3 text-[11px] leading-relaxed transition-all duration-300 ${
-        item.isRecommendedNow
-          ? 'border-cyan-400/20 bg-cyan-500/[0.07] text-cyan-100/85'
-          : item.isCompletedOutOfSequence
-          ? 'border-amber-400/20 bg-amber-500/[0.07] text-amber-100/85'
-          : 'border-white/[0.08] bg-white/[0.03] text-zinc-400'
-      }`}>
+      <div className={`rounded-2xl border px-4 py-3 text-[11px] leading-relaxed transition-all duration-300 ${getHintAppearance(item)}`}>
         {hint}
       </div>
 

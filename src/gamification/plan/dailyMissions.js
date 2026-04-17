@@ -13,7 +13,6 @@
  * @backend-ready: Trocar `createDailyMission` por `api.post('/missions/generate')`.
  */
 
-import { CONTENT_ITEMS } from '../content/contentItems.js';
 
 // ─── CONSTANTES DA FÍSICA ─────────────────────────────────────────────────────
 

@@ -23,7 +23,7 @@ export default function CronoLabAlgorithmPilot() {
   const [activeTab, setActiveTab] = useState('overview');
 
   const pilot = useMemo(() => getAlgorithmPilotData(progressSnapshot), [progressSnapshot]);
-  const motherSubjects = useMemo(() => getMotherSubjectsWithContent(progressSnapshot), [progressSnapshot]);
+  const motherSubjects = useMemo(() => pilot.motherSubjects ?? getMotherSubjectsWithContent(progressSnapshot), [pilot, progressSnapshot]);
 
   const handleCompleteOfficial = useCallback((itemId) => {
     const next = toggleAlgorithmPilotOfficialItem(itemId);
@@ -35,7 +35,17 @@ export default function CronoLabAlgorithmPilot() {
     setProgressSnapshot(next);
   }, []);
 
-  const { subject, currentCycle, studyCycles, pilotNotice, primaryRecommendedItem, explorationProgress } = pilot;
+  const {
+    subject,
+    currentCycle,
+    studyCycles,
+    pilotNotice,
+    primaryRecommendedItem,
+    recommendedLayer,
+    nextRecommendedAction,
+    explorationProgress,
+    disciplineProgress,
+  } = pilot;
 
   return (
     <DisciplineStudyLayout
@@ -52,18 +62,22 @@ export default function CronoLabAlgorithmPilot() {
           <AlgorithmSubjectOverview
             subject={subject}
             notice={pilotNotice}
-            recommendedItem={primaryRecommendedItem}
+            recommendedItem={recommendedLayer}
+            nextRecommendedAction={nextRecommendedAction}
+            disciplineProgress={disciplineProgress}
             explorationProgress={explorationProgress}
           />
           <CycleProgressHeader
             currentCycle={currentCycle}
             totalCycles={studyCycles.length}
-            progressPercent={subject.progressPercent}
+            progressPercent={disciplineProgress.official.progressPercent}
             subjectStatus={subject.status}
             subjectRotationHint={subject.subjectRotationHint}
-            recommendedItem={primaryRecommendedItem}
-            explorationProgress={explorationProgress}
+            recommendedItem={recommendedLayer}
+            nextRecommendedAction={nextRecommendedAction}
+            explorationProgress={disciplineProgress.exploration}
           />
+
         </div>
       )}
 

@@ -48,6 +48,7 @@ const CycleProgressHeader = memo(function CycleProgressHeader({
   subjectStatus,
   subjectRotationHint,
   recommendedItem,
+  nextRecommendedAction,
   explorationProgress,
 }) {
   const statusConfig = STATUS_CONFIG[subjectStatus] ?? STATUS_CONFIG.em_execucao;
@@ -139,14 +140,35 @@ const CycleProgressHeader = memo(function CycleProgressHeader({
 
       {recommendedItem && (
         <div className="mt-4 rounded-2xl border border-cyan-400/[0.14] bg-cyan-500/[0.06] px-4 py-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-            Próxima ação principal
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
+                Próxima ação principal
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white">{nextRecommendedAction?.title ?? recommendedItem.title}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-cyan-100/75">
+                {nextRecommendedAction?.supportText
+                  ?? (recommendedItem.isCompletedOutOfSequence
+                    ? 'Você já explorou este conteúdo. Agora ele precisa de validação oficial para liberar a próxima camada.'
+                    : 'Esta é a camada que move a progressão oficial da disciplina agora.')}
+              </p>
+            </div>
+            {nextRecommendedAction?.recommendedReasonLabel && (
+              <span className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-500/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-cyan-100/80">
+                {nextRecommendedAction.recommendedReasonLabel}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {explorationProgress && explorationProgress.exploredOnlyCount > 0 && (
+        <div className="mt-4 rounded-2xl border border-amber-400/12 bg-amber-500/[0.05] px-4 py-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-200">
+            Exploração sem inflação
           </p>
-          <p className="mt-1 text-sm font-semibold text-white">{recommendedItem.title}</p>
-          <p className="mt-1 text-[11px] leading-relaxed text-cyan-100/75">
-            {recommendedItem.isCompletedOutOfSequence
-              ? 'Você já explorou este conteúdo. Agora ele precisa de validação oficial para liberar a próxima camada.'
-              : 'Esta é a camada que move a progressão oficial da disciplina agora.'}
+          <p className="mt-1 text-[11px] leading-relaxed text-amber-100/70">
+            {explorationProgress.exploredOnlyCount} camada(s) foram exploradas fora da ordem, mas a barra principal continua refletindo apenas validações oficiais.
           </p>
         </div>
       )}
