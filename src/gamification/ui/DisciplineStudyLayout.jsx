@@ -35,29 +35,7 @@ export default function DisciplineStudyLayout({ subject, slug, tabs, activeTab, 
   return (
     <div className="flex min-h-screen w-full relative bg-[#05050A]/30">
       
-      {/* ── MOBILE HEADER (Top Strip merely for mobile back button/hamburger) ── */}
-      <div className="fixed top-0 inset-x-0 z-40 flex items-center justify-between border-b border-white/[0.06] p-4 lg:hidden bg-[#0A0A12]/95 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/crono-lab/disciplinas')}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m15 18-6-6 6-6"/>
-            </svg>
-          </button>
-          <span className="text-sm font-bold text-white truncate max-w-[180px]">{subject.title}</span>
-        </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 text-cyan-400"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/>
-          </svg>
-        </button>
-      </div>
+
 
       {/* ── MOBILE BACKDROP ── */}
       {isMobileMenuOpen && (
@@ -120,6 +98,30 @@ export default function DisciplineStudyLayout({ subject, slug, tabs, activeTab, 
 
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
+        {/* ── MOBILE HEADER (Moved inside main to respect layout flow) ── */}
+        <div className="sticky top-0 w-full z-40 flex items-center justify-between border-b border-white/[0.06] p-4 lg:hidden bg-[#0A0A12]/95 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/crono-lab/disciplinas')}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <span className="text-sm font-bold text-white truncate max-w-[180px]">{subject.title}</span>
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="flex items-center gap-2 p-2 text-cyan-400 bg-cyan-500/10 rounded-lg"
+          >
+            <span className="text-[10px] font-bold uppercase tracking-wider">Ações</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/>
+            </svg>
+          </button>
+        </div>
         <div className="w-full max-w-none px-4 py-20 lg:py-8 lg:px-6 xl:px-8 space-y-6 lg:space-y-8">
           {children}
           

@@ -143,3 +143,37 @@ export function getEligibleNowItems(enrichedItems) {
 export function getLockedItems(enrichedItems, limit = 4) {
   return enrichedItems.filter((i) => i.isLocked).slice(0, limit);
 }
+
+function sortItemsBySequence(items) {
+  return [...items].sort((a, b) => {
+    if ((a.cycle ?? 0) !== (b.cycle ?? 0)) return (a.cycle ?? 0) - (b.cycle ?? 0);
+    if ((a.order ?? 0) !== (b.order ?? 0)) return (a.order ?? 0) - (b.order ?? 0);
+    return String(a.id).localeCompare(String(b.id));
+  });
+}
+
+/**
+ * Retorna o item principal recomendado da trilha oficial.
+ *
+ * @param {Array<Object>} enrichedItems
+ * @returns {Object|null}
+ */
+export function getPrimaryRecommendedItem(enrichedItems) {
+  const eligibleNow = sortItemsBySequence(enrichedItems.filter((item) => item.isEligibleNow && item.status !== 'completed'));
+  if (eligibleNow[0]) return eligibleNow[0];
+
+  const comingNext = sortItemsBySequence(enrichedItems.filter((item) => item.isComingNext && item.status !== 'completed'));
+  return comingNext[0] ?? null;
+}
+
+/**
+ * Retorna os itens recomendados da trilha oficial já ordenados.
+ *
+ * @param {Array<Object>} enrichedItems
+ * @param {number} limit
+ * @returns {Array<Object>}
+ */
+export function getRecommendedNowItems(enrichedItems, limit = 1) {
+  const items = sortItemsBySequence(enrichedItems.filter((item) => (item.isEligibleNow || item.isComingNext) && item.status !== 'completed'));
+  return items.slice(0, limit);
+}

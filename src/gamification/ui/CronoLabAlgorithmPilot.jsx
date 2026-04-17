@@ -3,7 +3,8 @@ import {
   getAlgorithmPilotData,
   getMotherSubjectsWithContent,
   readAlgorithmPilotProgress,
-  toggleAlgorithmPilotItem,
+  toggleAlgorithmPilotOfficialItem,
+  toggleAlgorithmPilotFreeExplorationItem,
 } from '../pilots/algorithmPilot.js';
 import DisciplineStudyLayout from './DisciplineStudyLayout.jsx';
 import DisciplineTopicContents from './DisciplineTopicContents.jsx';
@@ -24,12 +25,17 @@ export default function CronoLabAlgorithmPilot() {
   const pilot = useMemo(() => getAlgorithmPilotData(progressSnapshot), [progressSnapshot]);
   const motherSubjects = useMemo(() => getMotherSubjectsWithContent(progressSnapshot), [progressSnapshot]);
 
-  const handleToggle = useCallback((itemId) => {
-    const next = toggleAlgorithmPilotItem(itemId);
+  const handleCompleteOfficial = useCallback((itemId) => {
+    const next = toggleAlgorithmPilotOfficialItem(itemId);
     setProgressSnapshot(next);
   }, []);
 
-  const { subject, currentCycle, studyCycles, pilotNotice } = pilot;
+  const handleToggleExploration = useCallback((itemId) => {
+    const next = toggleAlgorithmPilotFreeExplorationItem(itemId);
+    setProgressSnapshot(next);
+  }, []);
+
+  const { subject, currentCycle, studyCycles, pilotNotice, primaryRecommendedItem, explorationProgress } = pilot;
 
   return (
     <DisciplineStudyLayout
@@ -43,13 +49,20 @@ export default function CronoLabAlgorithmPilot() {
       {activeTab === 'overview' && (
         <div className="space-y-5 lg:space-y-6" style={{ animation: 'fadeIn 0.4s ease-out both' }}>
           <StudyCycleExplanationCard variant="content-based" />
-          <AlgorithmSubjectOverview subject={subject} notice={pilotNotice} />
+          <AlgorithmSubjectOverview
+            subject={subject}
+            notice={pilotNotice}
+            recommendedItem={primaryRecommendedItem}
+            explorationProgress={explorationProgress}
+          />
           <CycleProgressHeader
             currentCycle={currentCycle}
             totalCycles={studyCycles.length}
             progressPercent={subject.progressPercent}
             subjectStatus={subject.status}
             subjectRotationHint={subject.subjectRotationHint}
+            recommendedItem={primaryRecommendedItem}
+            explorationProgress={explorationProgress}
           />
         </div>
       )}
@@ -59,7 +72,9 @@ export default function CronoLabAlgorithmPilot() {
         <DisciplineTopicContents
           motherSubjects={motherSubjects}
           progressSnapshot={progressSnapshot}
-          onToggle={handleToggle}
+          onCompleteOfficial={handleCompleteOfficial}
+          onToggleExploration={handleToggleExploration}
+          recommendedItemId={primaryRecommendedItem?.id ?? null}
         />
       )}
     </DisciplineStudyLayout>

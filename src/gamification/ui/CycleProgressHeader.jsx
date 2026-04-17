@@ -1,7 +1,5 @@
 import { memo } from 'react';
 
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-
 const STATUS_CONFIG = {
   em_execucao: {
     label: 'Em execução',
@@ -24,7 +22,7 @@ const STATUS_CONFIG = {
 };
 
 const ROTATION_HINT_CONFIG = {
-  focus: null, // não exibir
+  focus: null,
   alternate: {
     icon: '🔄',
     label: 'Hora de alternar?',
@@ -43,14 +41,14 @@ const ROTATION_HINT_CONFIG = {
   },
 };
 
-// ─── COMPONENT ───────────────────────────────────────────────────────────────
-
 const CycleProgressHeader = memo(function CycleProgressHeader({
   currentCycle,
   totalCycles,
   progressPercent,
   subjectStatus,
   subjectRotationHint,
+  recommendedItem,
+  explorationProgress,
 }) {
   const statusConfig = STATUS_CONFIG[subjectStatus] ?? STATUS_CONFIG.em_execucao;
   const rotationConfig = ROTATION_HINT_CONFIG[subjectRotationHint ?? 'focus'];
@@ -62,10 +60,7 @@ const CycleProgressHeader = memo(function CycleProgressHeader({
       style={{ animation: 'animationIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both' }}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-        {/* Posição no ciclo */}
         <div className="flex items-center gap-4">
-          {/* Ciclo badge */}
           <div
             className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl text-center"
             style={{
@@ -86,7 +81,6 @@ const CycleProgressHeader = memo(function CycleProgressHeader({
               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">
                 de {totalCycles} ciclos
               </span>
-              {/* Status badge */}
               <span
                 className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider"
                 style={{ background: statusConfig.bg, borderColor: statusConfig.border, color: statusConfig.color }}
@@ -98,23 +92,27 @@ const CycleProgressHeader = memo(function CycleProgressHeader({
                 />
                 {statusConfig.label}
               </span>
+              {recommendedItem && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-cyan-200">
+                  trilha oficial ativa
+                </span>
+              )}
             </div>
-            <p className="mt-1 text-sm font-semibold text-white leading-snug">
+            <p className="mt-1 text-sm font-semibold leading-snug text-white">
               {currentCycle?.title ?? '—'}
             </p>
             {currentCycle?.objective && (
-              <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500 max-w-sm">
+              <p className="mt-0.5 max-w-sm text-[11px] leading-relaxed text-zinc-500">
                 {currentCycle.objective}
               </p>
             )}
           </div>
         </div>
 
-        {/* Barra de progresso da disciplina */}
-        <div className="w-full sm:max-w-[200px]">
+        <div className="w-full sm:max-w-[220px]">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">
-              Disciplina
+              Trilha oficial
             </span>
             <span className="font-mono text-[11px] font-bold text-zinc-300">
               {progressPercent}%
@@ -130,10 +128,29 @@ const CycleProgressHeader = memo(function CycleProgressHeader({
               }}
             />
           </div>
+          <p className="mt-2 text-[10px] leading-relaxed text-zinc-500">
+            Exploração livre não altera este percentual.
+          </p>
+          <p className="mt-1 text-[10px] leading-relaxed text-zinc-500">
+            {explorationProgress?.exploredOnlyCount ?? 0} blocos explorados fora da ordem.
+          </p>
         </div>
       </div>
 
-      {/* Rotation hint — só aparece quando relevante */}
+      {recommendedItem && (
+        <div className="mt-4 rounded-2xl border border-cyan-400/[0.14] bg-cyan-500/[0.06] px-4 py-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
+            Próxima ação principal
+          </p>
+          <p className="mt-1 text-sm font-semibold text-white">{recommendedItem.title}</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-cyan-100/75">
+            {recommendedItem.isCompletedOutOfSequence
+              ? 'Você já explorou este conteúdo. Agora ele precisa de validação oficial para liberar a próxima camada.'
+              : 'Esta é a camada que move a progressão oficial da disciplina agora.'}
+          </p>
+        </div>
+      )}
+
       {rotationConfig && (
         <div
           className="mt-4 flex items-start gap-3 rounded-2xl border px-4 py-3"

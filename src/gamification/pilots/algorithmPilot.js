@@ -1,8 +1,8 @@
 /**
  * @fileoverview algorithmPilot.js — Dados e engine do piloto de Algoritmo e Programação
  *
- * Usa o cycleEngine compartilhado para enriquecer os items com isEligibleNow,
- * isComingNext, isLocked, completedAt, recommendedWeight e subjectRotationHint.
+ * Separa trilha oficial e exploração livre, reaproveitando o cycleEngine para manter
+ * a progressão principal coerente sem bloquear navegação fora da sequência.
  */
 
 import {
@@ -13,9 +13,36 @@ import {
   getComingNextItems,
   getEligibleNowItems,
   getLockedItems,
+  getPrimaryRecommendedItem,
+  getRecommendedNowItems,
 } from '../cycles/cycleEngine.js';
 
-export const ALGORITHM_PILOT_STORAGE_KEY = 'algoritmo-pilot-progress-v2';
+export const ALGORITHM_PILOT_STORAGE_KEY = 'algoritmo-pilot-progress-v3';
+const ALGORITHM_PILOT_LEGACY_STORAGE_KEY = 'algoritmo-pilot-progress-v2';
+
+const VISUAL_STATE = {
+  RECOMMENDED_NOW: 'recommended_now',
+  AVAILABLE_FOR_EXPLORATION: 'available_for_exploration',
+  COMPLETED_OFFICIALLY: 'completed_officially',
+  COMPLETED_OUT_OF_SEQUENCE: 'completed_out_of_sequence',
+  COMING_NEXT: 'coming_next',
+  LOCKED_CONTEXTUALLY: 'locked_contextually',
+};
+
+const ELIGIBLE_REASON = {
+  RECOMMENDED_NOW: 'recommended_now',
+  CURRENT_CYCLE: 'current_cycle',
+  EXPLORATION_OPEN: 'exploration_open',
+  NEXT_OFFICIAL: 'next_official',
+  LOCKED_CONTEXTUALLY: 'locked_contextually',
+  ALREADY_COMPLETED: 'already_completed',
+};
+
+const EMPTY_PROGRESS_STATE = {
+  version: 3,
+  officialProgress: {},
+  freeExplorationProgress: {},
+};
 
 // ─── CICLOS ───────────────────────────────────────────────────────────────────
 
@@ -299,39 +326,237 @@ const RESOURCE_ITEMS = [
   },
 ];
 
+const MOTHER_SUBJECTS = [
+  {
+    id: 'ms-vetores',
+    order: 1,
+    title: 'Vetores',
+    description: 'Fundamentos de vetores: declaração, índices, varredura com for, cálculos comuns (média, soma) e primeiros contatos com problemas no juiz online (Beecrowd).',
+    cycleIds: [1, 2],
+  },
+  {
+    id: 'ms-matrizes',
+    order: 2,
+    title: 'Matrizes',
+    description: 'Vetores bidimensionais: leitura e impressão com for aninhado, manipulação de diagonais, operações entre matrizes e simulação prática de desafios reais.',
+    cycleIds: [3, 4, 5, 6],
+  },
+  {
+    id: 'ms-revisao-simulado',
+    order: 3,
+    title: 'Consolidação e Simulado',
+    description: 'Fechamento do módulo com revisão cruzada e simulado sem consulta para medir retenção.',
+    cycleIds: [7],
+  },
+];
+
 // ─── STORAGE ──────────────────────────────────────────────────────────────────
 
-export function readAlgorithmPilotProgress() {
-  if (typeof window === 'undefined') return {};
-  try {
-    const stored = window.localStorage.getItem(ALGORITHM_PILOT_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
+function sanitizeProgressMap(progress) {
+  if (!progress || typeof progress !== 'object' || Array.isArray(progress)) return {};
+
+  return Object.fromEntries(
+    Object.entries(progress).filter(([, value]) => Boolean(value)).map(([key, value]) => [
+      key,
+      typeof value === 'string' && value.length > 4 ? value : new Date(0).toISOString(),
+    ]),
+  );
+}
+
+function normalizeAlgorithmPilotProgress(progress) {
+  if (!progress || typeof progress !== 'object' || Array.isArray(progress)) {
+    return { ...EMPTY_PROGRESS_STATE };
   }
+
+  if ('officialProgress' in progress || 'freeExplorationProgress' in progress) {
+    return {
+      version: 3,
+      officialProgress: sanitizeProgressMap(progress.officialProgress),
+      freeExplorationProgress: sanitizeProgressMap(progress.freeExplorationProgress),
+    };
+  }
+
+  return {
+    version: 3,
+    officialProgress: sanitizeProgressMap(progress),
+    freeExplorationProgress: {},
+  };
+}
+
+function readStoredProgress(raw) {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function readAlgorithmPilotProgress() {
+  if (typeof window === 'undefined') return { ...EMPTY_PROGRESS_STATE };
+
+  const current = readStoredProgress(window.localStorage.getItem(ALGORITHM_PILOT_STORAGE_KEY));
+  if (current) return normalizeAlgorithmPilotProgress(current);
+
+  const legacy = readStoredProgress(window.localStorage.getItem(ALGORITHM_PILOT_LEGACY_STORAGE_KEY));
+  if (legacy) {
+    const migrated = normalizeAlgorithmPilotProgress(legacy);
+    writeAlgorithmPilotProgress(migrated);
+    window.localStorage.removeItem(ALGORITHM_PILOT_LEGACY_STORAGE_KEY);
+    return migrated;
+  }
+
+  return { ...EMPTY_PROGRESS_STATE };
 }
 
 export function writeAlgorithmPilotProgress(progress) {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(ALGORITHM_PILOT_STORAGE_KEY, JSON.stringify(progress));
+    window.localStorage.setItem(ALGORITHM_PILOT_STORAGE_KEY, JSON.stringify(normalizeAlgorithmPilotProgress(progress)));
   } catch {
     // noop
   }
 }
 
-/**
- * Alterna o estado de um item. Salva timestamp ISO quando marcando como feito.
- */
-export function toggleAlgorithmPilotItem(itemId) {
+function toggleProgressEntry(progressMap, itemId) {
+  const isCurrentlyDone = Boolean(progressMap[itemId]);
+  if (isCurrentlyDone) {
+    const { [itemId]: _removed, ...rest } = progressMap;
+    return rest;
+  }
+
+  return {
+    ...progressMap,
+    [itemId]: new Date().toISOString(),
+  };
+}
+
+export function toggleAlgorithmPilotOfficialItem(itemId) {
   const current = readAlgorithmPilotProgress();
-  const isCurrentlyDone = Boolean(current[itemId]);
   const next = {
     ...current,
-    [itemId]: isCurrentlyDone ? false : new Date().toISOString(),
+    officialProgress: toggleProgressEntry(current.officialProgress, itemId),
   };
   writeAlgorithmPilotProgress(next);
   return next;
+}
+
+export function toggleAlgorithmPilotFreeExplorationItem(itemId) {
+  const current = readAlgorithmPilotProgress();
+  const next = {
+    ...current,
+    freeExplorationProgress: toggleProgressEntry(current.freeExplorationProgress, itemId),
+  };
+  writeAlgorithmPilotProgress(next);
+  return next;
+}
+
+// ─── DERIVAÇÕES ────────────────────────────────────────────────────────────────
+
+function getExplorationVisualState(item, primaryRecommendedItemId) {
+  const isOfficialCompleted = item.status === 'completed';
+  const isCompletedOutOfSequence = Boolean(item.isCompletedOutOfSequence);
+
+  if (isOfficialCompleted) return VISUAL_STATE.COMPLETED_OFFICIALLY;
+  if (item.id === primaryRecommendedItemId) return VISUAL_STATE.RECOMMENDED_NOW;
+  if (isCompletedOutOfSequence) return VISUAL_STATE.COMPLETED_OUT_OF_SEQUENCE;
+  if (item.isComingNext) return VISUAL_STATE.COMING_NEXT;
+  if (item.isLocked) return VISUAL_STATE.LOCKED_CONTEXTUALLY;
+  return VISUAL_STATE.AVAILABLE_FOR_EXPLORATION;
+}
+
+function getEligibleReason(item, primaryRecommendedItemId) {
+  if (item.status === 'completed') return ELIGIBLE_REASON.ALREADY_COMPLETED;
+  if (item.id === primaryRecommendedItemId) return ELIGIBLE_REASON.RECOMMENDED_NOW;
+  if (item.isEligibleNow) return ELIGIBLE_REASON.CURRENT_CYCLE;
+  if (item.isComingNext) return ELIGIBLE_REASON.NEXT_OFFICIAL;
+  if (item.isLocked) return ELIGIBLE_REASON.LOCKED_CONTEXTUALLY;
+  return ELIGIBLE_REASON.EXPLORATION_OPEN;
+}
+
+function decorateCycleItems(cycleItems, freeExplorationProgress, primaryRecommendedItemId) {
+  return cycleItems.map((item) => {
+    const explorationCompletedAt = freeExplorationProgress[item.id] ?? null;
+    const isOfficialCompleted = item.status === 'completed';
+    const isCompletedOutOfSequence = !isOfficialCompleted && Boolean(explorationCompletedAt);
+    const isExplored = isOfficialCompleted || isCompletedOutOfSequence;
+    const isRecommendedNow = item.id === primaryRecommendedItemId;
+    const visualState = getExplorationVisualState({ ...item, isCompletedOutOfSequence }, primaryRecommendedItemId);
+
+    return {
+      ...item,
+      sequenceOrder: item.order,
+      motherSubjectOrder: getMotherSubjectOrder(item.cycle),
+      layerOrder: item.order,
+      isOfficialCompleted,
+      isCompletedOutOfSequence,
+      isExplored,
+      isRecommendedNow,
+      progressType: isOfficialCompleted ? 'official' : isCompletedOutOfSequence ? 'exploration' : 'official',
+      visualState,
+      eligibleReason: getEligibleReason(item, primaryRecommendedItemId),
+      explorationCompletedAt,
+      officialCompletedAt: item.completedAt,
+    };
+  });
+}
+
+function getMotherSubjectOrder(cycle) {
+  return MOTHER_SUBJECTS.find((subject) => subject.cycleIds.includes(cycle))?.order ?? 0;
+}
+
+function buildDecoratedCycleData(progressState) {
+  const cycleItems = enrichCycleItems(CYCLE_ITEMS, STUDY_CYCLES, progressState.officialProgress);
+  const primaryRecommendedItem = getPrimaryRecommendedItem(cycleItems);
+  const decoratedCycleItems = decorateCycleItems(cycleItems, progressState.freeExplorationProgress, primaryRecommendedItem?.id ?? null);
+
+  return {
+    cycleItems: decoratedCycleItems,
+    primaryRecommendedItem: decoratedCycleItems.find((item) => item.id === primaryRecommendedItem?.id) ?? null,
+    recommendedNowItems: getRecommendedNowItems(decoratedCycleItems, 3),
+  };
+}
+
+export function getRecommendedLayer(progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  return buildDecoratedCycleData(progress).primaryRecommendedItem;
+}
+
+export function getNextRecommendedAction(progressOverride) {
+  const recommendedItem = getRecommendedLayer(progressOverride);
+  if (!recommendedItem) return null;
+
+  return {
+    itemId: recommendedItem.id,
+    title: recommendedItem.title,
+    visualState: recommendedItem.visualState,
+    cycle: recommendedItem.cycle,
+    eligibleReason: recommendedItem.eligibleReason,
+  };
+}
+
+export function getOfficialProgress(progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const { cycleItems } = buildDecoratedCycleData(progress);
+  return calcProgressMetrics(cycleItems);
+}
+
+export function getExplorationProgress(progressOverride) {
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const { cycleItems } = buildDecoratedCycleData(progress);
+  const exploredOnlyCount = cycleItems.filter((item) => item.isCompletedOutOfSequence).length;
+  const totalCount = cycleItems.length;
+  const progressPercent = totalCount > 0 ? Math.round((exploredOnlyCount / totalCount) * 100) : 0;
+
+  return {
+    exploredOnlyCount,
+    totalCount,
+    progressPercent,
+  };
+}
+
+export function isOutOfSequenceCompletion(item) {
+  return Boolean(item?.isCompletedOutOfSequence);
 }
 
 // ─── DATA GETTER ──────────────────────────────────────────────────────────────
@@ -341,79 +566,62 @@ export function toggleAlgorithmPilotItem(itemId) {
  * Cada Mother Subject encapsula um ou mais ciclos, agrupando Teoria e Prática daquele bloco maior.
  */
 export function getMotherSubjectsWithContent(progressOverride) {
-  const progress = progressOverride ?? readAlgorithmPilotProgress();
-  const cycleItems = enrichCycleItems(CYCLE_ITEMS, STUDY_CYCLES, progress);
-
-  const MOTHER_SUBJECTS = [
-    {
-      id: 'ms-vetores',
-      order: 1,
-      title: 'Vetores',
-      description: 'Fundamentos de vetores: declaração, índices, varredura com for, cálculos comuns (média, soma) e primeiros contatos com problemas no juiz online (Beecrowd).',
-      cycleIds: [1, 2],
-    },
-    {
-      id: 'ms-matrizes',
-      order: 2,
-      title: 'Matrizes',
-      description: 'Vetores bidimensionais: leitura e impressão com for aninhado, manipulação de diagonais, operações entre matrizes e simulação prática de desafios reais.',
-      cycleIds: [3, 4, 5, 6],
-    },
-    {
-      id: 'ms-revisao-simulado',
-      order: 3,
-      title: 'Consolidação e Simulado',
-      description: 'Fechamento do módulo com revisão cruzada e simulado sem consulta para medir retenção.',
-      cycleIds: [7], // Cycle 7 isolado como Conteúdo-mãe de fechamento
-    }
-  ];
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const { cycleItems, primaryRecommendedItem } = buildDecoratedCycleData(progress);
 
   return MOTHER_SUBJECTS.map((ms) => {
-    // 1. Filtrar os items do ciclo que pertencem a este MotherSubject
-    const items = cycleItems.filter((i) => ms.cycleIds.includes(i.cycle));
-    
-    // 2. Extrair informações de status e progresso agregados
+    const items = cycleItems.filter((item) => ms.cycleIds.includes(item.cycle));
+
     const totalCount = items.length;
-    const completedCount = items.filter((i) => i.isCompleted).length;
-    const isUnlocked = items.some((i) => i.isEligibleNow || i.isComingNext || i.isCompleted);
-    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-    
-    const status = 
-      completedCount === totalCount ? 'concluido'
+    const officialCompletedCount = items.filter((item) => item.isOfficialCompleted).length;
+    const exploredOutOfSequenceCount = items.filter((item) => item.isCompletedOutOfSequence).length;
+    const containsRecommendedNow = items.some((item) => item.isRecommendedNow);
+    const isUnlocked = items.some((item) => item.isEligibleNow || item.isComingNext || item.isExplored);
+    const officialProgressPercent = totalCount > 0 ? Math.round((officialCompletedCount / totalCount) * 100) : 0;
+
+    const status =
+      officialCompletedCount === totalCount ? 'concluido'
       : isUnlocked ? 'em_execucao'
       : 'bloqueado';
 
-    // 3. Separar por "camadas"
-    // Camada Teoria/Subtópicos: CycleItems de kind 'theory' ou 'review'
     const theoryItems = items
-      .filter((i) => i.kind === 'theory' || i.kind === 'review')
-      .map((i) => ({ ...i, theoryPoints: buildTheoryPoints(i) }));
-      
-    // Camada Prática: CycleItems de kind 'practice' (aninhando os exercícios reais)
-    const practiceCycleItems = items
-      .filter((i) => i.kind === 'practice')
-      .map((i) => {
-         const exercises = PRACTICE_ITEMS.filter((p) => p.cycle === i.cycle);
-         return { ...i, exercises };
-      });
+      .filter((item) => item.kind === 'theory' || item.kind === 'review')
+      .map((item) => ({ ...item, theoryPoints: buildTheoryPoints(item) }));
 
-    // Camada Recursos: Fixados diretamente pela relevância (Cycle proximity mapping)
-    const resourceItems = RESOURCE_ITEMS.filter((r) => {
-      if (ms.id === 'ms-vetores') return ['alg-resource-beecrowd'].includes(r.id);
-      if (ms.id === 'ms-matrizes') return ['alg-resource-pdf-matrizes', 'alg-resource-pdf-trilha', 'alg-resource-playlist'].includes(r.id);
+    const practiceCycleItems = items
+      .filter((item) => item.kind === 'practice')
+      .map((item) => ({
+        ...item,
+        exercises: PRACTICE_ITEMS.filter((practiceItem) => practiceItem.cycle === item.cycle),
+      }));
+
+    const resourceItems = RESOURCE_ITEMS.filter((resource) => {
+      if (ms.id === 'ms-vetores') return ['alg-resource-beecrowd'].includes(resource.id);
+      if (ms.id === 'ms-matrizes') return ['alg-resource-pdf-matrizes', 'alg-resource-pdf-trilha', 'alg-resource-playlist'].includes(resource.id);
       return false;
     });
+
+    const nextOfficialLayer = items.find((item) => item.isRecommendedNow)
+      ?? items.find((item) => item.isEligibleNow && !item.isOfficialCompleted)
+      ?? items.find((item) => item.isComingNext && !item.isOfficialCompleted)
+      ?? null;
 
     return {
       ...ms,
       status,
-      progressPercent,
-      completedCount,
+      progressPercent: officialProgressPercent,
+      officialProgressPercent,
+      officialCompletedCount,
+      exploredOutOfSequenceCount,
+      completedCount: officialCompletedCount,
       totalCount,
       isUnlocked,
+      containsRecommendedNow,
+      nextOfficialLayerTitle: nextOfficialLayer?.title ?? null,
       theoryItems,
       practiceCycleItems,
       resourceItems,
+      isRecommendedMotherSubject: containsRecommendedNow && primaryRecommendedItem != null,
     };
   });
 }
@@ -439,46 +647,51 @@ function buildTheoryPoints(item) {
     'alg-revisao-simulado': [
       'Aplicações conjuntas exigem que o estudante entenda qual laço coordena a matriz original ou auxiliar.',
       'Saber declarar o escopo das variáveis previne a poluição estadais em grandes funções.',
-    ]
+    ],
   };
   return MAP[item.id] ?? [`Pontos principais sobre "${item.title}".`];
 }
 
 export function getAlgorithmPilotData(progressOverride) {
-  const progress = progressOverride ?? readAlgorithmPilotProgress();
-
-  // Enriquecer items via engine
-  const cycleItems = enrichCycleItems(CYCLE_ITEMS, STUDY_CYCLES, progress);
+  const progress = normalizeAlgorithmPilotProgress(progressOverride ?? readAlgorithmPilotProgress());
+  const { cycleItems, primaryRecommendedItem, recommendedNowItems } = buildDecoratedCycleData(progress);
   const currentCycle = getCurrentCycle(cycleItems, STUDY_CYCLES);
-  const { completedCount, totalCount, progressPercent } = calcProgressMetrics(cycleItems);
+  const officialProgress = calcProgressMetrics(cycleItems);
+  const explorationProgress = getExplorationProgress(progress);
 
   const eligibleItems = getEligibleNowItems(cycleItems);
   const comingNextItems = getComingNextItems(cycleItems, 3);
   const lockedItems = getLockedItems(cycleItems, 4);
-  const subjectRotationHint = getSubjectRotationHint(progressPercent);
-
-  const cycleItemsCurrent = cycleItems.filter((i) => i.cycle === currentCycle.order);
+  const subjectRotationHint = getSubjectRotationHint(officialProgress.progressPercent);
+  const cycleItemsCurrent = cycleItems.filter((item) => item.cycle === currentCycle.order);
+  const nextRecommendedAction = getNextRecommendedAction(progress);
 
   return {
     pilotNotice: {
       title: 'Piloto de Algoritmo e Programação no Crono-Lab',
-      body: 'Esta disciplina foi reorganizada por ciclos de conteúdo, não por datas. A estrutura está em validação.',
-      label: 'piloto temporário',
+      body: 'Agora a disciplina separa exploração livre da trilha oficial. Você pode adiantar conteúdo sem perder o próximo passo principal.',
+      label: 'progressão oficial ativa',
     },
     subject: {
       id: 'algoritmos-programacao',
       title: 'Algoritmo e Programação',
-      subtitle: 'Disciplina-piloto adaptada para ciclos guiados por conteúdo e progressão pedagógica.',
+      subtitle: 'Disciplina-piloto com trilha oficial, exploração livre e próxima camada recomendada sempre visível.',
       status:
-        completedCount === totalCount
+        officialProgress.completedCount === officialProgress.totalCount
           ? 'consolidado'
-          : eligibleItems.length > 0
+          : primaryRecommendedItem
           ? 'em_execucao'
           : 'travado',
-      progressPercent,
-      completedCount,
-      totalCount,
-      nextStep: eligibleItems[0]?.title ?? comingNextItems[0]?.title ?? 'Todos os ciclos concluídos.',
+      progressPercent: officialProgress.progressPercent,
+      officialProgressPercent: officialProgress.progressPercent,
+      explorationProgressPercent: explorationProgress.progressPercent,
+      completedCount: officialProgress.completedCount,
+      totalCount: officialProgress.totalCount,
+      exploredCount: explorationProgress.exploredOnlyCount,
+      nextStep: primaryRecommendedItem?.title ?? 'Todos os ciclos concluídos.',
+      nextStepSupport: primaryRecommendedItem
+        ? 'Siga por aqui para manter a progressão oficial da disciplina.'
+        : 'A trilha oficial desta disciplina já foi concluída.',
       subjectRotationHint,
     },
     studyCycles: STUDY_CYCLES,
@@ -486,10 +699,16 @@ export function getAlgorithmPilotData(progressOverride) {
       ...currentCycle,
       items: cycleItemsCurrent,
     },
+    primaryRecommendedItem,
+    recommendedNowItems,
+    nextRecommendedAction,
     eligibleItems,
     comingNextItems,
     lockedItems,
     allCycleItems: cycleItems,
+    officialProgress,
+    explorationProgress,
+    progressSnapshot: progress,
     practiceItems: PRACTICE_ITEMS,
     reviewItems: REVIEW_ITEMS,
     resourceItems: RESOURCE_ITEMS,

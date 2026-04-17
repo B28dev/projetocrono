@@ -1,28 +1,26 @@
 import { memo, useState } from 'react';
 import HowStudyCycleWorksModal from './HowStudyCycleWorksModal.jsx';
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
-
 const STEPS = [
   {
-    icon: '🗂️',
-    title: 'Organizado por progressão',
-    copy: 'Os conteúdos seguem uma ordem pedagógica. Cada bloco prepara o próximo.',
-  },
-  {
-    icon: '✅',
-    title: 'Você escolhe entre o que está liberado',
-    copy: 'Não tem data fixa. Você avança no seu tempo — dentro do que faz sentido estudar agora.',
+    icon: '🧭',
+    title: 'Existe uma trilha oficial',
+    copy: 'Sempre há uma próxima camada recomendada para manter a progressão principal coerente.',
   },
   {
     icon: '🔓',
-    title: 'Concluiu? O próximo abre',
-    copy: 'Ao marcar um bloco como estudado, o Crono libera o conteúdo seguinte da fila.',
+    title: 'Exploração livre continua aberta',
+    copy: 'Você pode abrir conteúdos futuros sem bloqueio bruto nem perda de autonomia.',
   },
   {
-    icon: '🔄',
-    title: 'Alternância sugerida',
-    copy: 'O sistema avisa quando vale dar uma volta em outra matéria para não travar num único ponto.',
+    icon: '✅',
+    title: 'Só validação move a disciplina',
+    copy: 'Explorar antes ajuda, mas só a conclusão oficial libera a próxima camada da trilha.',
+  },
+  {
+    icon: '↗',
+    title: 'Antecipação fica sinalizada',
+    copy: 'O Crono mostra quando um bloco foi visto fora da ordem para não confundir exploração com avanço principal.',
   },
 ];
 
@@ -49,10 +47,7 @@ const STEPS_DATE_BASED = [
   },
 ];
 
-// ─── COMPONENT ───────────────────────────────────────────────────────────────
-
 const StudyCycleExplanationCard = memo(function StudyCycleExplanationCard({
-  /** 'content-based' | 'date-based' */
   variant = 'content-based',
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,7 +59,6 @@ const StudyCycleExplanationCard = memo(function StudyCycleExplanationCard({
         className="lab-card rounded-[28px] border border-white/[0.07] bg-[#0A0A12]/75 p-5 shadow-xl backdrop-blur-xl lg:p-6 animate-animation-in"
         aria-label="Como o ciclo de estudos funciona"
       >
-        {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
@@ -81,7 +75,7 @@ const StudyCycleExplanationCard = memo(function StudyCycleExplanationCard({
               <h3 className="mt-0.5 text-base font-semibold leading-snug text-white">
                 {variant === 'date-based'
                   ? 'Este piloto ainda usa datas'
-                  : 'Liberdade com ordem — sem calendário fixo'}
+                  : 'Liberdade com trilha oficial preservada'}
               </h3>
             </div>
           </div>
@@ -100,7 +94,6 @@ const StudyCycleExplanationCard = memo(function StudyCycleExplanationCard({
           </button>
         </div>
 
-        {/* Steps grid */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {steps.map((step, index) => (
             <div
@@ -122,7 +115,6 @@ const StudyCycleExplanationCard = memo(function StudyCycleExplanationCard({
           ))}
         </div>
 
-        {/* Frase-guia */}
         <div className="mt-5 flex items-center gap-3 rounded-2xl border border-cyan-400/[0.12] bg-cyan-500/[0.06] px-4 py-3">
           <div
             className="h-1 w-1 shrink-0 rounded-full bg-cyan-400"
@@ -132,7 +124,7 @@ const StudyCycleExplanationCard = memo(function StudyCycleExplanationCard({
           <p className="text-[11px] italic leading-relaxed text-cyan-200/80">
             {variant === 'date-based'
               ? 'Este piloto ainda valida o formato de datas. O ciclo por conteúdo chega na próxima versão.'
-              : 'Você escolhe dentro do que faz sentido — não dentro do caos.'}
+              : 'Você pode explorar qualquer bloco. A trilha oficial continua apontando o próximo passo principal.'}
           </p>
         </div>
       </section>
