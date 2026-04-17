@@ -22,14 +22,17 @@ const DisciplineCatalogPage = memo(function DisciplineCatalogPage() {
   return (
     <div className="space-y-6 lg:space-y-8" style={{ animation: 'animationIn 0.3s ease-out both' }}>
       <div className="lab-card overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-6 lg:p-8 backdrop-blur-xl shadow-xl">
-        <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
-          Disciplinas piloto
-        </p>
+        <div className="flex items-center gap-3 mb-2">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
+            Catálogo de Matérias
+          </p>
+          <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+        </div>
         <h2 className="font-display text-2xl font-bold tracking-tight text-white">
-          Catálogo do Laboratório
+          Sua Grade de Estudos
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400">
-          Escolha uma disciplina para entrar. O sistema carregará a sua mesa de estudos específica sem misturar o dashboard raiz.
+          Selecione uma disciplina disponível. Você entrará na plataforma de execução exclusiva daquela matéria.
         </p>
       </div>
 

@@ -326,6 +326,8 @@ export default function CronoLab() {
   const resolvedSectionId = section ?? CRONO_LAB_DEFAULT_SECTION;
   const activeSection = getCronoLabSection(resolvedSectionId);
   const isInvalidSection = !isValidCronoLabSection(resolvedSectionId);
+  
+  const isDisciplineInnerPage = activeSection.id === 'disciplinas' && Boolean(slug);
   const { missions, missionItems, loadingState, contentItems } = useStudyStore();
   const {
     userProgress,
@@ -588,11 +590,13 @@ export default function CronoLab() {
     <div className="flex min-h-screen w-full bg-[#05050A] font-inter text-zinc-100 overflow-hidden">
       
       {/* ── SIDEBAR ── */}
-      <DashboardSidebar
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        activeSectionId={activeSection.id}
-      />
+      {!isDisciplineInnerPage && (
+        <DashboardSidebar
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+          activeSectionId={activeSection.id}
+        />
+      )}
 
       {/* ── MAIN AREA ── */}
       <main className="relative flex min-h-screen flex-1 flex-col overflow-y-auto overflow-x-hidden">
@@ -606,17 +610,19 @@ export default function CronoLab() {
         />
 
         {/* ── TOPBAR ── */}
-        <DashboardTopbar
-          momentum={momentum}
-          dateLabel={getLocalDateString()}
-          onOpenSidebar={() => setIsMobileMenuOpen(true)}
-          sectionTitle={activeSection.title}
-        />
+        {!isDisciplineInnerPage && (
+          <DashboardTopbar
+            momentum={momentum}
+            dateLabel={getLocalDateString()}
+            onOpenSidebar={() => setIsMobileMenuOpen(true)}
+            sectionTitle={activeSection.title}
+          />
+        )}
 
         {/* ── SCROLLABLE GRID CONTAINER ── */}
-        <div className="relative z-10 w-full max-w-[1600px] flex-1 px-4 py-6 md:px-8 md:py-8 lg:p-10 mx-auto">
+        <div className={`relative z-10 w-full flex-1 mx-auto ${isDisciplineInnerPage ? 'max-w-none p-0' : 'max-w-[1600px] px-4 py-6 md:px-8 md:py-8 lg:p-10'}`}>
           
-          <div ref={gridRef} className="space-y-6 lg:space-y-8">
+          <div ref={gridRef} className={isDisciplineInnerPage ? 'h-full flex flex-col' : 'space-y-6 lg:space-y-8'}>
             {renderSectionContent()}
           </div>
           
