@@ -339,7 +339,7 @@ export default function CronoLab() {
     isActiveDayNow,
     isCleanDayNow,
     momentumState,
-    recordAttempt,
+    applyResolvedMissionAttempt,
     refreshBacklog,
   } = useProgressStore();
 
@@ -363,20 +363,30 @@ export default function CronoLab() {
     if (!todayItems[0]) return;
     const item = todayItems[0];
     const content = contentItems.find((c) => c.id === item.contentItemId);
-    const fakeAttempt = {
-      id: `sim-${Date.now()}`,
-      missionItemId: item.id,
-      contentItemId: content.id,
-      attemptType: 'flashcard_flip',
-      answeredBeforeReveal: true,
-      selfAssessment: 'good',
-      detectedAsSpeedClick: false,
-      xpGranted: 0,
-      needsReinforcement: false,
-      attemptedAt: new Date().toISOString(),
-    };
-    recordAttempt(fakeAttempt, content);
-  }, [todayItems, contentItems, recordAttempt]);
+    if (!content) return;
+
+    applyResolvedMissionAttempt({
+      rawAttempt: {
+        id: `sim-${Date.now()}`,
+        missionItemId: item.id,
+        contentItemId: content.id,
+        attemptType: 'flashcard_flip',
+        validationKind: content.interactionType === 'theory' ? 'theory' : 'flashcard',
+        answeredBeforeReveal: true,
+        selfAssessment: content.interactionType === 'theory' ? 'theory_done' : 'good',
+        detectedAsSpeedClick: false,
+        xpGranted: 0,
+        needsReinforcement: false,
+        attemptedAt: new Date().toISOString(),
+        validationSource: content.validationMode ?? null,
+        resultTier: 'validated',
+        feedbackKey: 'validated',
+        isValidatedExecution: true,
+      },
+      missionItem: item,
+      contentItem: content,
+    });
+  }, [todayItems, contentItems, applyResolvedMissionAttempt]);
 
   const handleSimulateBreakStreak = useCallback(() => {
     alert('[Sistema] Streak break: Passe um dia sem validar para quebrar a ofensiva naturalmente. O engine de data faz isso silenciosamente.');

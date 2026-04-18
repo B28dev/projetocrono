@@ -15,6 +15,7 @@
 import { getLocalDateString } from '../plan/dailyMissions.js';
 import { hasRealValidationForItem } from '../execution/answerAttempts.js';
 import { countCompletedRequired, countTotalRequired } from '../plan/missionItems.js';
+import { compareMissionDates, extractMissionDate } from '../plan/missionDates.js';
 
 // ─── CONSTANTES ───────────────────────────────────────────────────────────────
 
@@ -55,17 +56,11 @@ export function getBacklogItems(missionItems, attempts, todayDate) {
   const today = todayDate ?? getLocalDateString();
 
   return missionItems.filter((item) => {
-    // Só considera itens obrigatórios
     if (!item.requiredForCleanDay) return false;
 
-    // Só considera dias passados (não hoje)
-    // MissionItems não têm date diretamente, mas o dailyMissionId contém a data
-    // Formato: mission-{userId}-{YYYY-MM-DD}
-    const missionDate = item.dailyMissionId.split('-').slice(-1)[0];
-    // fallback: se não conseguir extrair, assume como passado
-    if (missionDate && missionDate === today) return false;
+    const missionDate = extractMissionDate(item.dailyMissionId);
+    if (missionDate === today) return false;
 
-    // Considera em aberto se não completado E sem Validação Real
     if (item.status === 'completed') return false;
     if (hasRealValidationForItem(attempts, item.id)) return false;
 
@@ -119,6 +114,9 @@ export function createInitialBacklogState(userId) {
     oldestDebtDate: null,
     debtSeverity: 'none',
     backlogClearedAt: null,
+    pendingMissionItems: 0,
+    reinforcementPendingCount: 0,
+    lastDebtUpdateAt: null,
   };
 }
 
@@ -131,25 +129,31 @@ export function createInitialBacklogState(userId) {
  */
 export function rebuildBacklogState(userId, missionItems, attempts) {
   const backlogItems = getBacklogItems(missionItems, attempts);
+  const reinforcementPendingCount = missionItems.filter(
+    (item) => item.origin === 'reinforcement' && item.status !== 'completed',
+  ).length;
 
-  // Encontra a data mais antiga do backlog
   let oldestDebtDate = null;
   for (const item of backlogItems) {
-    const missionDate = item.dailyMissionId.split('-').slice(-1)[0];
-    if (!oldestDebtDate || (missionDate && missionDate < oldestDebtDate)) {
+    const missionDate = extractMissionDate(item.dailyMissionId);
+    if (compareMissionDates(missionDate, oldestDebtDate) < 0) {
       oldestDebtDate = missionDate;
     }
   }
 
   const totalDebtItems = backlogItems.length;
   const debtSeverity = getDebtSeverity(totalDebtItems);
+  const now = new Date().toISOString();
 
   return {
     userId,
     totalDebtItems,
     oldestDebtDate,
     debtSeverity,
-    backlogClearedAt: totalDebtItems === 0 ? new Date().toISOString() : null,
+    backlogClearedAt: totalDebtItems === 0 ? now : null,
+    pendingMissionItems: totalDebtItems,
+    reinforcementPendingCount,
+    lastDebtUpdateAt: now,
   };
 }
 

@@ -1,6 +1,6 @@
 export default function NextActionPanel({ nextAction }) {
   return (
-    <section className="lab-card rounded-[28px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(10,10,18,0.92),rgba(10,10,18,0.82))] p-5 shadow-[0_0_40px_rgba(0,232,255,0.06)] backdrop-blur-xl lg:p-6">
+    <section className="lab-card rounded-[28px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(10,10,18,0.94),rgba(10,10,18,0.84))] p-4 shadow-[0_0_40px_rgba(0,232,255,0.06)] backdrop-blur-xl sm:p-5 lg:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl">
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-300">
@@ -14,7 +14,7 @@ export default function NextActionPanel({ nextAction }) {
               o que eu faço agora
             </span>
           </div>
-          <h3 className="mt-4 text-2xl font-semibold tracking-tight text-white lg:text-[28px]">
+          <h3 className="mt-4 text-xl font-semibold tracking-tight text-white sm:text-2xl lg:text-[28px]">
             {nextAction.title}
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-zinc-300">
@@ -22,11 +22,11 @@ export default function NextActionPanel({ nextAction }) {
           </p>
         </div>
 
-        <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-4 lg:max-w-xs">
+        <div className="w-full rounded-[24px] border border-cyan-400/14 bg-cyan-500/[0.06] p-4 lg:max-w-xs">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
             Direção imediata
           </p>
-          <p className="mt-3 text-sm font-semibold text-white">
+          <p className="mt-3 text-sm font-semibold leading-relaxed text-white">
             {nextAction.ctaLabel}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-zinc-500">
@@ -35,18 +35,18 @@ export default function NextActionPanel({ nextAction }) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-5 grid gap-3 lg:grid-cols-3">
         {nextAction.items.map((item, index) => (
-          <div key={item.id} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 transition-colors duration-300 hover:border-cyan-400/25 hover:bg-white/[0.05]">
+          <div key={item.id} className="rounded-[22px] border border-white/10 bg-white/[0.03] px-3.5 py-4 transition-all duration-300 hover:border-cyan-400/25 hover:bg-white/[0.05]">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-500/10 text-[10px] font-mono font-bold text-cyan-200">
                 {index + 1}
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold leading-relaxed text-white">
                   {item.text}
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-xs leading-relaxed text-zinc-500">
                   {item.topic || 'Trilha prioritária'}{item.date ? ` · ${item.date}` : ''}
                 </p>
               </div>

@@ -57,7 +57,8 @@ export default function CronoLabMissionPanel({ todayMission, todayItems, content
     todayProgress,
     isCleanDayNow,
     backlogState,
-    grantBonus,
+    userProgress,
+    streakState,
   } = useProgressStore();
   const [feedback, setFeedback] = useState(null);
 
@@ -80,45 +81,76 @@ export default function CronoLabMissionPanel({ todayMission, todayItems, content
   );
 
   const statusMeta = STATUS_META[todayMission?.summaryStatus] ?? STATUS_META.pending;
-  const missionPercent = todayMission?.missionProgressPercent ?? todayProgress?.percent ?? 0;
-  const completedOfficialCount = todayMission?.completedMissionItems?.length ?? todayItems.filter((item) => item.isOfficial && item.isValidated).length;
+  const missionPercent = userProgress?.todayProgressPercent ?? todayMission?.missionProgressPercent ?? todayProgress?.percent ?? 0;
+  const completedOfficialCount = userProgress?.officialCompletedToday ?? todayMission?.completedMissionItems?.length ?? todayItems.filter((item) => item.isOfficial && item.isValidated).length;
   const officialCount = todayMission?.officialMissionItems?.length ?? todayItems.filter((item) => item.isOfficial).length;
   const partialCount = todayItems.filter((item) => item.validationStatus === 'validated_partial').length;
   const wrongCount = todayItems.filter((item) => item.validationStatus === 'validated_wrong').length;
   const revealOnlyCount = todayItems.filter((item) => item.validationStatus === 'revealed_without_attempt').length;
+  const todayState = userProgress?.todayState ?? 'idle';
+  const streakStatus = streakState?.streakStatus ?? 'active';
+  const reinforcementPendingCount = backlogState?.reinforcementPendingCount ?? 0;
+  const stateLabel = todayState.replaceAll('_', ' ');
+  const streakLabel = streakStatus.replaceAll('_', ' ');
+  const backlogCount = backlogState?.pendingMissionItems ?? backlogState?.totalDebtItems ?? 0;
+  const feedbackStateHelper = todayState === 'clean'
+    ? 'Dia limpo. Perímetro seguro.'
+    : todayState === 'debt'
+      ? 'Pendência aberta. Isso volta como custo.'
+      : todayState === 'reinforcement_pending'
+        ? 'Erro útil registrado. Reforço necessário.'
+        : todayState === 'in_progress'
+          ? 'Execução em curso. Mantenha a linha.'
+          : 'Sem validação real suficiente ainda.';
 
-  useEffect(() => {
-    if (!feedback) return undefined;
-    const timeoutId = window.setTimeout(() => setFeedback(null), 2800);
-    return () => window.clearTimeout(timeoutId);
-  }, [feedback]);
+  const feedbackCopy = feedback ? {
+    validation_success: 'Execução validada. Base consolidada.',
+    validation_partial: 'Erro útil. Ajuste a rota.',
+    validation_failed: 'Tentativa registrada. Ainda não fechou.',
+    revealed_without_attempt: 'Sem tentativa, sem reconhecimento sistêmico.',
+    speed_click: 'Clique rápido demais. O Crono não registra chute.',
+    mission_clean: 'Dia limpo. Perímetro seguro.',
+    backlog_cleared: 'Acumulado zerado. Terreno recuperado.',
+    debt_opened: 'Ficou aberto. Isso volta como custo.',
+    streak_saved: 'Ofensiva mantida por validação real.',
+    streak_at_risk: 'Ofensiva em risco. Falta validação real hoje.',
+  }[feedback.eventType] ?? feedbackStateHelper : feedbackStateHelper;
 
-  useEffect(() => {
-    if (!todayMission) return;
-    if (todayProgress?.percent === 100) {
-      grantBonus('daily_complete_bonus', todayMission.id);
-    }
-  }, [grantBonus, todayMission, todayProgress?.percent]);
+  const progressTone = todayState === 'clean'
+    ? 'text-emerald-200'
+    : todayState === 'debt'
+      ? 'text-rose-200'
+      : todayState === 'reinforcement_pending'
+        ? 'text-amber-200'
+        : 'text-cyan-200';
 
-  useEffect(() => {
-    if (!todayMission) return;
-    if (isCleanDayNow) {
-      grantBonus('clean_day_bonus', todayMission.id);
-    }
-  }, [grantBonus, isCleanDayNow, todayMission]);
+  const progressBadgeTone = todayState === 'clean'
+    ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+    : todayState === 'debt'
+      ? 'border-rose-400/20 bg-rose-500/10 text-rose-200'
+      : todayState === 'reinforcement_pending'
+        ? 'border-amber-400/20 bg-amber-500/10 text-amber-200'
+        : 'border-cyan-400/20 bg-cyan-500/10 text-cyan-200';
 
-  useEffect(() => {
-    if (!todayMission) return;
-    if ((backlogState?.totalDebtItems ?? 0) === 0 && todayProgress?.validationsToday > 0) {
-      grantBonus('backlog_clear_bonus', todayMission.id);
-    }
-  }, [backlogState?.totalDebtItems, grantBonus, todayMission, todayProgress?.validationsToday]);
+  const missionBarColor = todayState === 'clean' ? 'emerald' : todayState === 'debt' ? 'red' : 'blue';
 
   const handleAnswer = (payload) => {
     const result = resolveAttempt(payload);
     if (!result) return;
     setFeedback(result);
   };
+
+  const progressBarValue = missionPercent;
+  const xpToday = userProgress?.xpToday ?? 0;
+  const validationsToday = todayProgress?.validationsToday ?? 0;
+  const currentStreak = streakState?.currentStreak ?? 0;
+  const backlogSeverity = backlogState?.debtSeverity?.replaceAll('_', ' ') ?? 'none';
+
+  useEffect(() => {
+    if (!feedback) return undefined;
+    const timeoutId = window.setTimeout(() => setFeedback(null), 2800);
+    return () => window.clearTimeout(timeoutId);
+  }, [feedback]);
 
   return (
     <div className="lab-card flex-1 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 backdrop-blur-xl shadow-xl">
@@ -145,12 +177,24 @@ export default function CronoLabMissionPanel({ todayMission, todayItems, content
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3 animate-in fade-in duration-500">
+        <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-4 animate-in fade-in duration-500">
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Progresso oficial</p>
-            <p className="mt-2 text-2xl font-black text-white">{missionPercent}%</p>
+            <p className={`mt-2 text-2xl font-black ${progressTone}`}>{progressBarValue}%</p>
             <p className="mt-1 text-[11px] text-zinc-500">{completedOfficialCount}/{officialCount} itens oficiais concluídos</p>
-            <ProgressBar value={missionPercent} color="blue" className="mt-3" />
+            <ProgressBar value={progressBarValue} color={missionBarColor} className="mt-3" />
+          </div>
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Estado do dia</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className={`inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${progressBadgeTone}`}>
+                {stateLabel}
+              </span>
+              <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                streak {streakLabel}
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-zinc-500">{feedbackCopy}</p>
           </div>
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Ação principal</p>
@@ -158,11 +202,111 @@ export default function CronoLabMissionPanel({ todayMission, todayItems, content
             <p className="mt-1 text-[11px] text-zinc-500">{primaryItem?.reason ?? 'Se houver nova recomendação oficial, ela aparece aqui.'}</p>
           </div>
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Camadas secundárias</p>
-            <p className="mt-2 text-2xl font-black text-white">{pendingItems.length + reinforcementItems.length}</p>
-            <p className="mt-1 text-[11px] text-zinc-500">{pendingItems.length} pendência(s) • {reinforcementItems.length} reforço(s)</p>
-            <p className="mt-2 text-[11px] text-zinc-500">{partialCount} parcial • {wrongCount} erro • {revealOnlyCount} revelado sem tentar</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Sistema vivo</p>
+            <p className="mt-2 text-2xl font-black text-white">+{xpToday}</p>
+            <p className="mt-1 text-[11px] text-zinc-500">XP hoje • {validationsToday} validações reais • {currentStreak} dias de ofensiva</p>
+            <p className="mt-2 text-[11px] text-zinc-500">{backlogCount} pendência(s) • {reinforcementPendingCount} reforço(s) • severidade {backlogSeverity}</p>
           </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <span className={`inline-flex rounded-full border px-2.5 py-1 font-mono uppercase tracking-[0.18em] ${progressBadgeTone}`}>
+              {feedbackStateHelper}
+            </span>
+            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono uppercase tracking-[0.18em] text-white/55">
+              {partialCount} parcial
+            </span>
+            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono uppercase tracking-[0.18em] text-white/55">
+              {wrongCount} erro útil
+            </span>
+            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono uppercase tracking-[0.18em] text-white/55">
+              {revealOnlyCount} reveal sem tentativa
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Leitura operacional</p>
+          <p className="mt-2 text-sm text-zinc-400">Execução validada move XP, ofensiva, progresso do dia e custo pendente. Exploração livre não entra nesse placar.</p>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Pendência oficial</p>
+            <p className="mt-2 text-xl font-black text-white">{pendingItems.length}</p>
+            <p className="mt-1 text-[11px] text-zinc-500">O que ficou aberto continua visível como custo.</p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Reforço necessário</p>
+            <p className="mt-2 text-xl font-black text-white">{reinforcementItems.length}</p>
+            <p className="mt-1 text-[11px] text-zinc-500">Erro útil não some. Ele vira nova carga operacional.</p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Ofensiva</p>
+            <p className="mt-2 text-xl font-black text-white">{currentStreak}d</p>
+            <p className="mt-1 text-[11px] text-zinc-500">Só sobe com validação real no dia.</p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-cyan-400/12 bg-cyan-500/[0.04] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">Feedback operacional</p>
+          <p className="mt-2 text-sm text-zinc-300">{feedback ? feedbackCopy : 'O sistema fica vivo quando você valida. Sem validação real, não há recompensa plena.'}</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Meta diária</p>
+          <p className="mt-2 text-sm text-zinc-400">{isCleanDayNow ? 'Dia limpo confirmado. Continue preservando a linha.' : 'A meta e a limpeza reagem apenas ao que foi validado de verdade.'}</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Missão sistêmica</p>
+          <p className="mt-2 text-sm text-zinc-400">Cada validação atualiza missão, dia, streak, backlog e ledger sem depender de reload.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Consequência operacional</p>
+          <p className="mt-2 text-sm text-zinc-400">O que fica aberto não desaparece. O sistema guarda memória e cobra depois.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Linha de execução</p>
+          <p className="mt-2 text-sm text-zinc-400">Primeiro validar, depois ganhar sistema. Nunca o contrário.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">XP útil</p>
+          <p className="mt-2 text-sm text-zinc-400">Erro tentando ainda gera valor útil, mas reveal sem tentativa não vende progresso falso.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Memória do dia</p>
+          <p className="mt-2 text-sm text-zinc-400">O dia sabe se está idle, em curso, limpo, com dívida ou precisando de reforço.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Execução study-first</p>
+          <p className="mt-2 text-sm text-zinc-400">Nada aqui recompensa intenção. Só execução validada move o sistema.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Resumo de risco</p>
+          <p className="mt-2 text-sm text-zinc-400">Se não houver validação real, a ofensiva não avança e a dívida continua viva.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Controle local</p>
+          <p className="mt-2 text-sm text-zinc-400">Primeira versão sistêmica local, mas já com regra conceitual correta para crescer depois.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Motor vivo</p>
+          <p className="mt-2 text-sm text-zinc-400">XP, ofensiva, acumulado e feedback agora reagem ao mesmo evento de validação.</p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Sem dashboard fake</p>
+          <p className="mt-2 text-sm text-zinc-400">O painel não mente sobre progresso: sem validação real, sem vitória visual completa.</p>
         </div>
       </div>
 

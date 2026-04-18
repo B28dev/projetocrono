@@ -161,19 +161,8 @@
  */
 
 /**
- * @typedef {'validation_success' | 'validation_partial' | 'validation_failed' | 'revealed_without_attempt' | 'speed_click' | 'mission_completed' | 'mission_progress'} MissionEventType
+ * @typedef {'validation_success' | 'validation_partial' | 'validation_failed' | 'revealed_without_attempt' | 'speed_click' | 'mission_completed' | 'mission_progress' | 'mission_clean' | 'debt_opened' | 'streak_saved' | 'streak_at_risk' | 'backlog_cleared'} MissionEventType
  * @typedef {'success' | 'warning' | 'danger' | 'info'} ValidationFeedbackTone
- *
- * @typedef {Object} MissionInteractionResult
- * @property {import('./types').AnswerAttempt | null} attempt
- * @property {number} xpGranted
- * @property {boolean} countedAsRealValidation
- * @property {boolean} shouldCompleteItem
- * @property {boolean} needsReinforcement
- * @property {MissionEventType} eventType
- * @property {ValidationFeedbackTone} tone
- * @property {string} feedbackKey
- * @property {MissionValidationStatus | null} validationStatus
  */
 
 // ─── LAYER 4: PROGRESSÃO ────────────────────────────────────────────────────
@@ -187,7 +176,15 @@
  * @property {number} xpThisWeek              - XP ganho esta semana
  * @property {number} completedValidationsToday - Validações Reais hoje
  * @property {number} completedBlocksToday    - Blocos de fogo hoje
+ * @property {number} officialCompletedToday  - Itens oficiais concluídos hoje
+ * @property {string|null} lastValidatedDate  - Data local da última validação real
+ * @property {'idle'|'in_progress'|'partial'|'clean'|'debt'|'reinforcement_pending'} todayState - Estado operacional do dia
+ * @property {number} todayProgressPercent    - Percentual do progresso oficial do dia
  * @property {string} lastActiveAt            - ISO timestamp da última atividade
+ */
+
+/**
+ * @typedef {'idle' | 'in_progress' | 'partial' | 'clean' | 'debt' | 'reinforcement_pending'} TodayState
  */
 
 /**
@@ -211,6 +208,66 @@
  * @property {string|null}  oldestDebtDate  - Data ISO do débito mais antigo
  * @property {DebtSeverity} debtSeverity    - Severidade do acumulado
  * @property {string|null}  backlogClearedAt - Quando foi zerado pela última vez
+ * @property {number}       pendingMissionItems - Quantidade operacional de pendências oficiais
+ * @property {number}       reinforcementPendingCount - Quantidade de reforços ainda em aberto
+ * @property {string|null}  lastDebtUpdateAt - Última atualização do estado de dívida
+ */
+
+/**
+ * @typedef {Object} EventFeedback
+ * @property {MissionEventType} eventType
+ * @property {string} messageKey
+ * @property {ValidationFeedbackTone} tone
+ * @property {string} visualState
+ */
+
+/**
+ * @typedef {Object} OfficialProgressSummary
+ * @property {number} officialCompletedToday
+ * @property {number} totalOfficialToday
+ * @property {number} validationsToday
+ * @property {number} accumulatedDebtCount
+ * @property {number} reinforcementPendingCount
+ * @property {TodayState} todayState
+ */
+
+/**
+ * @typedef {Object} MissionInteractionResult
+ * @property {import('./types').AnswerAttempt | null} attempt
+ * @property {number} xpGranted
+ * @property {boolean} countedAsRealValidation
+ * @property {boolean} shouldCompleteItem
+ * @property {boolean} needsReinforcement
+ * @property {MissionEventType} eventType
+ * @property {ValidationFeedbackTone} tone
+ * @property {string} feedbackKey
+ * @property {MissionValidationStatus | null} validationStatus
+ * @property {TodayState|null} todayState
+ * @property {string|null} streakImpact
+ * @property {string|null} backlogImpact
+ * @property {string} visualState
+ */
+
+/**
+ * @typedef {Object} ValidationResolution
+ * @property {import('./types').AnswerAttempt} attempt
+ * @property {import('./types').MissionItem} missionItemPatch
+ * @property {import('./types').StreakState} streakState
+ * @property {import('./types').BacklogState} backlogState
+ * @property {OfficialProgressSummary} officialProgressSummary
+ * @property {{sourceType: string, sourceId: string}[]} bonusTriggers
+ * @property {MissionInteractionResult} feedback
+ */
+
+/**
+ * @typedef {Object} DayStateSummary
+ * @property {TodayState} todayState
+ * @property {number} validationsToday
+ * @property {number} officialCompletedToday
+ * @property {number} totalOfficialToday
+ * @property {number} reinforcementPendingCount
+ * @property {number} accumulatedDebtCount
+ * @property {number} percent
  */
 
 /**
