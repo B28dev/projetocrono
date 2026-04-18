@@ -15,6 +15,12 @@
 
 import { CONTENT_ITEMS } from '../content/contentItems.js';
 
+function getMissionItemOriginFromRole(missionRole) {
+  if (missionRole === 'reinforcement') return 'reinforcement';
+  if (missionRole === 'pending') return 'backlog';
+  return 'today';
+}
+
 // ─── ID GENERATOR ────────────────────────────────────────────────────────────
 
 let _idCounter = 1;
@@ -42,6 +48,23 @@ export function createMissionItem({
   origin,
   order,
   requiredForCleanDay = true,
+  missionRole = null,
+  sourceDisciplineId = null,
+  motherSubjectId = null,
+  layerId = null,
+  layerTitle = null,
+  priority = null,
+  reason = null,
+  isRecommended = false,
+  isOfficial = true,
+  generatedFrom = null,
+  requiresValidation = true,
+  validationType = null,
+  validationStatus = 'idle',
+  validationAttemptId = null,
+  isValidated = false,
+  validatedAt = null,
+  lastResultTier = null,
 }) {
   const contentItem = CONTENT_ITEMS.find((c) => c.id === contentItemId);
   const missionType = contentItem?.kind ?? 'flashcard';
@@ -62,6 +85,23 @@ export function createMissionItem({
     reviewBucket: null,
     nextReviewAt: null,
     difficultyRating: null,
+    missionRole,
+    sourceDisciplineId,
+    motherSubjectId,
+    layerId,
+    layerTitle,
+    priority,
+    reason,
+    isRecommended,
+    isOfficial,
+    generatedFrom,
+    requiresValidation,
+    validationType,
+    validationStatus,
+    validationAttemptId,
+    isValidated,
+    validatedAt,
+    lastResultTier,
   };
 }
 
@@ -140,6 +180,71 @@ export function generateMissionItems(mission, availableItems, backlogItems = [])
   }
 
   return items;
+}
+
+export function generateMissionItemsFromOfficialMission(mission, missionContentItems, previousItems = []) {
+  if (!mission || missionContentItems.length === 0) return [];
+
+  const previousItemsByLayerId = new Map(
+    previousItems
+      .filter((item) => item.layerId)
+      .map((item) => [item.layerId, item]),
+  );
+
+  return missionContentItems
+    .map((contentItem, index) => {
+      const metadata = contentItem.missionMetadata ?? {};
+      const origin = getMissionItemOriginFromRole(metadata.missionRole);
+      const previousItem = previousItemsByLayerId.get(metadata.layerId)
+        ?? previousItems.find((item) => item.contentItemId === contentItem.id)
+        ?? null;
+
+      const nextItem = createMissionItem({
+        dailyMissionId: mission.id,
+        contentItemId: contentItem.id,
+        origin,
+        order: index + 1,
+        requiredForCleanDay: metadata.missionRole !== 'reinforcement',
+        missionRole: metadata.missionRole ?? null,
+        sourceDisciplineId: mission.sourceDisciplineId ?? metadata.sourceDisciplineId ?? null,
+        motherSubjectId: metadata.motherSubjectId ?? null,
+        layerId: metadata.layerId ?? null,
+        layerTitle: contentItem.title,
+        priority: metadata.priority ?? index + 1,
+        reason: metadata.reason ?? null,
+        isRecommended: metadata.missionRole === 'primary',
+        isOfficial: metadata.isOfficial ?? metadata.missionRole !== 'reinforcement',
+        generatedFrom: metadata.generatedFrom ?? null,
+        requiresValidation: metadata.requiresValidation ?? true,
+        validationType: metadata.validationType ?? contentItem.interactionType ?? null,
+        validationStatus: 'idle',
+        validationAttemptId: null,
+        isValidated: false,
+        validatedAt: null,
+        lastResultTier: null,
+      });
+
+      if (!previousItem) return nextItem;
+
+      return {
+        ...nextItem,
+        id: previousItem.id,
+        status: previousItem.status,
+        completedAt: previousItem.completedAt,
+        lastAttemptAt: previousItem.lastAttemptAt,
+        attemptCount: previousItem.attemptCount,
+        needsSameDayReinforcement: previousItem.needsSameDayReinforcement,
+        reviewBucket: previousItem.reviewBucket,
+        nextReviewAt: previousItem.nextReviewAt,
+        difficultyRating: previousItem.difficultyRating,
+        validationStatus: previousItem.validationStatus ?? nextItem.validationStatus,
+        validationAttemptId: previousItem.validationAttemptId ?? null,
+        isValidated: previousItem.isValidated ?? false,
+        validatedAt: previousItem.validatedAt ?? null,
+        lastResultTier: previousItem.lastResultTier ?? null,
+      };
+    })
+    .sort((a, b) => (a.priority ?? a.order) - (b.priority ?? b.order));
 }
 
 // ─── STATUS HELPERS ──────────────────────────────────────────────────────────

@@ -1,6 +1,8 @@
 export default function ValidationResultActions({ actions, disabled = false }) {
+  const columnsClass = actions.length <= 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3';
+
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+    <div className={`grid grid-cols-1 gap-2 ${columnsClass}`}>
       {actions.map((action) => (
         <button
           key={action.id}

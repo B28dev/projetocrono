@@ -96,7 +96,23 @@ export function SessionStoreProvider({ children }) {
    * @returns {import('../types').AnswerAttempt | null}
    */
   const submitAttempt = useCallback(
-    ({ contentItemId, attemptType, validationKind, selfAssessment, resultTier, feedbackKey, answeredBeforeReveal }) => {
+    ({
+      contentItemId,
+      attemptType,
+      validationKind,
+      selfAssessment,
+      resultTier,
+      feedbackKey,
+      answeredBeforeReveal,
+      disciplineId,
+      motherSubjectId,
+      layerId,
+      responsePayload,
+      validationSource,
+      isValidatedExecution,
+      objectiveCorrectness,
+      nextReviewHint,
+    }) => {
       if (!currentItemId) return null;
       if (isCoolingDown) return null;
 
@@ -117,6 +133,14 @@ export function SessionStoreProvider({ children }) {
         thinkTimeMs,
         resultTier,
         feedbackKey,
+        disciplineId,
+        motherSubjectId,
+        layerId,
+        responsePayload,
+        validationSource,
+        isValidatedExecution,
+        objectiveCorrectness,
+        nextReviewHint,
       });
 
       // Revela após a tentativa

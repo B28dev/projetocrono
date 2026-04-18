@@ -56,6 +56,14 @@ export function createAttempt({
   needsReinforcement = false,
   resultTier,
   feedbackKey,
+  disciplineId = null,
+  motherSubjectId = null,
+  layerId = null,
+  responsePayload = null,
+  validationSource = null,
+  isValidatedExecution = null,
+  objectiveCorrectness = null,
+  nextReviewHint = null,
 }) {
   const detectedAsSpeedClick =
     answeredBeforeReveal && thinkTimeMs < MIN_THINK_MS;
@@ -81,6 +89,14 @@ export function createAttempt({
     resultTier: computedResultTier,
     feedbackKey: feedbackKey ?? getDefaultFeedbackKey(computedResultTier, answeredBeforeReveal, detectedAsSpeedClick),
     attemptedAt: new Date().toISOString(),
+    disciplineId,
+    motherSubjectId,
+    layerId,
+    responsePayload,
+    validationSource,
+    isValidatedExecution,
+    objectiveCorrectness,
+    nextReviewHint,
   };
 }
 
@@ -115,6 +131,7 @@ export function isRealValidation(attempt) {
   if (attempt.detectedAsSpeedClick) return false;
   if (attempt.selfAssessment === 'revealed') return false;
   if (attempt.resultTier === 'invalid') return false;
+  if (attempt.isValidatedExecution === false && attempt.validationSource) return false;
   return true;
 }
 
@@ -141,7 +158,9 @@ export function shouldMarkReinforcement(attempt) {
 export function classifyMissionEvent(attempt) {
   if (isSpeedClickAttempt(attempt)) return 'speed_click';
   if (isRevealWithoutAttempt(attempt)) return 'revealed_without_attempt';
+  if (attempt?.validationKind === 'theory' && attempt?.isValidatedExecution) return 'validation_success';
   if (attempt?.resultTier === 'validated') return 'validation_success';
+  if (attempt?.resultTier === 'partial' && attempt?.selfAssessment === 'failed') return 'validation_failed';
   if (attempt?.resultTier === 'partial') return 'validation_partial';
   return 'mission_progress';
 }
@@ -158,6 +177,7 @@ export function finalizeAttempt(attempt) {
   return {
     ...attempt,
     needsReinforcement: shouldMarkReinforcement(attempt),
+    isValidatedExecution: attempt.isValidatedExecution ?? isRealValidation(attempt),
     feedbackKey: attempt.feedbackKey ?? getDefaultFeedbackKey(attempt.resultTier, attempt.answeredBeforeReveal, attempt.detectedAsSpeedClick),
   };
 }
@@ -174,7 +194,7 @@ export function getAttemptDisplayAssessment(attempt) {
 export function getAttemptOutcomeSummary(attempt) {
   return {
     countedAsRealValidation: isRealValidation(attempt),
-    shouldCompleteItem: shouldCompleteFromAttempt(attempt),
+    shouldCompleteItem: shouldCompleteFromAttempt(attempt) && isRealValidation(attempt),
     shouldMarkRevealedOnly: isRevealWithoutAttempt(attempt),
     needsReinforcement: shouldMarkReinforcement(attempt),
     eventType: classifyMissionEvent(attempt),

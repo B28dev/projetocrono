@@ -36,6 +36,11 @@ export default function FeedbackToast({ feedback, onClose }) {
             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 font-mono uppercase tracking-[0.18em]">
               {feedback.countedAsRealValidation ? 'validação real' : 'sem validação real'}
             </span>
+            {feedback.validationStatus ? (
+              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 font-mono uppercase tracking-[0.18em]">
+                {feedback.validationStatus.replaceAll('_', ' ')}
+              </span>
+            ) : null}
           </div>
         </div>
       </div>

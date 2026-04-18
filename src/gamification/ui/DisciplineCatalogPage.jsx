@@ -16,6 +16,13 @@ const CATALOG_DATA = [
     status: 'em_execucao',
     icon: '🚀',
   },
+  {
+    slug: 'engenharia-software',
+    title: 'Introdução à Engenharia de Software',
+    description: 'Disciplina reorganizada no Crono-Lab com visão geral mais limpa, conteúdos por bloco-mãe e universo próprio de exercícios.',
+    status: 'em_execucao',
+    icon: '🧠',
+  },
 ];
 
 const DisciplineCatalogPage = memo(function DisciplineCatalogPage() {

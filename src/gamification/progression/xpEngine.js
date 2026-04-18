@@ -151,19 +151,21 @@ const MAX_LEVEL = LEVEL_XP_TABLE.length;
 export function calculateXp(attempt, contentItem, streakMultiplier = 1.0) {
   if (attempt.detectedAsSpeedClick) return 0;
   if (!attempt.answeredBeforeReveal) return 0;
+  if (attempt.validationSource && !attempt.isValidatedExecution && attempt.validationKind !== 'written') return 0;
 
   const validationKind = attempt.validationKind
     ?? (contentItem.kind === 'assisted_question' ? 'assisted_question' : 'flashcard');
 
   let base = 0;
 
-  if (validationKind === 'flashcard') {
+  if (validationKind === 'flashcard' || validationKind === 'true_false' || validationKind === 'theory') {
+    if (attempt.selfAssessment === 'theory_done') base = 12;
     if (attempt.selfAssessment === 'easy' || attempt.selfAssessment === 'good') base = 5;
     if (attempt.selfAssessment === 'hard') base = 2;
     if (attempt.selfAssessment === 'failed' || attempt.selfAssessment === 'revealed') base = 0;
   }
 
-  if (validationKind === 'assisted_question') {
+  if (validationKind === 'assisted_question' || validationKind === 'written') {
     if (attempt.selfAssessment === 'easy' || attempt.selfAssessment === 'good') base = 30;
     if (attempt.selfAssessment === 'partial') base = 18;
     if (attempt.selfAssessment === 'hard' || attempt.selfAssessment === 'failed') base = 8;
@@ -172,6 +174,14 @@ export function calculateXp(attempt, contentItem, streakMultiplier = 1.0) {
 
   const withStreak = base * streakMultiplier;
   return Math.round(withStreak);
+}
+
+export function getShouldCompleteMissionItem(attempt) {
+  return Boolean(attempt?.isValidatedExecution) && Boolean(attempt?.answeredBeforeReveal) && !attempt?.detectedAsSpeedClick;
+}
+
+export function getShouldMarkRevealedOnly(attempt) {
+  return !attempt.answeredBeforeReveal || attempt.selfAssessment === 'revealed';
 }
 
 export function getBonusXp(sourceType) {
@@ -205,14 +215,6 @@ export function finalizeAttemptWithXp(attempt, contentItem, streakMultiplier = 1
     xpGranted,
     needsReinforcement: shouldFlagReinforcement(attempt),
   };
-}
-
-export function getShouldCompleteMissionItem(attempt) {
-  return Boolean(attempt?.answeredBeforeReveal) && !attempt?.detectedAsSpeedClick;
-}
-
-export function getShouldMarkRevealedOnly(attempt) {
-  return !attempt.answeredBeforeReveal || attempt.selfAssessment === 'revealed';
 }
 
 export function getBonusReason(sourceType) {

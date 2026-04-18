@@ -11,9 +11,17 @@ export const MISSION_EVENT_COPY = {
     title: 'Ainda não fechou',
     body: 'Tentativa real conta como dado. Volte mais afiado no próximo giro.',
   },
+  validated_theory: {
+    title: 'Base validada',
+    body: 'A camada teórica foi registrada como estudo oficial do dia.',
+  },
   revealed_without_attempt: {
     title: 'Sem tentativa, sem validação',
     body: 'Intenção não conta. Sem tentar, o sistema não reconhece progresso real.',
+  },
+  explored_only: {
+    title: 'Exploração registrada',
+    body: 'Você abriu o conteúdo, mas ainda não houve validação oficial suficiente.',
   },
   speed_click: {
     title: 'Clique rápido demais',

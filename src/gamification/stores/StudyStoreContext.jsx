@@ -13,9 +13,16 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { CONTENT_ITEMS } from '../content/contentItems.js';
-import { getMockTodayMission, getAvailableContentForMission, getLocalDateString } from '../plan/dailyMissions.js';
-import { generateMissionItems } from '../plan/missionItems.js';
+import { getLocalDateString } from '../plan/dailyMissions.js';
+import { generateMissionItemsFromOfficialMission } from '../plan/missionItems.js';
+import {
+  ALGORITHM_PILOT_PROGRESS_EVENT,
+  generateDailyMission,
+  getAlgorithmMissionContentItems,
+  getMissionProgress,
+  getMissionSummaryStatus,
+  readAlgorithmPilotProgress,
+} from '../pilots/algorithmPilot.js';
 import {
   readTodayMission, writeTodayMission,
   readMissionItems, writeMissionItems,
@@ -27,12 +34,13 @@ const StudyStoreContext = createContext(null);
 
 // ─── INITIAL STATE ───────────────────────────────────────────────────────────
 
-/** @returns {{ missions: [], missionItems: [], loadingState: string }} */
+/** @returns {{ missions: [], missionItems: [], loadingState: string, contentItems: [] }} */
 function getInitialState() {
   return {
     missions: [],
     missionItems: [],
     loadingState: 'idle', // 'idle' | 'loading' | 'ready' | 'error' | 'empty'
+    contentItems: [],
   };
 }
 
@@ -45,53 +53,101 @@ export function StudyStoreProvider({ userId, children }) {
   const [state, setState] = useState(getInitialState);
   const initializedRef = useRef(false);
 
+  const buildTodayMissionState = useCallback((previousItems = []) => {
+    const progressSnapshot = readAlgorithmPilotProgress();
+    const baseMission = generateDailyMission(progressSnapshot);
+    const contentItems = getAlgorithmMissionContentItems(progressSnapshot);
+    const mission = {
+      ...baseMission,
+      date: getLocalDateString(),
+      targetValidations: baseMission.officialMissionItems?.length ?? 0,
+      targetBlocks: Math.max(1, Math.min(2, (baseMission.pendingActions?.length ?? 0) + (baseMission.primaryAction ? 1 : 0))),
+      summaryStatus: getMissionSummaryStatus(progressSnapshot),
+      missionProgressPercent: getMissionProgress(progressSnapshot).percent,
+    };
+    const missionItems = generateMissionItemsFromOfficialMission(mission, contentItems, previousItems);
+
+    return {
+      mission,
+      missionItems,
+      contentItems,
+    };
+  }, []);
+
   const loadTodayMission = useCallback(async (uid) => {
     if (!uid) return;
 
     setState((prev) => ({ ...prev, loadingState: 'loading' }));
 
     try {
-      // 1. Tenta recuperar do localStorage
       const cachedMission = readTodayMission();
       const cachedItems = readMissionItems();
       const today = getLocalDateString();
+      const previousItems = cachedMission && cachedMission.date === today ? cachedItems : [];
+      const { mission, missionItems, contentItems } = buildTodayMissionState(previousItems);
 
-      // Cache válido = missão de hoje já existe
-      if (cachedMission && cachedMission.date === today && cachedItems.length > 0) {
-        setState({
-          missions: [cachedMission],
-          missionItems: cachedItems,
-          loadingState: cachedItems.length > 0 ? 'ready' : 'empty',
-        });
-        return;
-      }
-
-      // 2. Gera nova missão do dia
-      // @backend-ready: substituir por api.get('/missions/today')
-      const mission = getMockTodayMission(uid);
-      const availableContent = getAvailableContentForMission();
-
-      if (availableContent.length === 0) {
-        setState({ missions: [mission], missionItems: [], loadingState: 'empty' });
-        return;
-      }
-
-      const items = generateMissionItems(mission, availableContent, []);
-
-      // 3. Persiste
       writeTodayMission(mission);
-      writeMissionItems(items);
+      writeMissionItems(missionItems);
 
       setState({
         missions: [mission],
-        missionItems: items,
-        loadingState: items.length > 0 ? 'ready' : 'empty',
+        missionItems,
+        contentItems,
+        loadingState: missionItems.length > 0 ? 'ready' : 'empty',
       });
     } catch (err) {
       console.error('[StudyStore] Erro ao carregar missão do dia:', err);
       setState((prev) => ({ ...prev, loadingState: 'error' }));
     }
-  }, []);
+  }, [buildTodayMissionState]);
+
+  const syncMissionFromPilot = useCallback(() => {
+    setState((prev) => {
+      try {
+        const previousItems = prev.missionItems ?? [];
+        const { mission, missionItems, contentItems } = buildTodayMissionState(previousItems);
+        writeTodayMission(mission);
+        writeMissionItems(missionItems);
+        return {
+          missions: [mission],
+          missionItems,
+          contentItems,
+          loadingState: missionItems.length > 0 ? 'ready' : 'empty',
+        };
+      } catch (err) {
+        console.error('[StudyStore] Erro ao sincronizar missão com piloto:', err);
+        return { ...prev, loadingState: 'error' };
+      }
+    });
+  }, [buildTodayMissionState]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handlePilotProgressChange = () => {
+      syncMissionFromPilot();
+    };
+    window.addEventListener(ALGORITHM_PILOT_PROGRESS_EVENT, handlePilotProgressChange);
+    return () => window.removeEventListener(ALGORITHM_PILOT_PROGRESS_EVENT, handlePilotProgressChange);
+  }, [syncMissionFromPilot]);
+
+  useEffect(() => {
+    if (!userId) {
+      initializedRef.current = false;
+      setState(getInitialState());
+    }
+  }, [userId]);
+
+  const contentItems = state.contentItems;
+
+  useEffect(() => {
+    if (!contentItems.length || state.missionItems.length === 0) return;
+    const hasMissingContent = state.missionItems.some(
+      (item) => !contentItems.find((contentItem) => contentItem.id === item.contentItemId),
+    );
+    if (hasMissingContent) {
+      syncMissionFromPilot();
+    }
+  }, [contentItems, state.missionItems, syncMissionFromPilot]);
 
   // Inicializa quando userId estiver disponível
   useEffect(() => {
@@ -131,11 +187,12 @@ export function StudyStoreProvider({ userId, children }) {
       missions: state.missions,
       missionItems: state.missionItems,
       loadingState: state.loadingState,
-      contentItems: CONTENT_ITEMS,
+      contentItems: state.contentItems,
       patchMissionItem,
       refreshMission,
+      syncMissionFromPilot,
     }),
-    [state, patchMissionItem, refreshMission],
+    [state, patchMissionItem, refreshMission, syncMissionFromPilot],
   );
 
   return (

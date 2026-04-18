@@ -16,6 +16,9 @@ import {
   getPrimaryRecommendedItem,
   getRecommendedNowItems,
 } from '../cycles/cycleEngine.js';
+import {
+  getAlgorithmMatrixMissionBank,
+} from './algorithmMatrixQuestionBank.js';
 
 export const ALGORITHM_PILOT_STORAGE_KEY = 'algoritmo-pilot-progress-v3';
 export const ALGORITHM_PILOT_PROGRESS_EVENT = 'algorithm-pilot-progress-changed';
@@ -326,6 +329,8 @@ const RESOURCE_ITEMS = [
     status: 'referenciado',
   },
 ];
+
+const MATRIX_MISSION_BANK = getAlgorithmMatrixMissionBank();
 
 const MOTHER_SUBJECTS = [
   {
@@ -815,34 +820,71 @@ export function getAlgorithmMissionCandidates(progressOverride) {
   };
 }
 
+function getMatrixMissionTemplateForAction(action) {
+  if (!action) return null;
+
+  if (action.layerType === 'practice') {
+    const writtenItems = MATRIX_MISSION_BANK.written;
+    const writtenIndex = action.cycle >= 6 ? 2 : action.cycle >= 5 ? 1 : 0;
+    return writtenItems[writtenIndex] ?? writtenItems[0] ?? null;
+  }
+
+  if (action.layerType === 'review') {
+    return MATRIX_MISSION_BANK.trueFalse[3] ?? MATRIX_MISSION_BANK.trueFalse[0] ?? null;
+  }
+
+  if (action.cycle >= 4) {
+    return MATRIX_MISSION_BANK.trueFalse[(action.order - 1) % MATRIX_MISSION_BANK.trueFalse.length] ?? null;
+  }
+
+  return MATRIX_MISSION_BANK.theory[(action.order - 1) % MATRIX_MISSION_BANK.theory.length] ?? null;
+}
+
 export function getAlgorithmMissionContentItems(progressOverride) {
   const { primaryAction, pendingActions, reinforcementActions } = getAlgorithmMissionCandidates(progressOverride);
   const allActions = [primaryAction, ...pendingActions, ...reinforcementActions].filter(Boolean);
 
-  return allActions.map((action) => ({
-    id: `alg-mission-${action.id}`,
-    subjectId: 'algoritmos-programacao',
-    moduleId: action.motherSubjectId ?? 'algoritmo-daily-mission',
-    kind: action.layerType === 'practice' ? 'assisted_question' : 'flashcard',
-    title: action.title,
-    front: action.layerType === 'practice' ? null : action.description,
-    back: action.layerType === 'practice' ? null : action.reason,
-    prompt: action.layerType === 'practice' ? action.description : null,
-    answerModel: action.reason,
-    mustIncludePoints: [],
-    difficulty: action.difficulty ?? 'medium',
-    xpProfileId: action.layerType === 'practice' ? 'assisted_medium' : 'flashcard_medium',
-    isActive: true,
-    missionMetadata: {
-      layerId: action.id,
-      motherSubjectId: action.motherSubjectId,
-      missionRole: action.missionRole,
-      generatedFrom: action.generatedFrom,
-      isOfficial: action.isOfficial,
-      priority: action.priority,
-      reason: action.reason,
-    },
-  }));
+  return allActions.map((action) => {
+    const template = getMatrixMissionTemplateForAction(action);
+    const interactionType = template?.interactionType ?? (action.layerType === 'practice' ? 'written' : 'theory');
+    const isWritten = interactionType === 'written';
+    const kind = isWritten ? 'assisted_question' : 'flashcard';
+
+    return {
+      id: `alg-mission-${action.id}`,
+      subjectId: 'algoritmos-programacao',
+      moduleId: action.motherSubjectId ?? 'algoritmo-daily-mission',
+      kind,
+      interactionType,
+      validationMode: template?.validationMode ?? (isWritten ? 'self_assessed' : 'auto'),
+      sourceRef: template?.sourceRef ?? null,
+      title: template?.title ?? action.title,
+      front: !isWritten ? (template?.statement ?? action.description) : null,
+      back: !isWritten ? (template?.explanation ?? action.reason) : null,
+      prompt: isWritten ? (template?.prompt ?? action.description) : null,
+      answerModel: template?.answerModel ?? action.reason,
+      mustIncludePoints: template?.mustIncludePoints ?? [],
+      options: template?.options ?? [],
+      correctOptionId: template?.correctOptionId ?? null,
+      explanationsByOption: template?.explanationsByOption ?? null,
+      trueFalseAnswer: template?.trueFalseAnswer ?? null,
+      difficulty: template?.difficulty ?? action.difficulty ?? 'medium',
+      xpProfileId: template?.xpProfileId ?? (isWritten ? 'assisted_medium' : 'flashcard_medium'),
+      isActive: true,
+      missionMetadata: {
+        layerId: action.id,
+        motherSubjectId: action.motherSubjectId,
+        missionRole: action.missionRole,
+        generatedFrom: action.generatedFrom,
+        isOfficial: action.isOfficial,
+        priority: action.priority,
+        reason: action.reason,
+        sourceDisciplineId: 'algoritmos-programacao',
+        validationType: interactionType,
+        requiresValidation: true,
+      },
+    };
+  });
 }
 
 export function completeAlgorithmMissionLayer(layerId, progressOverride) {

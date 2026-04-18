@@ -17,6 +17,7 @@ import CronoLabMissionPanel from '../gamification/ui/CronoLabMissionPanel.jsx';
 import CronoLabDebugControls from '../gamification/ui/CronoLabDebugControls.jsx';
 import CronoLabEntrepreneurshipPilot from '../gamification/ui/CronoLabEntrepreneurshipPilot.jsx';
 import CronoLabAlgorithmPilot from '../gamification/ui/CronoLabAlgorithmPilot.jsx';
+import CronoLabSoftwareEngineeringPilot from '../gamification/ui/CronoLabSoftwareEngineeringPilot.jsx';
 import DisciplineCatalogPage from '../gamification/ui/DisciplineCatalogPage.jsx';
 import {
   CRONO_LAB_DEFAULT_SECTION,
@@ -562,6 +563,10 @@ export default function CronoLab() {
 
       if (slug === 'empreendedorismo') {
         return <CronoLabEntrepreneurshipPilot />;
+      }
+
+      if (slug === 'engenharia-software') {
+        return <CronoLabSoftwareEngineeringPilot />;
       }
 
       return <Navigate to="/crono-lab/disciplinas" replace />;
