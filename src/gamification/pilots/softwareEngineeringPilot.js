@@ -15,7 +15,7 @@ import {
   topics,
 } from '../../data/engenharia-software.js';
 
-export const SOFTWARE_ENGINEERING_PILOT_STORAGE_KEY = 'engsoftware-study-plan-progress-v3';
+export const SOFTWARE_ENGINEERING_PILOT_STORAGE_KEY = 'engsoftware-study-plan-progress-v2';
 
 const DIFFICULTY_META = {
   facil: {
@@ -447,6 +447,157 @@ function getOverviewInsights({ nextAction, statusMeta, compositionChart, current
   };
 }
 
+function getTopKpis({ metrics, currentFocus, overdueTasks, pendingTodayTasks }) {
+  return [
+    {
+      id: 'progress',
+      label: 'Progresso',
+      value: `${metrics.progressPercent}%`,
+      helper: `${metrics.completedTasks}/${metrics.totalTasks} tarefas concluídas`,
+    },
+    {
+      id: 'focus',
+      label: 'Assunto atual',
+      value: currentFocus.label,
+      helper: currentFocus.helper,
+    },
+    {
+      id: 'pending',
+      label: 'O que falta',
+      value: overdueTasks.length > 0 ? `${overdueTasks.length} em atraso` : pendingTodayTasks.length > 0 ? `${pendingTodayTasks.length} de hoje` : 'Em dia',
+      helper: overdueTasks.length > 0
+        ? 'Há itens anteriores competindo com o avanço da disciplina.'
+        : pendingTodayTasks.length > 0
+          ? 'Restam itens do ciclo atual antes de fechar o dia.'
+          : 'Sem acúmulo importante neste momento.',
+    },
+  ];
+}
+
+function getBottleneckTopics({ recovery, currentFocus }) {
+  const items = [...(recovery.items ?? []), ...(recovery.pendingTodayPreview ?? [])];
+  const grouped = new Map();
+
+  items.forEach((item) => {
+    const topic = item.topic ?? currentFocus.label;
+    grouped.set(topic, (grouped.get(topic) ?? 0) + 1);
+  });
+
+  const ranked = [...grouped.entries()]
+    .map(([topic, count]) => ({
+      id: topic,
+      topic,
+      count,
+      helper: count > 1 ? `${count} pontos puxando atenção agora.` : 'Esse assunto ainda pede fechamento.',
+    }))
+    .sort((left, right) => right.count - left.count);
+
+  return ranked.length > 0
+    ? ranked.slice(0, 3)
+    : [{
+        id: currentFocus.label,
+        topic: currentFocus.label,
+        count: 1,
+        helper: 'Sem gargalo explícito; este é o foco mais próximo da disciplina.',
+      }];
+}
+
+function getDashboardData({
+  subject,
+  overview,
+  nextAction,
+  recovery,
+  progressChart,
+  compositionChart,
+  insights,
+  topKpis,
+  bottlenecks,
+}) {
+  return {
+    header: {
+      title: subject.title,
+      status: overview.hero.statusLabel,
+      subtitle: overview.subtitle,
+      cta: {
+        label: 'Ir para conteúdos',
+        targetTab: 'contents',
+      },
+    },
+    firstFold: {
+      title: 'Primeira dobra',
+      hero: {
+        eyebrow: 'seu próximo passo',
+        title: nextAction.title,
+        summary: nextAction.reason,
+        status: overview.hero.statusLabel,
+        statusTone: overview.hero.statusTone,
+        topKpis,
+        nextAction: {
+          title: nextAction.items[0]?.text ?? overview.nextActionLabel,
+          summary: nextAction.ctaLabel,
+          impact: nextAction.items[0]?.topic ?? overview.currentTopicLabel,
+          items: nextAction.items,
+        },
+        cta: {
+          label: 'Continuar pelos conteúdos',
+          targetTab: 'contents',
+        },
+      },
+      primaryChart: progressChart,
+    },
+    contextGrid: {
+      title: 'Como eu estou',
+      blocks: [
+        {
+          id: 'composition',
+          type: 'composition',
+          title: 'Composição do progresso',
+          description: 'Resumo visual do que já foi concluído e do que ainda está aberto.',
+          data: compositionChart,
+        },
+        {
+          id: 'cadence',
+          type: 'cadence',
+          title: 'Cadência da disciplina',
+          description: overview.statusCopy,
+          data: {
+            label: overview.hero.statusLabel,
+            body: overview.hero.commandLine,
+            helper: overview.progressLogicSummary,
+          },
+        },
+        {
+          id: 'bottleneck',
+          type: 'bottleneck',
+          title: 'Travas por assunto',
+          description: 'Assuntos que ainda estão segurando o avanço do plano.',
+          data: bottlenecks,
+        },
+      ],
+    },
+    secondarySections: [
+      {
+        id: 'pending',
+        type: 'pending',
+        title: 'Itens em atraso',
+        data: recovery,
+      },
+      {
+        id: 'timeline',
+        type: 'timeline',
+        title: 'Linha do plano',
+        data: progressChart,
+      },
+      {
+        id: 'support',
+        type: 'support',
+        title: 'Contexto extra',
+        data: insights,
+      },
+    ],
+  };
+}
+
 function inferQuestionDifficulty(question) {
   if (question.tipo === 'Fixacao') return 'facil';
   if (question.tipo === 'Comparacao') return 'medio';
@@ -593,6 +744,12 @@ export function getSoftwareEngineeringPilotData({ shift = 'noturno-adele' } = {}
     currentFocus,
     shift,
   });
+  const topKpis = getTopKpis({
+    metrics,
+    currentFocus,
+    overdueTasks,
+    pendingTodayTasks,
+  });
 
   return {
     subject: {
@@ -661,6 +818,15 @@ export function getSoftwareEngineeringPilotData({ shift = 'noturno-adele' } = {}
       items: overdueTasks.slice(0, 4),
       pendingTodayPreview: pendingTodayTasks.slice(0, 3),
     },
+    planState: {
+      groups,
+      overdueTasks,
+      todayTasks,
+      pendingTodayTasks,
+      metrics,
+      statusMeta,
+      currentFocus,
+    },
     contents: {
       eyebrow: 'Conteúdos',
       title: 'Assuntos organizados por bloco-mãe',
@@ -691,5 +857,51 @@ export function getSoftwareEngineeringPilotData({ shift = 'noturno-adele' } = {}
       blocks: exerciseBlocks,
       difficulties: DIFFICULTY_META,
     },
+    dashboardData: getDashboardData({
+      subject: {
+        title: 'Introdução à Engenharia de Software',
+      },
+      overview: {
+        ...{
+          title: 'Introdução à Engenharia de Software',
+          subtitle: 'Visão geral enxuta para responder onde você está, o que vem agora e qual assunto está puxando a disciplina.',
+        },
+        hero: {
+          statusLabel: statusMeta.label,
+          statusTone: statusMeta.tone,
+          commandLine: statusMeta.commandLine,
+        },
+        statusCopy: STATUS_COPY[status],
+        progressLogicSummary: 'A progressão oficial anda por plano, depois por conteúdos e então por exercícios em modos separados de treino.',
+        nextActionLabel: nextAction.items[0]?.text ?? 'Base revisada. Sem ação crítica imediata.',
+        currentTopicLabel: currentFocus.label,
+      },
+      nextAction,
+      recovery: {
+        eyebrow: 'itens em atraso',
+        title: overdueTasks.length > 0 ? 'O que ainda precisa de atenção' : 'Tudo certo por aqui',
+        description: overdueTasks.length > 0
+          ? 'Esses itens ainda seguram o avanço da disciplina e merecem prioridade.'
+          : pendingTodayTasks.length > 0
+            ? 'Não há atraso antigo, mas ainda existem itens deste ciclo para concluir.'
+            : 'Nenhum atraso importante no momento.',
+        isActive: overdueTasks.length > 0,
+        overdueCount: overdueTasks.length,
+        pendingTodayCount: pendingTodayTasks.length,
+        items: overdueTasks.slice(0, 4),
+        pendingTodayPreview: pendingTodayTasks.slice(0, 3),
+      },
+      progressChart,
+      compositionChart,
+      insights,
+      topKpis,
+      bottlenecks: getBottleneckTopics({
+        recovery: {
+          items: overdueTasks.slice(0, 4),
+          pendingTodayPreview: pendingTodayTasks.slice(0, 3),
+        },
+        currentFocus,
+      }),
+    }),
   };
 }
