@@ -1,45 +1,45 @@
-const SEGMENT_CLASS_MAP = {
-  success: 'border-emerald-400/16 bg-emerald-500/[0.08] text-emerald-300 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-700',
-  info: 'border-cyan-400/16 bg-cyan-500/[0.08] text-cyan-300 dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-700',
-  warning: 'border-amber-400/16 bg-amber-500/[0.08] text-amber-300 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-700',
-  neutral: 'border-white/[0.08] bg-white/[0.03] text-zinc-400 dark:border-stone-300 dark:bg-white dark:text-stone-500',
-};
-
 export default function PrimaryProgressChartCard({ chart, onOpenPanel }) {
   const total = chart.segments.reduce((sum, segment) => sum + segment.value, 0) || 1;
+  const leadingSegments = [...chart.segments].sort((a, b) => b.value - a.value).slice(0, 3);
 
   return (
-    <article className="rounded-[28px] border border-white/[0.06] bg-white/[0.03] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white sm:p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-xl space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-stone-500">
-            gráfico principal
+    <article className="flex h-full flex-col rounded-lg border border-cyan-400/[0.12] bg-[#101012] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.24)] backdrop-blur-xl dark:border-stone-300 dark:bg-white dark:shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-6 lg:p-7">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-xl">
+          <p className="text-xs font-semibold text-cyan-300 dark:text-cyan-700">
+            progresso
           </p>
-          <h3 className="text-2xl font-bold tracking-tight text-white dark:text-stone-950">
+          <h3 className="mt-2 text-3xl font-bold leading-tight text-white dark:text-stone-950">
             {chart.title}
           </h3>
         </div>
-        <button
-          type="button"
-          onClick={() => onOpenPanel?.('progress')}
-          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-600 dark:hover:text-stone-900"
-          aria-expanded="false"
-        >
-          Ver detalhes
-        </button>
+        <div className="flex items-start gap-4 sm:flex-col sm:items-end sm:gap-3">
+          <div className="text-left sm:text-right">
+            <p className="text-5xl font-black leading-none text-white dark:text-stone-950">{chart.centerValue}</p>
+            <p className="mt-1 text-sm font-semibold text-zinc-300 dark:text-stone-700">{chart.centerLabel}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onOpenPanel?.('progress')}
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 dark:hover:text-stone-950"
+            aria-expanded="false"
+          >
+            Detalhes
+          </button>
+        </div>
       </div>
 
-      <div className="mt-5 space-y-4">
-        <div className="overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.03] p-1.5 dark:border-stone-300 dark:bg-stone-100">
-          <div className="flex h-10 gap-1.5 overflow-hidden rounded-full">
+      <div className="mt-8 flex flex-1 flex-col justify-end space-y-6">
+        <div className="overflow-hidden rounded-lg border border-white/[0.08] bg-white/[0.04] p-1.5 dark:border-stone-300 dark:bg-stone-100">
+          <div className="flex h-20 gap-1.5 overflow-hidden rounded-md">
             {chart.segments.map((segment) => (
               <div
                 key={segment.id}
-                className="h-full rounded-full"
+                className="h-full rounded-md transition-[width] duration-500"
                 style={{
                   width: `${Math.max((segment.value / total) * 100, 6)}%`,
                   backgroundColor: segment.color,
-                  boxShadow: `0 0 18px ${segment.color}44`,
+                  boxShadow: `0 0 24px ${segment.color}38`,
                 }}
                 aria-label={`${segment.label}: ${segment.value}`}
               />
@@ -47,15 +47,15 @@ export default function PrimaryProgressChartCard({ chart, onOpenPanel }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-8 gap-y-6 pt-6 sm:grid-cols-3">
-          {chart.segments.map((segment) => {
+        <div className="grid gap-3 border-t border-white/[0.08] pt-5 sm:grid-cols-3 dark:border-stone-200">
+          {leadingSegments.map((segment) => {
             return (
-              <div key={segment.id} className="flex flex-col gap-1.5">
+              <div key={segment.id} className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: segment.color, boxShadow: `0 0 12px ${segment.color}66` }} />
-                  <p className="text-[13px] font-semibold text-zinc-400 dark:text-stone-500">{segment.label}</p>
+                  <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: segment.color, boxShadow: `0 0 12px ${segment.color}66` }} />
+                  <p className="truncate text-sm font-semibold text-zinc-300 dark:text-stone-700">{segment.label}</p>
                 </div>
-                <p className="text-[2.5rem] font-bold leading-none tracking-tight text-white tabular-nums dark:text-stone-950">
+                <p className="mt-2 text-4xl font-black leading-none text-white tabular-nums dark:text-stone-950">
                   {segment.value}
                 </p>
               </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import ProgressBar from '../../components/ProgressBar.jsx';
+import { getSubjectById } from '../content/subjects.js';
 import { useMissionEngine } from '../runtime/useMissionEngine.js';
 import { useProgressStore } from '../stores/ProgressStoreContext.jsx';
 import MissionItemCard from './MissionItemCard.jsx';
@@ -8,41 +9,440 @@ import FeedbackToast from './FeedbackToast.jsx';
 const STATUS_META = {
   completed: {
     label: 'Missão limpa',
-    badge: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200',
-    helper: 'Tudo que era oficial para hoje foi resolvido.',
+    badge: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-100',
+    helper: 'Tudo que importava hoje já foi fechado.',
   },
   in_progress: {
     label: 'Em curso',
-    badge: 'border-cyan-400/20 bg-cyan-500/10 text-cyan-200',
-    helper: 'A missão está reagindo ao que você conclui na trilha oficial.',
+    badge: 'border-cyan-400/20 bg-cyan-500/10 text-cyan-100',
+    helper: 'A trilha já está em movimento.',
   },
   pending: {
     label: 'Aguardando ação',
-    badge: 'border-amber-400/20 bg-amber-500/10 text-amber-200',
-    helper: 'Comece pela ação principal para avançar sem bagunçar a trilha.',
+    badge: 'border-amber-400/20 bg-amber-500/10 text-amber-100',
+    helper: 'Comece pela primeira frente do dia.',
   },
   failed: {
     label: 'Sem missão oficial',
-    badge: 'border-white/10 bg-white/5 text-white/60',
-    helper: 'Hoje não há camada oficial aberta nesta disciplina piloto.',
+    badge: 'border-white/10 bg-white/[0.04] text-zinc-300',
+    helper: 'Hoje não há frente oficial aberta.',
   },
 };
 
-function SectionHeader({ eyebrow, title, subtitle }) {
+const PRIORITY_META = {
+  now: {
+    label: 'agora',
+    badge: 'border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100',
+  },
+  today: {
+    label: 'hoje',
+    badge: 'border-cyan-400/20 bg-cyan-500/10 text-cyan-100',
+  },
+  review: {
+    label: 'revisão',
+    badge: 'border-amber-400/20 bg-amber-500/10 text-amber-100',
+  },
+  done: {
+    label: 'feito',
+    badge: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-100',
+  },
+};
+
+const ROLE_LABEL = {
+  primary: 'principal',
+  pending: 'sugerida',
+  reinforcement: 'relacionado',
+};
+
+const MOTHER_SUBJECT_LABELS = {
+  'ms-vetores': 'Vetores',
+  'ms-matrizes': 'Matrizes',
+  'ms-revisao-simulado': 'Consolidação e Simulado',
+};
+
+function formatLabel(value) {
+  if (!value) return 'Missão';
+
+  const subject = getSubjectById(value);
+  if (subject?.title) return subject.title;
+  if (MOTHER_SUBJECT_LABELS[value]) return MOTHER_SUBJECT_LABELS[value];
+
+  return value
+    .replace(/^ms-/, '')
+    .replaceAll('-', ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function sortMissionItems(items) {
+  return [...items].sort((a, b) => {
+    const priorityA = a.priority ?? a.order ?? Number.MAX_SAFE_INTEGER;
+    const priorityB = b.priority ?? b.order ?? Number.MAX_SAFE_INTEGER;
+    if (priorityA !== priorityB) return priorityA - priorityB;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
+}
+
+function getMissionItemTitle(item, contentMap) {
+  return contentMap[item.contentItemId]?.title ?? item.layerTitle ?? item.contentItemId;
+}
+
+function getDisciplineTitle(items, useMotherSubjectBuckets) {
+  const [firstItem] = items;
+  if (!firstItem) return 'Missão';
+  return formatLabel(
+    useMotherSubjectBuckets
+      ? (firstItem.motherSubjectId ?? firstItem.sourceDisciplineId)
+      : (firstItem.sourceDisciplineId ?? firstItem.motherSubjectId),
+  );
+}
+
+function getBucketStatusLine(bucket) {
+  if (bucket.primaryItem && bucket.primaryItem.status !== 'completed') {
+    return bucket.primaryItem.reason ?? 'Esta é a frente que move o dia agora.';
+  }
+  if (bucket.officialRemainingCount > 0) {
+    return `${bucket.officialRemainingCount} item(ns) oficial(is) ainda pedem validação.`;
+  }
+  if (bucket.relatedItems.length > 0) {
+    return 'Restou apenas revisão complementar.';
+  }
+  return 'Frente limpa por hoje.';
+}
+
+function getBucketReviewCue(bucket) {
+  const errorItem = bucket.items.find((item) => ['validated_partial', 'validated_wrong'].includes(item.validationStatus));
+  if (errorItem?.reason) return errorItem.reason;
+  if (bucket.relatedItems[0]?.reason) return bucket.relatedItems[0].reason;
+  return null;
+}
+
+function getBucketPriorityTone(bucket) {
+  if (bucket.primaryItem && bucket.primaryItem.status !== 'completed') return PRIORITY_META.now;
+  if (bucket.officialRemainingCount > 0) return PRIORITY_META.today;
+  if (bucket.relatedItems.length > 0) return PRIORITY_META.review;
+  return PRIORITY_META.done;
+}
+
+function buildDisciplineBuckets(todayItems) {
+  const sourceDisciplineIds = new Set(todayItems.map((item) => item.sourceDisciplineId).filter(Boolean));
+  const motherSubjectIds = new Set(todayItems.map((item) => item.motherSubjectId).filter(Boolean));
+  const useMotherSubjectBuckets = sourceDisciplineIds.size <= 1 && motherSubjectIds.size > 1;
+  const grouped = new Map();
+
+  for (const item of sortMissionItems(todayItems)) {
+    const key = useMotherSubjectBuckets && item.motherSubjectId
+      ? item.motherSubjectId
+      : item.sourceDisciplineId ?? item.motherSubjectId ?? 'mission-hub';
+
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(item);
+  }
+
+  return [...grouped.entries()]
+    .map(([key, items]) => {
+      const itemIds = new Set();
+      const suggestedItems = [];
+      const relatedItems = [];
+      let primaryItem = null;
+      let completedOfficialCount = 0;
+      let officialRemainingCount = 0;
+      let totalOfficialCount = 0;
+      let nextActionItem = null;
+
+      for (const item of items) {
+        itemIds.add(item.id);
+
+        if (!primaryItem && item.missionRole === 'primary') {
+          primaryItem = item;
+        }
+
+        if (item.isOfficial) {
+          totalOfficialCount += 1;
+          if (item.status === 'completed') {
+            completedOfficialCount += 1;
+          } else {
+            officialRemainingCount += 1;
+          }
+          if (suggestedItems.length < 5) {
+            suggestedItems.push(item);
+          }
+        }
+
+        if ((!item.isOfficial || item.missionRole === 'reinforcement') && relatedItems.length < 2) {
+          relatedItems.push(item);
+        }
+
+        if (!nextActionItem && item.status !== 'completed') {
+          nextActionItem = item;
+        }
+      }
+
+      const resolvedNextActionItem = primaryItem
+        ?? nextActionItem
+        ?? items[0]
+        ?? null;
+      const progressPercent = totalOfficialCount > 0
+        ? Math.round((completedOfficialCount / totalOfficialCount) * 100)
+        : 100;
+
+      const bucket = {
+        id: key,
+        title: getDisciplineTitle(items, useMotherSubjectBuckets),
+        items,
+        itemIds,
+        primaryItem,
+        suggestedItems,
+        relatedItems,
+        nextActionItem: resolvedNextActionItem,
+        completedOfficialCount,
+        officialRemainingCount,
+        totalOfficialCount,
+        progressPercent,
+      };
+
+      return {
+        ...bucket,
+        previewCountLabel: `${suggestedItems.length} questão${suggestedItems.length === 1 ? '' : 'ões'} · ${relatedItems.length} conteúdo${relatedItems.length === 1 ? '' : 's'}`,
+        statusLine: getBucketStatusLine(bucket),
+        reviewCue: getBucketReviewCue(bucket),
+        priorityTone: getBucketPriorityTone(bucket),
+      };
+    })
+    .sort((a, b) => {
+      const rankA = a.nextActionItem?.priority ?? a.nextActionItem?.order ?? Number.MAX_SAFE_INTEGER;
+      const rankB = b.nextActionItem?.priority ?? b.nextActionItem?.order ?? Number.MAX_SAFE_INTEGER;
+      if (rankA !== rankB) return rankA - rankB;
+      return a.title.localeCompare(b.title, 'pt-BR');
+    });
+}
+
+function MissionPreviewButton({ item, content, index, onOpen }) {
+  const tone = item.missionRole === 'primary'
+    ? 'border-fuchsia-400/20 bg-fuchsia-500/[0.08] text-fuchsia-100'
+    : item.status === 'completed'
+      ? 'border-emerald-400/20 bg-emerald-500/[0.06] text-emerald-100'
+      : 'border-white/10 bg-white/[0.03] text-zinc-100';
+
   return (
-    <div>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
-        {eyebrow}
-      </p>
-      <h3 className="mt-2 text-base font-semibold tracking-tight text-white lg:text-lg">
-        {title}
-      </h3>
-      {subtitle ? <p className="mt-1 text-xs leading-relaxed text-zinc-500">{subtitle}</p> : null}
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-left transition-colors duration-200 hover:border-white/16 hover:bg-white/[0.05] ${tone}`}
+    >
+      <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[10px] font-mono font-bold text-zinc-200">
+        {index + 1}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold leading-relaxed text-white">
+          {content?.title ?? item.layerTitle ?? item.contentItemId}
+        </span>
+        <span className="mt-1 block text-[11px] uppercase tracking-[0.16em] text-zinc-300">
+          {ROLE_LABEL[item.missionRole] ?? 'missão'}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function DisciplineCard({
+  bucket,
+  index,
+  isOpen,
+  activeMissionItem,
+  revealState,
+  isCoolingDown,
+  contentMap,
+  onToggle,
+  onOpenMissionItem,
+  onAnswer,
+  onReveal,
+  onClose,
+}) {
+  const activeItem = activeMissionItem && bucket.itemIds.has(activeMissionItem.id)
+    ? activeMissionItem
+    : null;
+  const activeContent = activeItem ? contentMap[activeItem.contentItemId] : null;
+  const cardTone = index === 0
+    ? 'border-fuchsia-400/22 bg-[linear-gradient(180deg,rgba(15,10,24,0.95),rgba(11,11,19,0.9))] shadow-[0_0_40px_rgba(217,70,239,0.08)]'
+    : 'border-white/[0.08] bg-[#0A0A12]/82';
+
+  return (
+    <div className={`overflow-hidden rounded-[30px] border backdrop-blur-xl transition-all duration-300 ${cardTone}`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left lg:px-6"
+        aria-expanded={isOpen}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.18em] ${bucket.priorityTone.badge}`}>
+              {bucket.priorityTone.label}
+            </span>
+            {index === 0 ? (
+              <span className="rounded-full border border-white/12 bg-white/[0.04] px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-200">
+                primeira frente
+              </span>
+            ) : null}
+          </div>
+
+          <h3 className="mt-3 text-lg font-semibold tracking-tight text-white lg:text-[22px]">
+            {bucket.title}
+          </h3>
+          <p className="mt-1 text-sm text-zinc-200">
+            {bucket.statusLine}
+          </p>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-zinc-300">
+            <span>{bucket.previewCountLabel}</span>
+            <span>{bucket.completedOfficialCount}/{bucket.totalOfficialCount} oficial</span>
+          </div>
+
+          <div className="mt-3 max-w-md">
+            <ProgressBar value={bucket.progressPercent} color={index === 0 ? 'rose' : 'blue'} />
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3 pt-0.5">
+          {bucket.nextActionItem ? (
+            <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-200 sm:inline-flex">
+              {bucket.nextActionItem.status === 'completed' ? 'concluído' : 'abrir missão'}
+            </span>
+          ) : null}
+          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm text-zinc-200 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+            ▾
+          </span>
+        </div>
+      </button>
+
+      {isOpen ? (
+        <div className="border-t border-white/[0.08] px-5 py-5 lg:px-6 lg:py-6 animate-in fade-in duration-300">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
+            <div className="space-y-4">
+              <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-300">
+                      Próxima ação
+                    </p>
+                    <p className="mt-2 text-base font-semibold leading-relaxed text-white">
+                      {bucket.nextActionItem ? getMissionItemTitle(bucket.nextActionItem, contentMap) : 'Sem ação aberta'}
+                    </p>
+                    <p className="mt-1 text-sm text-zinc-300">
+                      {bucket.nextActionItem?.reason ?? 'Abra a frente mais útil e siga.'}
+                    </p>
+                  </div>
+                  {bucket.nextActionItem ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenMissionItem(bucket.nextActionItem)}
+                      className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.18em] text-cyan-100 transition-colors hover:border-cyan-300/30 hover:bg-cyan-500/14"
+                    >
+                      {bucket.nextActionItem.status === 'completed' ? 'reabrir foco' : 'abrir agora'}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              {bucket.suggestedItems.length > 0 ? (
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
+                      Questões sugeridas
+                    </p>
+                    <p className="mt-1 text-sm text-zinc-300">
+                      Só o essencial para avançar nesta frente.
+                    </p>
+                  </div>
+                  <div className="grid gap-3">
+                    {bucket.suggestedItems.map((item, itemIndex) => (
+                      <MissionPreviewButton
+                        key={item.id}
+                        item={item}
+                        content={contentMap[item.contentItemId]}
+                        index={itemIndex}
+                        onOpen={() => onOpenMissionItem(item)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {activeItem && activeContent ? (
+                <MissionItemCard
+                  item={activeItem}
+                  content={activeContent}
+                  isActive
+                  isRevealed={revealState === 'revealed'}
+                  isCoolingDown={isCoolingDown}
+                  onOpen={() => onOpenMissionItem(activeItem)}
+                  onReveal={onReveal}
+                  onAnswer={onAnswer}
+                  onClose={onClose}
+                />
+              ) : null}
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
+                  Conteúdos relacionados
+                </p>
+                {bucket.relatedItems.length > 0 ? (
+                  <div className="mt-3 space-y-3">
+                    {bucket.relatedItems.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onOpenMissionItem(item)}
+                        className="flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition-colors duration-200 hover:border-white/16 hover:bg-white/[0.05]"
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold leading-relaxed text-white">
+                            {getMissionItemTitle(item, contentMap)}
+                          </span>
+                          <span className="mt-1 block text-xs text-zinc-300">
+                            {item.reason ?? 'Conteúdo complementar do dia.'}
+                          </span>
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-200">
+                          abrir
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-zinc-300">
+                    Nada além do núcleo principal nesta frente.
+                  </p>
+                )}
+              </div>
+
+              {bucket.reviewCue ? (
+                <div className="rounded-[26px] border border-amber-400/16 bg-amber-500/[0.05] p-4">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-200">
+                    Cue de revisão
+                  </p>
+                  <p className="mt-2 text-sm text-amber-50/90">
+                    {bucket.reviewCue}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-export default function CronoLabMissionPanel({ todayMission, todayItems, contentItems, loadingState }) {
+export default function CronoLabMissionPanel({
+  todayMission,
+  todayItems,
+  contentItems,
+  loadingState,
+  embedded = false,
+}) {
   const {
     activeMissionItem,
     activeContentItem,
@@ -53,98 +453,48 @@ export default function CronoLabMissionPanel({ todayMission, todayItems, content
     resolveAttempt,
     closeMissionItem,
   } = useMissionEngine();
-  const {
-    todayProgress,
-    isCleanDayNow,
-    backlogState,
-    userProgress,
-    streakState,
-  } = useProgressStore();
+  const { todayProgress, userProgress } = useProgressStore();
   const [feedback, setFeedback] = useState(null);
+  const [openBucketId, setOpenBucketId] = useState();
 
   const contentMap = useMemo(
     () => Object.fromEntries(contentItems.map((item) => [item.id, item])),
     [contentItems],
   );
 
-  const primaryItem = useMemo(
-    () => todayItems.find((item) => item.missionRole === 'primary') ?? null,
-    [todayItems],
-  );
-  const pendingItems = useMemo(
-    () => todayItems.filter((item) => item.missionRole === 'pending'),
-    [todayItems],
-  );
-  const reinforcementItems = useMemo(
-    () => todayItems.filter((item) => item.missionRole === 'reinforcement'),
+  const disciplineBuckets = useMemo(
+    () => buildDisciplineBuckets(todayItems),
     [todayItems],
   );
 
   const statusMeta = STATUS_META[todayMission?.summaryStatus] ?? STATUS_META.pending;
-  const missionPercent = userProgress?.todayProgressPercent ?? todayMission?.missionProgressPercent ?? todayProgress?.percent ?? 0;
-  const completedOfficialCount = userProgress?.officialCompletedToday ?? todayMission?.completedMissionItems?.length ?? todayItems.filter((item) => item.isOfficial && item.isValidated).length;
+  const progressPercent = userProgress?.todayProgressPercent ?? todayMission?.missionProgressPercent ?? todayProgress?.percent ?? 0;
+  const completedOfficialCount = todayMission?.completedMissionItems?.length ?? todayItems.filter((item) => item.isOfficial && item.status === 'completed').length;
   const officialCount = todayMission?.officialMissionItems?.length ?? todayItems.filter((item) => item.isOfficial).length;
-  const partialCount = todayItems.filter((item) => item.validationStatus === 'validated_partial').length;
-  const wrongCount = todayItems.filter((item) => item.validationStatus === 'validated_wrong').length;
-  const revealOnlyCount = todayItems.filter((item) => item.validationStatus === 'revealed_without_attempt').length;
-  const todayState = userProgress?.todayState ?? 'idle';
-  const streakStatus = streakState?.streakStatus ?? 'active';
-  const reinforcementPendingCount = backlogState?.reinforcementPendingCount ?? 0;
-  const stateLabel = todayState.replaceAll('_', ' ');
-  const streakLabel = streakStatus.replaceAll('_', ' ');
-  const backlogCount = backlogState?.pendingMissionItems ?? backlogState?.totalDebtItems ?? 0;
-  const feedbackStateHelper = todayState === 'clean'
-    ? 'Dia limpo. Perímetro seguro.'
-    : todayState === 'debt'
-      ? 'Pendência aberta. Isso volta como custo.'
-      : todayState === 'reinforcement_pending'
-        ? 'Erro útil registrado. Reforço necessário.'
-        : todayState === 'in_progress'
-          ? 'Execução em curso. Mantenha a linha.'
-          : 'Sem validação real suficiente ainda.';
 
-  const feedbackCopy = feedback ? {
-    validation_success: 'Execução validada. Base consolidada.',
-    validation_partial: 'Erro útil. Ajuste a rota.',
-    validation_failed: 'Tentativa registrada. Ainda não fechou.',
-    revealed_without_attempt: 'Sem tentativa, sem reconhecimento sistêmico.',
-    speed_click: 'Clique rápido demais. O Crono não registra chute.',
-    mission_clean: 'Dia limpo. Perímetro seguro.',
-    backlog_cleared: 'Acumulado zerado. Terreno recuperado.',
-    debt_opened: 'Ficou aberto. Isso volta como custo.',
-    streak_saved: 'Ofensiva mantida por validação real.',
-    streak_at_risk: 'Ofensiva em risco. Falta validação real hoje.',
-  }[feedback.eventType] ?? feedbackStateHelper : feedbackStateHelper;
+  useEffect(() => {
+    if (!disciplineBuckets.length) {
+      setOpenBucketId(null);
+      return;
+    }
 
-  const progressTone = todayState === 'clean'
-    ? 'text-emerald-200'
-    : todayState === 'debt'
-      ? 'text-rose-200'
-      : todayState === 'reinforcement_pending'
-        ? 'text-amber-200'
-        : 'text-cyan-200';
+    if (activeMissionItem) {
+      const activeBucket = disciplineBuckets.find((bucket) => bucket.itemIds.has(activeMissionItem.id));
+      if (activeBucket && activeBucket.id !== openBucketId) {
+        setOpenBucketId(activeBucket.id);
+        return;
+      }
+    }
 
-  const progressBadgeTone = todayState === 'clean'
-    ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
-    : todayState === 'debt'
-      ? 'border-rose-400/20 bg-rose-500/10 text-rose-200'
-      : todayState === 'reinforcement_pending'
-        ? 'border-amber-400/20 bg-amber-500/10 text-amber-200'
-        : 'border-cyan-400/20 bg-cyan-500/10 text-cyan-200';
+    if (openBucketId === undefined) {
+      setOpenBucketId(disciplineBuckets[0].id);
+      return;
+    }
 
-  const missionBarColor = todayState === 'clean' ? 'emerald' : todayState === 'debt' ? 'red' : 'blue';
-
-  const handleAnswer = (payload) => {
-    const result = resolveAttempt(payload);
-    if (!result) return;
-    setFeedback(result);
-  };
-
-  const progressBarValue = missionPercent;
-  const xpToday = userProgress?.xpToday ?? 0;
-  const validationsToday = todayProgress?.validationsToday ?? 0;
-  const currentStreak = streakState?.currentStreak ?? 0;
-  const backlogSeverity = backlogState?.debtSeverity?.replaceAll('_', ' ') ?? 'none';
+    if (openBucketId && !disciplineBuckets.some((bucket) => bucket.id === openBucketId)) {
+      setOpenBucketId(disciplineBuckets[0].id);
+    }
+  }, [disciplineBuckets, activeMissionItem, openBucketId]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -152,266 +502,87 @@ export default function CronoLabMissionPanel({ todayMission, todayItems, content
     return () => window.clearTimeout(timeoutId);
   }, [feedback]);
 
+  const handleAnswer = (payload) => {
+    const result = resolveAttempt(payload);
+    if (!result) return;
+    setFeedback(result);
+  };
+
   return (
-    <div className="lab-card flex-1 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 backdrop-blur-xl shadow-xl">
-      <div className="border-b border-white/[0.04] px-6 py-5 lg:px-8 lg:py-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="lab-card flex-1 overflow-hidden rounded-[32px] border border-white/[0.08] bg-[#090912]/88 shadow-xl backdrop-blur-xl">
+      <div className={`border-b border-white/[0.06] ${embedded ? 'px-5 py-5 lg:px-6' : 'px-6 py-6 lg:px-8 lg:py-7'}`}>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
-              Missão do Dia
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
+              Missão diária
             </p>
-            <h2 className="font-display text-xl font-bold tracking-tight text-white lg:text-2xl">
-              O que fazer hoje para avançar sem bagunçar a trilha
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-white lg:text-[28px]">
+              {embedded ? 'Launcher do dia' : 'Hub disciplinado do dia'}
             </h2>
-            <p className="mt-2 text-sm text-zinc-400">
+            <p className="mt-2 text-sm text-zinc-300">
               {statusMeta.helper}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={`inline-flex rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${statusMeta.badge}`}>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] ${statusMeta.badge}`}>
               {statusMeta.label}
             </span>
-            <div className="hidden h-12 w-12 items-center justify-center rounded-xl border border-white/[0.05] bg-white/[0.02] text-xl shadow-inner sm:flex">
-              🎯
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-200">
+              {completedOfficialCount}/{officialCount} oficial
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+          <div>
+            <div className="mb-2 flex items-center justify-between text-[11px] text-zinc-300">
+              <span>O que realmente move hoje</span>
+              <span>{progressPercent}%</span>
             </div>
+            <ProgressBar value={progressPercent} color="blue" />
           </div>
-        </div>
-
-        <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-4 animate-in fade-in duration-500">
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Progresso oficial</p>
-            <p className={`mt-2 text-2xl font-black ${progressTone}`}>{progressBarValue}%</p>
-            <p className="mt-1 text-[11px] text-zinc-500">{completedOfficialCount}/{officialCount} itens oficiais concluídos</p>
-            <ProgressBar value={progressBarValue} color={missionBarColor} className="mt-3" />
-          </div>
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Estado do dia</p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className={`inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${progressBadgeTone}`}>
-                {stateLabel}
-              </span>
-              <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
-                streak {streakLabel}
-              </span>
-            </div>
-            <p className="mt-2 text-[11px] text-zinc-500">{feedbackCopy}</p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Ação principal</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-white">{primaryItem?.layerTitle ?? primaryItem?.contentItemId ?? 'Sem ação principal aberta'}</p>
-            <p className="mt-1 text-[11px] text-zinc-500">{primaryItem?.reason ?? 'Se houver nova recomendação oficial, ela aparece aqui.'}</p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Sistema vivo</p>
-            <p className="mt-2 text-2xl font-black text-white">+{xpToday}</p>
-            <p className="mt-1 text-[11px] text-zinc-500">XP hoje • {validationsToday} validações reais • {currentStreak} dias de ofensiva</p>
-            <p className="mt-2 text-[11px] text-zinc-500">{backlogCount} pendência(s) • {reinforcementPendingCount} reforço(s) • severidade {backlogSeverity}</p>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className={`inline-flex rounded-full border px-2.5 py-1 font-mono uppercase tracking-[0.18em] ${progressBadgeTone}`}>
-              {feedbackStateHelper}
-            </span>
-            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono uppercase tracking-[0.18em] text-white/55">
-              {partialCount} parcial
-            </span>
-            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono uppercase tracking-[0.18em] text-white/55">
-              {wrongCount} erro útil
-            </span>
-            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono uppercase tracking-[0.18em] text-white/55">
-              {revealOnlyCount} reveal sem tentativa
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Leitura operacional</p>
-          <p className="mt-2 text-sm text-zinc-400">Execução validada move XP, ofensiva, progresso do dia e custo pendente. Exploração livre não entra nesse placar.</p>
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Pendência oficial</p>
-            <p className="mt-2 text-xl font-black text-white">{pendingItems.length}</p>
-            <p className="mt-1 text-[11px] text-zinc-500">O que ficou aberto continua visível como custo.</p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Reforço necessário</p>
-            <p className="mt-2 text-xl font-black text-white">{reinforcementItems.length}</p>
-            <p className="mt-1 text-[11px] text-zinc-500">Erro útil não some. Ele vira nova carga operacional.</p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Ofensiva</p>
-            <p className="mt-2 text-xl font-black text-white">{currentStreak}d</p>
-            <p className="mt-1 text-[11px] text-zinc-500">Só sobe com validação real no dia.</p>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-cyan-400/12 bg-cyan-500/[0.04] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">Feedback operacional</p>
-          <p className="mt-2 text-sm text-zinc-300">{feedback ? feedbackCopy : 'O sistema fica vivo quando você valida. Sem validação real, não há recompensa plena.'}</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Meta diária</p>
-          <p className="mt-2 text-sm text-zinc-400">{isCleanDayNow ? 'Dia limpo confirmado. Continue preservando a linha.' : 'A meta e a limpeza reagem apenas ao que foi validado de verdade.'}</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Missão sistêmica</p>
-          <p className="mt-2 text-sm text-zinc-400">Cada validação atualiza missão, dia, streak, backlog e ledger sem depender de reload.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Consequência operacional</p>
-          <p className="mt-2 text-sm text-zinc-400">O que fica aberto não desaparece. O sistema guarda memória e cobra depois.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Linha de execução</p>
-          <p className="mt-2 text-sm text-zinc-400">Primeiro validar, depois ganhar sistema. Nunca o contrário.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">XP útil</p>
-          <p className="mt-2 text-sm text-zinc-400">Erro tentando ainda gera valor útil, mas reveal sem tentativa não vende progresso falso.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Memória do dia</p>
-          <p className="mt-2 text-sm text-zinc-400">O dia sabe se está idle, em curso, limpo, com dívida ou precisando de reforço.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Execução study-first</p>
-          <p className="mt-2 text-sm text-zinc-400">Nada aqui recompensa intenção. Só execução validada move o sistema.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Resumo de risco</p>
-          <p className="mt-2 text-sm text-zinc-400">Se não houver validação real, a ofensiva não avança e a dívida continua viva.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">Controle local</p>
-          <p className="mt-2 text-sm text-zinc-400">Primeira versão sistêmica local, mas já com regra conceitual correta para crescer depois.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">Motor vivo</p>
-          <p className="mt-2 text-sm text-zinc-400">XP, ofensiva, acumulado e feedback agora reagem ao mesmo evento de validação.</p>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 animate-in fade-in duration-500">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Sem dashboard fake</p>
-          <p className="mt-2 text-sm text-zinc-400">O painel não mente sobre progresso: sem validação real, sem vitória visual completa.</p>
+          <p className="text-sm text-zinc-300 lg:text-right">
+            {disciplineBuckets.length} frente{disciplineBuckets.length === 1 ? '' : 's'} prioritária{disciplineBuckets.length === 1 ? '' : 's'} para abrir.
+          </p>
         </div>
       </div>
 
-      <div className="space-y-4 px-4 py-4 lg:px-6 lg:py-6">
+      <div className={`space-y-4 ${embedded ? 'px-4 py-4 lg:px-5' : 'px-4 py-5 lg:px-6 lg:py-6'}`}>
         {feedback ? <FeedbackToast feedback={feedback} onClose={() => setFeedback(null)} /> : null}
 
         {loadingState === 'empty' || todayItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.01] py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-[26px] border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
             <span className="mb-4 text-3xl opacity-50">📭</span>
-            <p className="text-sm font-medium text-zinc-300">Nenhuma missão oficial aberta para hoje.</p>
-            <p className="mt-1 text-xs text-zinc-500">Quando a trilha oficial apontar uma nova camada, ela nasce aqui.</p>
+            <p className="text-sm font-medium text-zinc-100">Nenhuma frente oficial aberta para hoje.</p>
+            <p className="mt-1 text-xs text-zinc-400">Quando a trilha abrir algo novo, ele aparece aqui.</p>
           </div>
         ) : (
-          <>
-            {primaryItem ? (
-              <div className="rounded-[28px] border border-fuchsia-400/18 bg-fuchsia-500/[0.07] p-4 shadow-[0_0_18px_rgba(217,70,239,0.08)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-                <SectionHeader
-                  eyebrow="Ação principal"
-                  title={primaryItem.layerTitle ?? contentMap[primaryItem.contentItemId]?.title ?? 'Missão principal'}
-                  subtitle={primaryItem.reason}
-                />
-              </div>
-            ) : null}
-
-            {pendingItems.length > 0 ? (
-              <div className="space-y-3 rounded-2xl border border-amber-400/12 bg-amber-500/[0.04] p-4 animate-in fade-in duration-500">
-                <SectionHeader
-                  eyebrow="Pendências"
-                  title="Custos visíveis da trilha oficial"
-                  subtitle="Entram abaixo da ação principal e não roubam o foco do que foi recomendado agora."
-                />
-                <div className="space-y-3">
-                  {pendingItems.map((item) => (
-                    <MissionItemCard
-                      key={item.id}
-                      item={item}
-                      content={contentMap[item.contentItemId]}
-                      isActive={activeMissionItem?.id === item.id}
-                      isRevealed={activeMissionItem?.id === item.id && revealState === 'revealed'}
-                      isCoolingDown={activeMissionItem?.id === item.id && isCoolingDown}
-                      onOpen={() => openMissionItem(item)}
-                      onReveal={revealCurrentItem}
-                      onAnswer={handleAnswer}
-                      onClose={closeMissionItem}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {reinforcementItems.length > 0 ? (
-              <div className="space-y-3 rounded-2xl border border-cyan-400/12 bg-cyan-500/[0.04] p-4 animate-in fade-in duration-500">
-                <SectionHeader
-                  eyebrow="Reforço"
-                  title="Complementos do dia"
-                  subtitle="Aparecem como camada auxiliar e nunca tomam o lugar da ação principal."
-                />
-                <div className="space-y-3">
-                  {reinforcementItems.map((item) => (
-                    <MissionItemCard
-                      key={item.id}
-                      item={item}
-                      content={contentMap[item.contentItemId]}
-                      isActive={activeMissionItem?.id === item.id}
-                      isRevealed={activeMissionItem?.id === item.id && revealState === 'revealed'}
-                      isCoolingDown={activeMissionItem?.id === item.id && isCoolingDown}
-                      onOpen={() => openMissionItem(item)}
-                      onReveal={revealCurrentItem}
-                      onAnswer={handleAnswer}
-                      onClose={closeMissionItem}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <div className="space-y-3">
-              <SectionHeader
-                eyebrow="Operação do dia"
-                title="Fila completa da missão"
-                subtitle="A execução reage sozinha quando uma camada oficial é validada."
-              />
-              {todayItems.map((item) => (
-                <MissionItemCard
-                  key={item.id}
-                  item={item}
-                  content={contentMap[item.contentItemId]}
-                  isActive={activeMissionItem?.id === item.id}
-                  isRevealed={activeMissionItem?.id === item.id && revealState === 'revealed'}
-                  isCoolingDown={activeMissionItem?.id === item.id && isCoolingDown}
-                  onOpen={() => openMissionItem(item)}
-                  onReveal={revealCurrentItem}
-                  onAnswer={handleAnswer}
-                  onClose={closeMissionItem}
-                />
-              ))}
-            </div>
-          </>
+          disciplineBuckets.map((bucket, index) => (
+            <DisciplineCard
+              key={bucket.id}
+              bucket={bucket}
+              index={index}
+              isOpen={openBucketId === bucket.id}
+              activeMissionItem={activeMissionItem}
+              revealState={revealState}
+              isCoolingDown={activeMissionItem && bucket.itemIds.has(activeMissionItem.id) ? isCoolingDown : false}
+              contentMap={contentMap}
+              onToggle={() => setOpenBucketId((current) => (current === bucket.id ? null : bucket.id))}
+              onOpenMissionItem={(item) => {
+                setOpenBucketId(bucket.id);
+                openMissionItem(item);
+              }}
+              onAnswer={handleAnswer}
+              onReveal={revealCurrentItem}
+              onClose={closeMissionItem}
+            />
+          ))
         )}
 
         {activeMissionItem && activeContentItem ? (
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-zinc-400 dark:border-stone-300 dark:bg-stone-100/80 dark:text-stone-600">
-            {isCoolingDown
-              ? 'Cooldown ativo. Sem pressa: chute não entra no sistema.'
-              : 'Operação ativa. Execute primeiro, avalie depois.'}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-zinc-300">
+            {isCoolingDown ? 'Cooldown ativo. Sem pressa.' : 'Foco aberto. Execute e valide.'}
           </div>
         ) : null}
       </div>

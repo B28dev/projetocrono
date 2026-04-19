@@ -42,7 +42,7 @@ function AccordionItem({ summary, isOpen, onToggle }) {
   }, [isOpen]);
 
   return (
-    <div className={`summary-item cyber-glass rounded-xl border backdrop-blur-md transition-colors duration-300 dark:shadow-sm ${
+    <div className={`summary-item cyber-glass rounded-lg border backdrop-blur-md transition-colors duration-300 dark:shadow-sm ${
       isOpen
         ? 'border-white/20 bg-white/10 dark:border-stone-400 dark:bg-stone-50 cyberpunk:border-[#00e8ff]/40 cyberpunk:bg-white/10'
         : 'border-white/10 bg-white/5 hover:border-[#00e8ff]/30 hover:bg-white/10 dark:border-stone-300 dark:bg-stone-100/50 dark:hover:border-stone-400 dark:hover:bg-stone-50 cyberpunk:border-white/10 cyberpunk:bg-white/5 cyberpunk:hover:border-[#00e8ff]/30 cyberpunk:hover:bg-white/10'
@@ -54,13 +54,13 @@ function AccordionItem({ summary, isOpen, onToggle }) {
         <div className="min-w-0 flex items-center gap-2">
           <span className="truncate text-sm font-semibold text-zinc-100 dark:text-stone-900 cyberpunk:font-display cyberpunk:text-white">{summary.title}</span>
           {summary.badge?.label ? (
-            <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${badgeColorClass}`}>
+            <span className={`shrink-0 rounded-md border px-2 py-0.5 font-mono text-xs ${badgeColorClass}`}>
               {summary.badge.label}
             </span>
           ) : null}
         </div>
         <svg
-          className={`w-4 h-4 text-zinc-500 dark:text-stone-500 flex-shrink-0 transition-transform duration-200 cyberpunk:text-[#00e8ff] ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-zinc-400 dark:text-stone-600 flex-shrink-0 transition-transform duration-200 cyberpunk:text-[#00e8ff] ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 16 16"
         >
@@ -76,7 +76,7 @@ function AccordionItem({ summary, isOpen, onToggle }) {
                 <thead className="bg-zinc-900/60 text-zinc-300 dark:bg-stone-200 dark:text-stone-700 cyberpunk:bg-white/[0.06] cyberpunk:text-white/75">
                   <tr>
                     {summary.table.headers.map((header) => (
-                      <th key={header} className="px-3 py-2 font-semibold tracking-wide">
+                      <th key={header} className="px-3 py-2 font-semibold">
                         {header}
                       </th>
                     ))}
@@ -112,7 +112,7 @@ function AccordionItem({ summary, isOpen, onToggle }) {
           ) : null}
 
           {summary.note ? (
-            <p className="text-xs leading-relaxed text-zinc-500 dark:text-stone-600 cyberpunk:text-white/60">
+            <p className="text-xs leading-relaxed text-zinc-400 dark:text-stone-600 cyberpunk:text-white/60">
               {summary.note}
             </p>
           ) : null}

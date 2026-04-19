@@ -27,7 +27,7 @@ export default function TopicChip({ topic, onClick }) {
       <div className="topic-chip-content flex w-full min-w-0 items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${styles.dot}`} />
         <span className="min-w-0 text-sm font-medium text-zinc-200 dark:text-stone-800 cyberpunk:text-white">{topic.name}</span>
-        <span className={`ml-auto flex-shrink-0 text-[11px] font-semibold cyberpunk:font-mono ${styles.tag}`}>{topic.frequency}</span>
+        <span className={`ml-auto flex-shrink-0 text-xs font-semibold cyberpunk:font-mono ${styles.tag}`}>{topic.frequency}</span>
       </div>
     </button>
   );

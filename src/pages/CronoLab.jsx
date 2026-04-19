@@ -521,6 +521,7 @@ export default function CronoLab() {
                 todayItems={todayItems}
                 contentItems={contentItems}
                 loadingState={loadingState}
+                embedded
               />
             </div>
 
@@ -545,10 +546,10 @@ export default function CronoLab() {
               Missão Diária
             </p>
             <h2 className="font-display text-2xl font-bold tracking-tight text-white">
-              Operação do dia em tela cheia
+              Abrir a disciplina certa e agir
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400">
-              Aqui a missão vira o centro absoluto da execução. Sem distração, sem fuga visual, só validação real.
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300">
+              Primeiro a frente prioritária. Depois o que existe dentro dela.
             </p>
           </div>
 

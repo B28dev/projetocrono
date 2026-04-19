@@ -1,52 +1,43 @@
 export default function NextActionBlock({ nextAction, onOpenPanel }) {
-  const visibleItems = nextAction.items.slice(0, 3);
+  const primaryItem = nextAction.items[0];
 
   return (
-    <section className="rounded-[24px] border border-fuchsia-400/16 bg-fuchsia-500/[0.08] p-4 shadow-[0_0_20px_rgba(255,62,165,0.08)] dark:border-fuchsia-500/25 dark:bg-fuchsia-500/10">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-fuchsia-300 dark:text-fuchsia-700">
-            {nextAction.eyebrow}
-          </p>
-          <h3 className="text-xl font-bold text-white dark:text-stone-950">
-            {nextAction.title}
-          </h3>
-        </div>
+    <section className="border-t border-white/[0.08] pt-4 dark:border-stone-200">
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-semibold text-cyan-300 dark:text-cyan-700">
+          {nextAction.eyebrow}
+        </p>
+        <h3 className="text-lg font-bold leading-snug text-white dark:text-stone-950">
+          {nextAction.title}
+        </h3>
 
-        <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
+        {primaryItem ? (
+          <div className="flex gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 text-xs font-bold text-cyan-200 dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-700">
+              1
+            </span>
+            <p className="text-sm font-semibold leading-relaxed text-zinc-100 dark:text-stone-800">
+              {primaryItem.text}
+            </p>
+          </div>
+        ) : null}
+
+        <div className="flex flex-col gap-2 sm:flex-row">
           <a
             href={nextAction.cta.href}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 text-sm font-semibold text-fuchsia-100 transition-colors hover:border-fuchsia-300/35 hover:text-white dark:border-fuchsia-500/25 dark:bg-fuchsia-500/10 dark:text-fuchsia-700"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300/35 hover:text-white dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-700"
           >
             {nextAction.cta.label}
           </a>
           <button
             type="button"
             onClick={() => onOpenPanel?.('nextAction')}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-600 dark:hover:text-stone-900"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-700 dark:hover:text-stone-950"
             aria-expanded="false"
           >
             Ver plano
           </button>
         </div>
-      </div>
-
-      <div className="mt-6 grid gap-6 sm:grid-cols-3">
-        {visibleItems.map((item, index) => (
-          <div key={item.id} className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-[11px] font-bold text-fuchsia-200 dark:bg-fuchsia-500/15 dark:text-fuchsia-700">
-                {index + 1}
-              </span>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-stone-500">
-                {item.topic || 'Próximo Passo'}
-              </p>
-            </div>
-            <p className="text-base font-semibold leading-snug text-white dark:text-stone-950">
-              {item.text}
-            </p>
-          </div>
-        ))}
       </div>
     </section>
   );

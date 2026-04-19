@@ -18,17 +18,14 @@ export default function ContextGrid({
   onToggleBottleneck,
 }) {
   return (
-    <section className="space-y-4" aria-label={contextGrid.title}>
-      <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-stone-600">
-          visão analítica
-        </p>
-        <h2 className="text-2xl font-semibold tracking-tight text-white dark:text-stone-950">
+    <section className="space-y-3" aria-label={contextGrid.title}>
+      <div>
+        <h2 className="text-xl font-semibold text-white dark:text-stone-950">
           {contextGrid.title}
         </h2>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {contextGrid.blocks.map((block) => {
           const Component = CARD_COMPONENTS[block.type];
           return Component ? (

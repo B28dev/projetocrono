@@ -3,7 +3,7 @@ import PriorityFilterChips from './PriorityFilterChips.jsx';
 const GROUP_TONE_CLASS = {
   warning: 'border-amber-400/20 bg-amber-500/10 text-amber-100 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-700',
   info: 'border-cyan-400/20 bg-cyan-500/10 text-cyan-200 dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-700',
-  neutral: 'border-white/10 bg-white/[0.03] text-white/60 dark:border-stone-300 dark:bg-white dark:text-stone-600',
+  neutral: 'border-white/10 bg-white/[0.03] text-zinc-300 dark:border-stone-300 dark:bg-white dark:text-stone-700',
 };
 
 export default function PendingItemsSection({
@@ -20,46 +20,49 @@ export default function PendingItemsSection({
     : section.data.filter((group) => group.id === pendingFilter);
 
   return (
-    <article className="rounded-[24px] border border-white/[0.06] bg-white/[0.02] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white/80">
-      <div className="max-w-3xl space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-300 dark:text-amber-700">
+    <article className="rounded-lg border border-white/[0.08] bg-white/[0.018] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white/80">
+      <div className="max-w-3xl">
+        <p className="text-xs font-semibold text-amber-300 dark:text-amber-700">
           pendências
         </p>
-        <h3 className="text-2xl font-bold tracking-tight text-white dark:text-stone-950">Fila de Limpeza</h3>
+        <h3 className="mt-1 text-xl font-bold text-white dark:text-stone-950">Fila de Limpeza</h3>
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <PriorityFilterChips options={priorityFilterOptions} selectedId={pendingFilter} onChange={onChangePendingFilter} />
         {focusTargets?.urgentPendingGroupId ? (
           <button
             type="button"
             onClick={() => onChangePendingFilter?.(focusTargets.urgentPendingGroupId)}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100 transition-colors hover:text-white dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-700"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100 transition-colors hover:text-white dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-700"
           >
-            Focar grupo urgente
+            Focar urgente
           </button>
         ) : null}
       </div>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 space-y-1">
         {visibleGroups.map((group) => {
           const toneClass = GROUP_TONE_CLASS[group.tone] ?? GROUP_TONE_CLASS.neutral;
           const isExpanded = expandedPendingGroups.includes(group.id);
 
           return (
-            <section key={group.id} className="border-b border-white/[0.06] py-5 last:border-0 dark:border-stone-200">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <section key={group.id} className="border-b border-white/[0.08] py-4 last:border-0 dark:border-stone-200">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-bold ${toneClass}`}>
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold ${toneClass}`}>
                     {group.items.length}
                   </span>
-                  <h4 className="text-base font-semibold text-white dark:text-stone-950">{group.label}</h4>
+                  <div>
+                    <h4 className="text-base font-semibold text-white dark:text-stone-950">{group.label}</h4>
+                    <p className="mt-0.5 text-xs font-medium text-zinc-400 dark:text-stone-600">{group.description}</p>
+                  </div>
                 </div>
                 <div>
                   <button
                     type="button"
                     onClick={() => onTogglePendingGroup?.(group.id)}
-                    className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-full bg-white/[0.03] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white dark:bg-stone-100 dark:text-stone-600 dark:hover:bg-stone-200 dark:hover:text-stone-900"
+                    className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg bg-white/[0.03] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white dark:bg-stone-100 dark:text-stone-600 dark:hover:bg-stone-200 dark:hover:text-stone-900"
                     aria-expanded={isExpanded}
                     aria-controls={`pending-group-${group.id}`}
                   >
@@ -71,11 +74,11 @@ export default function PendingItemsSection({
               </div>
 
               {isExpanded ? (
-                <div id={`pending-group-${group.id}`} className="mt-5 grid gap-4 pl-12 lg:grid-cols-2">
+                <div id={`pending-group-${group.id}`} className="mt-4 grid gap-4 border-l border-white/[0.08] pl-4 sm:ml-4 lg:grid-cols-2 dark:border-stone-200">
                   {group.items.map((task) => (
                     <div key={task.id} className="space-y-1">
-                      <p className="text-[13px] font-medium leading-relaxed text-zinc-200 dark:text-stone-800">{task.text}</p>
-                      <p className="text-[11px] font-medium text-zinc-500 dark:text-stone-500">{task.topic} {task.date ? `· ${task.date}` : ''}</p>
+                      <p className="text-sm font-medium leading-relaxed text-zinc-200 dark:text-stone-800">{task.text}</p>
+                      <p className="text-xs font-medium text-zinc-400 dark:text-stone-600">{task.topic} {task.date ? `· ${task.date}` : ''}</p>
                     </div>
                   ))}
                 </div>

@@ -24,17 +24,14 @@ export default function SecondaryStack({
   onOpenPanel,
 }) {
   return (
-    <section className="space-y-4" aria-label="Secondary stack">
-      <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-stone-600">
-          camada secundária
-        </p>
-        <h2 className="text-2xl font-semibold tracking-tight text-white dark:text-stone-950">
+    <section className="space-y-3" aria-label="Secondary stack">
+      <div>
+        <h2 className="text-xl font-semibold text-white dark:text-stone-950">
           Detalhe sob demanda
         </h2>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {sections.map((section) => {
           const Component = SECTION_COMPONENTS[section.type];
           return Component ? (

@@ -9,13 +9,13 @@ const BAR_TONE_CLASS = {
 
 export default function CadenceCard({ block, periodOptions, selectedPeriodKey, onChangePeriod, onOpenPanel }) {
   return (
-    <article className="rounded-[24px] border border-white/[0.06] bg-white/[0.03] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white">
+    <article className="rounded-lg border border-white/[0.08] bg-white/[0.025] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white">
       <div className="flex flex-col gap-4">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-stone-500">
+        <div>
+          <p className="text-xs font-semibold text-zinc-400 dark:text-stone-600">
             Cadência
           </p>
-          <h3 className="text-2xl font-bold tracking-tight text-white dark:text-stone-950">{block.title}</h3>
+          <h3 className="mt-1 text-xl font-bold text-white dark:text-stone-950">{block.title}</h3>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -23,29 +23,29 @@ export default function CadenceCard({ block, periodOptions, selectedPeriodKey, o
           <button
             type="button"
             onClick={() => onOpenPanel?.('cadence')}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-600 dark:hover:text-stone-900"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 dark:hover:text-stone-950"
             aria-expanded="false"
           >
-            Ver detalhes
+            Detalhes
           </button>
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col items-center justify-center text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300 dark:text-cyan-700">ritmo médio</p>
-        <p className="mt-2 text-4xl font-bold tracking-tight text-white dark:text-stone-950">{block.data.label}</p>
+      <div className="mt-7 flex flex-col items-center justify-center text-center">
+        <p className="text-xs font-semibold text-cyan-300 dark:text-cyan-700">ritmo médio</p>
+        <p className="mt-2 text-4xl font-black text-white dark:text-stone-950">{block.data.label}</p>
       </div>
 
-      <div className="mt-8 grid grid-cols-7 gap-2">
+      <div className="mt-7 grid grid-cols-7 gap-2">
         {block.data.series.map((item) => (
           <div key={item.id} className="space-y-3 text-center">
             <div className="flex h-32 items-end justify-center px-1">
               <div
-                className={`w-full max-w-[24px] rounded-md ${BAR_TONE_CLASS[item.state] ?? BAR_TONE_CLASS.neutral}`}
+                className={`w-full max-w-[24px] rounded ${BAR_TONE_CLASS[item.state] ?? BAR_TONE_CLASS.neutral}`}
                 style={{ height: `${Math.max(item.value, 12)}%` }}
               />
             </div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500 dark:text-stone-500">{item.shortLabel}</p>
+            <p className="text-xs font-medium text-zinc-400 dark:text-stone-600">{item.shortLabel}</p>
           </div>
         ))}
       </div>
