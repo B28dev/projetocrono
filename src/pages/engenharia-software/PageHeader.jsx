@@ -23,11 +23,11 @@ export default function PageHeader({ header, onBack }) {
             </span>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight text-white dark:text-stone-950 sm:text-4xl">
               {header.title}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400 dark:text-stone-600 sm:text-base">
+            <p className="text-sm text-zinc-400 dark:text-stone-600 sm:text-base">
               {header.subtitle}
             </p>
           </div>

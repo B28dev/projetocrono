@@ -4,27 +4,27 @@ const DETAILS_SECTION_META = {
   subjects: {
     id: 'subjects',
     title: 'Blocos de estudo',
-    description: 'A disciplina continua organizada por blocos para manter contexto antes do treino.',
+    description: 'Base organizada por bloco.',
   },
   topics: {
     id: 'topics',
     title: 'Temas mais cobrados',
-    description: 'Os assuntos de maior incidência continuam visíveis, mas fora da linha principal de decisão.',
+    description: 'Assuntos que mais puxam a prova.',
   },
   resources: {
     id: 'resources',
     title: 'Recursos de apoio',
-    description: 'Playlists e vídeos ficam na área final para consulta sob demanda.',
+    description: 'Playlists e vídeos sob demanda.',
   },
   summaries: {
     id: 'summaries',
     title: 'Base de revisão',
-    description: 'Resumos e leitura de prova permanecem disponíveis sem competir com o topo da home.',
+    description: 'Resumos e leitura de prova.',
   },
   exercises: {
     id: 'exercises',
     title: 'Exercícios preparados',
-    description: 'A estrutura de treino segue pronta por bloco e por nível de dificuldade.',
+    description: 'Treino pronto por bloco.',
   },
 };
 
@@ -52,13 +52,13 @@ function getHeroSummary({ pilot }) {
   let summary = 'Seu progresso está consistente e o foco agora é manter a cadência.';
 
   if (recovery.overdueCount >= 3) {
-    summary = 'A disciplina saiu do eixo; o melhor movimento agora é limpar o núcleo atrasado.';
+    summary = 'Limpe o núcleo atrasado antes de abrir novas frentes.';
   } else if (recovery.overdueCount > 0) {
-    summary = 'Você avançou bem, mas ainda há pendências críticas segurando o ritmo.';
+    summary = 'Há pendências críticas segurando o ritmo.';
   } else if (recovery.pendingTodayCount > 0) {
-    summary = 'Seu progresso está consistente e o foco agora é manter a cadência do dia.';
+    summary = 'Feche o ciclo de hoje para manter a cadência.';
   } else if (metrics.progressPercent === 100) {
-    summary = 'A trilha principal está limpa; agora vale consolidar a revisão e o treino.';
+    summary = 'Trilha principal limpa; hora de consolidar revisão e treino.';
   }
 
   return {
@@ -98,10 +98,10 @@ function getKpiItems({ pilot }) {
       label: 'Cadência',
       value: cadenceStatus,
       helper: recovery.overdueCount > 0
-        ? 'O atraso ainda quebra a constância da disciplina.'
+        ? 'Atraso ainda quebra a constância.'
         : recovery.pendingTodayCount > 0
-          ? 'O ritmo depende de fechar o ciclo de hoje.'
-          : 'A trilha está livre para manter avanço limpo.',
+          ? 'Feche hoje para manter o ritmo.'
+          : 'Trilha livre para avanço limpo.',
       tone: recovery.overdueCount > 0 ? 'warning' : 'info',
       trend: planState.statusMeta.shortLabel,
     },
@@ -114,12 +114,12 @@ function getKpiItems({ pilot }) {
           ? `${recovery.pendingTodayCount} hoje`
           : 'baixa',
       helper: recovery.overdueCount > 0
-        ? 'Essa carga deve cair antes de ampliar o estudo.'
+        ? 'Reduza isso antes de ampliar o estudo.'
         : recovery.pendingTodayCount > 0
-          ? 'Feche o dia para não transformar hoje em atraso.'
-          : 'Sem acúmulo importante competindo com o topo.',
+          ? 'Feche o dia antes de acumular atraso.'
+          : 'Sem acúmulo importante no topo.',
       tone: recovery.overdueCount > 0 ? 'warning' : recovery.pendingTodayCount > 0 ? 'info' : 'success',
-      trend: 'prioridade operacional',
+      trend: 'prioridade',
     },
   ];
 }
@@ -136,9 +136,6 @@ function getNextActionViewModel({ pilot, bottlenecksLead, pendingGroups }) {
       ? `Conclua ${pendingCount} frente(s) em ${primaryItem.topic || 'ordem prioritária'}`
       : nextAction.title,
     summary: nextAction.reason,
-    impact: primaryItem
-      ? `Isso reduz a pressão em ${primaryItem.topic || 'seu foco atual'} e destrava a próxima camada da disciplina.`
-      : 'Isso mantém a disciplina pronta para o próximo ciclo.',
     helper: nextAction.ctaLabel,
     cta: {
       label: 'Atacar próximas pendências',
@@ -147,7 +144,7 @@ function getNextActionViewModel({ pilot, bottlenecksLead, pendingGroups }) {
     items: nextAction.items,
     detail: {
       title: 'Plano sugerido para esta ação',
-      subtitle: 'A visão principal continua curta; aqui entra o impacto e a ordem de execução.',
+      subtitle: 'Detalhe da ordem sugerida para esta frente.',
       subtasks: nextAction.items.map((item, index) => ({
         id: item.id,
         label: item.text,
@@ -199,7 +196,7 @@ function getProgressChartViewModel({ pilot }) {
 
   return {
     title: 'Situação agregada da disciplina',
-    description: 'Leitura geral do peso já concluído, do que está vivo agora e do que ainda disputa avanço.',
+    description: 'Peso concluído, ativo e pendente.',
     centerValue: composition.centerValue,
     centerLabel: composition.centerLabel,
     segments: composition.segments.map((segment) => ({
@@ -209,7 +206,7 @@ function getProgressChartViewModel({ pilot }) {
     narrative: getProgressNarrative(composition),
     detail: {
       title: 'Decomposição do progresso',
-      subtitle: 'Cada bloco mostra onde o peso da disciplina está concentrado agora.',
+      subtitle: 'Onde o peso da disciplina está concentrado agora.',
       items: composition.segments.map((segment) => ({
         id: segment.id,
         label: segment.label,
@@ -226,12 +223,12 @@ function getCompositionViewModel({ pilot }) {
   return {
     ...composition,
     narrative: composition.dominantLabel === 'Atrasado'
-      ? 'Seu estado hoje é puxado por débito antigo. O ganho mais relevante vem da limpeza do atraso.'
+      ? 'Atraso ainda domina a leitura atual.'
       : composition.dominantLabel === 'Em andamento'
-        ? 'A maior parte da energia está no que já foi iniciado. Vale fechar o que está vivo antes de abrir novas frentes.'
+        ? 'O peso maior está no que já foi iniciado.'
         : composition.dominantLabel === 'Planejado'
-          ? 'O plano futuro ainda pesa mais do que o que já foi drenado. A disciplina ainda pede tração contínua.'
-          : 'A maior fatia já está concluída, sinal de que a disciplina entrou em zona mais controlada.',
+          ? 'O plano futuro ainda pesa mais.'
+          : 'A maior fatia já está concluída.',
   };
 }
 
@@ -262,17 +259,16 @@ function getCadenceViewModel({ pilot, periodKey }) {
 
   let narrative = 'Você mantém constância suficiente para continuar avançando.';
   if (recovery.overdueCount > 0) {
-    narrative = 'Seu ritmo caiu porque o atraso antigo ainda compete com o avanço atual.';
+    narrative = 'O atraso antigo ainda compete com o avanço.';
   } else if (recovery.pendingTodayCount > 0) {
-    narrative = 'O ritmo está estável, mas depende de fechar o bloco do dia para não perder tração.';
+    narrative = 'Feche o bloco do dia para manter tração.';
   } else if (series.some((item) => item.value === 100)) {
-    narrative = 'Houve retomada recente e a disciplina já mostra sinais de constância limpa.';
+    narrative = 'A disciplina já mostra retomada limpa.';
   }
 
   return {
     label: planState.statusMeta.label,
     body: planState.statusMeta.commandLine,
-    helper: pilot.overview.progressLogicSummary,
     narrative,
     series,
     periodLabel: getPeriodOption(periodKey).label,
@@ -316,8 +312,8 @@ function getBottlenecksViewModel({ pilot }) {
   return {
     items,
     narrative: lead
-      ? `${lead.topic} concentra o maior acúmulo agora. Esse é o melhor lugar para recuperar tração.`
-      : 'Não há gargalo dominante neste momento; a disciplina está mais equilibrada.',
+      ? `${lead.topic} concentra o maior acúmulo agora.`
+      : 'Não há gargalo dominante agora.',
     lead,
     detail: {
       title: 'Detalhe dos gargalos',
@@ -374,21 +370,21 @@ function getPendingGroupsViewModel({ pilot }) {
     {
       id: 'critical',
       label: 'Crítico',
-      description: 'Itens que já viraram custo aberto e seguram o ritmo.',
+      description: 'Custo aberto no ritmo.',
       tone: 'warning',
       items: groups.critical,
     },
     {
       id: 'important',
       label: 'Importante',
-      description: 'O que ainda precisa fechar hoje para a disciplina não escorregar.',
+      description: 'O que precisa fechar hoje.',
       tone: 'info',
       items: groups.important,
     },
     {
       id: 'complementary',
       label: 'Complementar',
-      description: 'Próximas frentes já visíveis, mas sem competir com a recuperação principal.',
+      description: 'Próximas frentes visíveis.',
       tone: 'neutral',
       items: groups.complementary,
     },
@@ -404,12 +400,12 @@ function getTimelineEventsViewModel({ pilot, periodKey }) {
     date: entry.date,
     completion: `${entry.completed}/${entry.total}`,
     summary: entry.state === 'overdue'
-      ? 'Esse marco ficou para trás e ainda puxa custo operacional.'
+      ? 'Marco atrasado.'
       : entry.state === 'today'
-        ? 'Este é o ponto vivo do ciclo atual.'
+        ? 'Ponto ativo do ciclo.'
         : entry.state === 'done' || entry.state === 'today_done'
-          ? 'Esse trecho já foi drenado no plano.'
-          : 'Esse marco ainda está projetado à frente.',
+          ? 'Trecho já drenado.'
+          : 'Marco projetado à frente.',
     isExamDay: entry.isExamDay,
     detail: {
       title: entry.label,
@@ -425,7 +421,7 @@ function getTimelineEventsViewModel({ pilot, periodKey }) {
 
   return {
     title: 'Linha de evolução da disciplina',
-    description: 'Cada marco mostra onde você avançou, onde travou e o que ainda está pela frente.',
+    description: 'Marcos do avanço no período.',
     items: events,
     periodLabel: period.label,
   };
@@ -447,8 +443,8 @@ function getSupportItemsViewModel({ pilot, bottlenecksLead }) {
 
   return {
     eyebrow: 'apoio útil',
-    title: 'O que ajuda a retomar sem aumentar a carga cognitiva',
-    description: 'Suporte curto para quando você precisa destravar a disciplina, revisar ou ganhar contexto rápido.',
+    title: 'Apoios úteis sem ruído',
+    description: 'Suporte rápido para destravar ou revisar.',
     modeLabel,
     items: [
       {
@@ -461,13 +457,13 @@ function getSupportItemsViewModel({ pilot, bottlenecksLead }) {
         id: 'resource',
         label: bottlenecksLead ? `Apoio para ${bottlenecksLead.topic}` : 'Material-chave',
         value: firstPlaylist?.title ?? 'Playlist principal',
-        body: firstPlaylist?.description ?? 'Use este material quando precisar de apoio rápido no tópico central.',
+        body: firstPlaylist?.description ?? 'Apoio rápido no tópico central.',
       },
       {
         id: 'review',
         label: 'Revisão útil',
         value: firstSummary?.title ?? firstVideoSet?.title ?? 'Resumo guiado',
-        body: firstSummary?.bullets?.[0] ?? firstVideoSet?.description ?? 'Abra esse apoio quando quiser revisar sem aumentar o ruído da home.',
+        body: firstSummary?.bullets?.[0] ?? firstVideoSet?.description ?? 'Revisão rápida sem poluir a home.',
       },
     ],
   };
@@ -604,7 +600,7 @@ export function getSoftwareEngineeringDashboardViewModel({
     details: {
       id: 'engenharia-software-detalhes',
       title: 'Área final de detalhes',
-      description: 'Tudo que aprofunda a disciplina continua disponível aqui, claramente abaixo da leitura de decisão.',
+      description: 'Tudo que aprofunda a disciplina fica aqui.',
       sections: [
         {
           ...DETAILS_SECTION_META.subjects,

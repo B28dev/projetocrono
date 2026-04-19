@@ -26,8 +26,8 @@ function SubjectCards({ items }) {
 function TopicsSection({ items }) {
   return (
     <div className="space-y-3">
-      <p className="text-sm leading-relaxed text-zinc-400 dark:text-stone-600">
-        Esses temas continuam sendo os que mais empurram a prova. Vale revisá-los quando a parte operacional estiver sob controle.
+      <p className="text-sm text-zinc-400 dark:text-stone-600">
+        Temas que mais puxam a prova.
       </p>
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((topic) => (
@@ -136,7 +136,7 @@ export default function DetailsSection({ details }) {
           Área final de detalhes
         </p>
         <h2 className="text-2xl font-semibold tracking-tight text-white dark:text-stone-950">{details.title}</h2>
-        <p className="max-w-3xl text-sm leading-relaxed text-zinc-400 dark:text-stone-600">{details.description}</p>
+        <p className="max-w-3xl text-sm text-zinc-400 dark:text-stone-600">{details.description}</p>
       </div>
 
       <div className="space-y-4">
@@ -148,7 +148,7 @@ export default function DetailsSection({ details }) {
             <article key={section.id} className="rounded-[24px] border border-white/[0.06] bg-white/[0.02] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white/80">
               <div className="mb-4 space-y-2">
                 <h3 className="text-lg font-semibold text-white dark:text-stone-950">{section.title}</h3>
-                <p className="text-sm leading-relaxed text-zinc-400 dark:text-stone-600">{section.description}</p>
+                <p className="text-sm text-zinc-400 dark:text-stone-600">{section.description}</p>
               </div>
               <Renderer items={section.data} resources={section.data} summaries={section.data} exercises={section.data} />
             </article>

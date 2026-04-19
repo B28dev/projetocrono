@@ -21,12 +21,11 @@ export default function PendingItemsSection({
 
   return (
     <article className="rounded-[24px] border border-white/[0.06] bg-white/[0.02] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white/80">
-      <div className="max-w-3xl space-y-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-300 dark:text-amber-700">
-          pendências rebaixadas
+      <div className="max-w-3xl space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-300 dark:text-amber-700">
+          pendências
         </p>
-        <h3 className="text-lg font-semibold text-white dark:text-stone-950">O que ainda pede limpeza</h3>
-        <p className="text-sm leading-relaxed text-zinc-400 dark:text-stone-600">Esses blocos ficam abaixo da overview para detalhar prioridade sem roubar o topo da ação principal.</p>
+        <h3 className="text-2xl font-bold tracking-tight text-white dark:text-stone-950">Fila de Limpeza</h3>
       </div>
 
       <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -37,7 +36,7 @@ export default function PendingItemsSection({
             onClick={() => onChangePendingFilter?.(focusTargets.urgentPendingGroupId)}
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100 transition-colors hover:text-white dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-700"
           >
-            Focar grupo mais urgente
+            Focar grupo urgente
           </button>
         ) : null}
       </div>
@@ -48,20 +47,19 @@ export default function PendingItemsSection({
           const isExpanded = expandedPendingGroups.includes(group.id);
 
           return (
-            <section key={group.id} className="rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-4 dark:border-stone-200 dark:bg-stone-50">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h4 className="text-sm font-semibold text-white dark:text-stone-950">{group.label}</h4>
-                  <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-stone-600">{group.description}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex min-h-9 w-fit items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${toneClass}`}>
-                    {group.items.length} item(ns)
+            <section key={group.id} className="border-b border-white/[0.06] py-5 last:border-0 dark:border-stone-200">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4">
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-bold ${toneClass}`}>
+                    {group.items.length}
                   </span>
+                  <h4 className="text-base font-semibold text-white dark:text-stone-950">{group.label}</h4>
+                </div>
+                <div>
                   <button
                     type="button"
                     onClick={() => onTogglePendingGroup?.(group.id)}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white dark:border-stone-300 dark:bg-white dark:text-stone-600 dark:hover:text-stone-900"
+                    className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-full bg-white/[0.03] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white dark:bg-stone-100 dark:text-stone-600 dark:hover:bg-stone-200 dark:hover:text-stone-900"
                     aria-expanded={isExpanded}
                     aria-controls={`pending-group-${group.id}`}
                   >
@@ -73,11 +71,11 @@ export default function PendingItemsSection({
               </div>
 
               {isExpanded ? (
-                <div id={`pending-group-${group.id}`} className="mt-4 grid gap-3 lg:grid-cols-2">
+                <div id={`pending-group-${group.id}`} className="mt-5 grid gap-4 pl-12 lg:grid-cols-2">
                   {group.items.map((task) => (
-                    <div key={task.id} className="rounded-[18px] border border-white/[0.06] bg-white/[0.03] px-4 py-4 dark:border-stone-200 dark:bg-white">
-                      <p className="text-sm font-semibold leading-relaxed text-white dark:text-stone-950">{task.text}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-stone-600">{task.topic} {task.date ? `· ${task.date}` : ''}</p>
+                    <div key={task.id} className="space-y-1">
+                      <p className="text-[13px] font-medium leading-relaxed text-zinc-200 dark:text-stone-800">{task.text}</p>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-stone-500">{task.topic} {task.date ? `· ${task.date}` : ''}</p>
                     </div>
                   ))}
                 </div>
