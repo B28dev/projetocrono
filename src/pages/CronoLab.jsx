@@ -31,11 +31,14 @@ import {
 const TOKEN = {
   pink: '#ff3ea5',
   cyan: '#00e8ff',
-  surface: 'rgba(10,10,18,0.7)',
+  surface: 'rgba(15,15,26,0.72)',
+  surfaceStrong: 'rgba(15,15,26,0.84)',
   border: 'rgba(255,255,255,0.06)',
-  muted: '#6b7098',
+  borderSubtle: 'rgba(255,255,255,0.04)',
+  muted: '#8c94bc',
   text: '#f0f0f8',
-  bg: '#05050A',
+  textSoft: 'rgba(223,228,248,0.82)',
+  bg: '#0d0d17',
 };
 
 // ─── MOMENTUM CONFIG ─────────────────────────────────────────────────────────
@@ -144,10 +147,10 @@ function SidebarNavItem({ icon, label, to, active, onNavigate }) {
     <NavLink
       to={to}
       onClick={onNavigate}
-      className={`flex w-full items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+      className={`flex w-full items-center gap-3.5 rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-200 ${
         active
-          ? 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400'
-          : 'border-transparent text-zinc-400 hover:bg-white/5 hover:text-zinc-100'
+          ? 'border-cyan-500/18 bg-cyan-500/10 text-cyan-300 shadow-[0_10px_28px_rgba(0,0,0,0.14)]'
+          : 'crono-lab-chip-soft border-transparent crono-lab-text-muted hover:text-zinc-100'
       }`}
     >
       <span className="text-lg opacity-80 saturate-50">{icon}</span>
@@ -158,21 +161,21 @@ function SidebarNavItem({ icon, label, to, active, onNavigate }) {
 
 function PlaceholderSection({ section }) {
   return (
-    <div className="lab-card overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-6 lg:p-8 backdrop-blur-xl shadow-xl">
+    <div className="crono-lab-surface crono-lab-border-soft crono-lab-panel-shadow lab-card overflow-hidden rounded-2xl border p-6 backdrop-blur-xl lg:p-8">
       <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
         {section.label}
       </p>
       <h2 className="font-display text-2xl font-bold tracking-tight text-white">
         {section.title}
       </h2>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400">
+      <p className="crono-lab-text-muted mt-3 max-w-2xl text-sm leading-relaxed">
         {section.description}
       </p>
-      <div className="mt-8 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center">
-        <p className="text-sm font-semibold text-zinc-200">
+      <div className="crono-lab-card-mist crono-lab-border-mist mt-8 rounded-2xl border border-dashed px-5 py-10 text-center">
+        <p className="crono-lab-text-secondary text-sm font-semibold">
           Esta área já responde ao clique e está pronta para receber conteúdo real.
         </p>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+        <p className="crono-lab-text-faint mt-2 text-xs leading-relaxed">
           O laboratório agora tem navegação funcional. O próximo passo é plugar a engine específica desta seção sem tocar no hub principal.
         </p>
       </div>
@@ -180,19 +183,21 @@ function PlaceholderSection({ section }) {
   );
 }
 
+
+
 const DashboardSidebar = memo(function DashboardSidebar({ isOpen, onClose, activeSectionId }) {
   return (
     <>
       {/* Mobile Backdrop */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+        <div
+          className="crono-lab-backdrop fixed inset-0 z-40 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
       
-      <aside 
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-white/[0.04] bg-[#0A0A12] shadow-2xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+      <aside
+        className={`crono-lab-sidebar crono-lab-shell-shadow fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r crono-lab-border-subtle transition-transform duration-300 lg:static lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -202,18 +207,18 @@ const DashboardSidebar = memo(function DashboardSidebar({ isOpen, onClose, activ
           <div className="px-6 py-6 lg:py-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-cyan-500 p-px shadow-lg shadow-cyan-500/20">
-                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#05050A] font-mono text-[11px] font-bold text-white">
+                <div className="crono-lab-brand-core flex h-full w-full items-center justify-center rounded-[11px] font-mono text-[11px] font-bold text-white">
                   CR
                 </div>
               </div>
               <span className="font-display text-xl font-bold tracking-tight text-white">
-                Projeto<span className="text-zinc-500">Crono</span>
+                Projeto<span className="crono-lab-inline-faint">Crono</span>
               </span>
             </div>
             
             {/* Mobile close button */}
-            <button 
-              className="lg:hidden p-2 text-zinc-500 hover:text-white"
+            <button
+              className="crono-lab-text-faint crono-lab-chip-soft lg:hidden rounded-lg border p-2 transition-colors hover:text-white"
               onClick={onClose}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -225,7 +230,7 @@ const DashboardSidebar = memo(function DashboardSidebar({ isOpen, onClose, activ
 
         {/* Nav */}
         <div className="flex-1 overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-white/10">
-          <p className="mb-3 px-4 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">
+          <p className="crono-lab-text-faint mb-3 px-4 font-mono text-[10px] font-bold uppercase tracking-[0.2em]">
             Navegação
           </p>
           <nav className="space-y-1">
@@ -243,7 +248,7 @@ const DashboardSidebar = memo(function DashboardSidebar({ isOpen, onClose, activ
         </div>
 
         {/* Footer */}
-        <div className="border-t border-white/[0.04] px-4 py-6">
+        <div className="crono-lab-border-subtle border-t px-4 py-6">
           <SidebarNavItem
             icon={CRONO_LAB_NAV_ITEMS[CRONO_LAB_NAV_ITEMS.length - 1].icon}
             label={CRONO_LAB_NAV_ITEMS[CRONO_LAB_NAV_ITEMS.length - 1].label}
@@ -252,7 +257,7 @@ const DashboardSidebar = memo(function DashboardSidebar({ isOpen, onClose, activ
             onNavigate={onClose}
           />
           <div className="mt-4 px-4">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">
+            <p className="crono-lab-text-faint font-mono text-[9px] uppercase tracking-widest">
               Versão 2.0.0-alpha
             </p>
           </div>
@@ -267,12 +272,12 @@ const DashboardSidebar = memo(function DashboardSidebar({ isOpen, onClose, activ
 
 function DashboardTopbar({ momentum, dateLabel, onOpenSidebar, sectionTitle }) {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.03] bg-[#0A0A12]/80 px-4 py-4 backdrop-blur-xl lg:px-10 lg:py-5 shadow-sm">
+    <header className="crono-lab-topbar crono-lab-panel-shadow sticky top-0 z-30 flex items-center justify-between border-b crono-lab-border-subtle px-4 py-4 backdrop-blur-xl lg:px-10 lg:py-5">
       <div className="flex items-center gap-3 lg:gap-4">
         {/* Mobile Hamburger Button */}
-        <button 
+        <button
           onClick={onOpenSidebar}
-          className="lg:hidden p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+          className="crono-lab-chip-soft crono-lab-text-muted lg:hidden rounded-lg border p-2 transition-colors hover:text-white"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -291,13 +296,13 @@ function DashboardTopbar({ momentum, dateLabel, onOpenSidebar, sectionTitle }) {
 
       <div className="flex items-center gap-4 lg:gap-6">
         <div className="hidden sm:flex flex-col items-end">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Status</span>
-          <span className="text-sm font-medium text-cyan-400 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="crono-lab-text-faint font-mono text-[10px] uppercase tracking-widest">Status</span>
+          <span className="flex items-center gap-1.5 text-sm font-medium text-cyan-300">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300" />
             Online
           </span>
         </div>
-        <div className="h-8 w-px bg-white/10 hidden sm:block" />
+        <div className="crono-lab-divider-soft hidden h-8 w-px sm:block" />
         <div className="flex items-center gap-3">
           <div
             className="flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wide transition-colors"
@@ -310,7 +315,7 @@ function DashboardTopbar({ momentum, dateLabel, onOpenSidebar, sectionTitle }) {
             <span>{momentum.icon}</span>
             <span className="hidden sm:inline">{momentum.label}</span>
           </div>
-          <span className="font-mono text-[10px] tracking-widest text-zinc-500 hidden md:block">
+          <span className="crono-lab-text-faint hidden font-mono text-[10px] tracking-widest md:block">
             {dateLabel}
           </span>
         </div>
@@ -414,7 +419,7 @@ export default function CronoLab() {
               </p>
               <div className="mt-5 w-full">
                 <LevelBar percent={levelProgress?.percent ?? 0} level={levelProgress?.level ?? 1} />
-                <div className="mt-2 flex items-center justify-between text-[11px] font-medium text-zinc-500">
+                <div className="crono-lab-text-faint mt-2 flex items-center justify-between text-[11px] font-medium">
                   <span>+{userProgress?.xpToday ?? 0} XP hoje</span>
                   <span>{levelProgress?.xpInLevel ?? 0} / {levelProgress?.xpForNextLevel ?? 0} XP</span>
                 </div>
@@ -426,11 +431,11 @@ export default function CronoLab() {
                 <p className="font-display text-4xl lg:text-[40px] font-black tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-rose-600">
                   {streakState?.currentStreak ?? 0}
                 </p>
-                <span className="text-sm font-medium text-zinc-500">dias</span>
+                <span className="crono-lab-text-faint text-sm font-medium">dias</span>
               </div>
               <div className="mt-6 flex items-center justify-between">
-                <p className="text-xs text-zinc-400">Recorde: {streakState?.highestStreak ?? 0}</p>
-                <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-1 font-mono text-[9px] font-bold text-zinc-300">
+                <p className="crono-lab-text-muted text-xs">Recorde: {streakState?.highestStreak ?? 0}</p>
+                <span className="crono-lab-chip-soft crono-lab-text-secondary rounded-full border px-2.5 py-1 font-mono text-[9px] font-bold">
                   {streakState?.streakMultiplier?.toFixed(1) ?? '1.0'}X XP
                 </span>
               </div>
@@ -441,10 +446,10 @@ export default function CronoLab() {
                 <p className="font-display text-4xl lg:text-[40px] font-black tracking-tight leading-none" style={{ color: severityStyle.text }}>
                   {backlogState?.totalDebtItems ?? 0}
                 </p>
-                <span className="text-sm font-medium text-zinc-500">itens</span>
+                <span className="crono-lab-text-faint text-sm font-medium">itens</span>
               </div>
               <div className="mt-6 flex items-center justify-between">
-                <p className="text-xs text-zinc-400 truncate pr-2">
+                <p className="crono-lab-text-muted truncate pr-2 text-xs">
                   {debtAge > 0 ? `Dívida ativa: ${debtAge}d` : 'Clean'}
                 </p>
                 <span
@@ -461,10 +466,10 @@ export default function CronoLab() {
                 <p className="font-display text-4xl lg:text-[40px] font-black tracking-tight leading-none text-zinc-100">
                   {todayProgress?.done ?? 0}
                 </p>
-                <span className="text-lg font-medium text-zinc-500">/ {todayProgress?.total ?? 0}</span>
+                <span className="crono-lab-text-faint text-lg font-medium">/ {todayProgress?.total ?? 0}</span>
               </div>
               <div className="mt-auto">
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                <div className="crono-lab-status-rail h-1.5 w-full overflow-hidden rounded-full bg-white/5">
                   <div
                     className="h-full transition-all duration-700 ease-out rounded-full"
                     style={{
@@ -473,21 +478,21 @@ export default function CronoLab() {
                     }}
                   />
                 </div>
-                <p className="mt-3 text-xs text-zinc-500 font-medium">
+                <p className="crono-lab-text-faint mt-3 text-xs font-medium">
                   {todayProgress?.validationsToday ?? 0} validações reais realizadas
                 </p>
               </div>
             </StatCard>
           </div>
 
-          <div className="lab-card overflow-hidden rounded-2xl border border-white/[0.04] bg-[#0A0A12]/60 p-5 md:p-6 lg:p-8 backdrop-blur-xl shadow-lg">
-            <p className="mb-6 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+          <div className="crono-lab-surface crono-lab-border-soft crono-lab-panel-shadow lab-card overflow-hidden rounded-2xl border p-5 backdrop-blur-xl md:p-6 lg:p-8">
+            <p className="crono-lab-text-faint mb-6 font-mono text-[10px] font-bold uppercase tracking-[0.2em]">
               Hub Tático de Sensores
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
               <div>
-                <p className="mb-2.5 text-[11px] font-medium text-zinc-500">Comportamento Geral</p>
-                <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-3.5 py-2">
+                <p className="crono-lab-text-faint mb-2.5 text-[11px] font-medium">Comportamento Geral</p>
+                <div className="crono-lab-card-mist crono-lab-border-subtle flex items-center gap-2 rounded-lg border px-3.5 py-2">
                   <span className="text-sm opacity-80">{momentum.icon}</span>
                   <span className="font-mono text-[10px] font-bold uppercase tracking-widest" style={{ color: momentum.color }}>
                     {momentum.label}
@@ -495,15 +500,15 @@ export default function CronoLab() {
                 </div>
               </div>
               <div>
-                <p className="mb-2.5 text-[11px] font-medium text-zinc-500">Check In Diário</p>
+                <p className="crono-lab-text-faint mb-2.5 text-[11px] font-medium">Check In Diário</p>
                 <BoolBadge value={isActiveDayNow} trueLabel="Ofensiva Salva" falseLabel="Em Risco" />
               </div>
               <div>
-                <p className="mb-2.5 text-[11px] font-medium text-zinc-500">Meta + Limpeza</p>
+                <p className="crono-lab-text-faint mb-2.5 text-[11px] font-medium">Meta + Limpeza</p>
                 <BoolBadge value={isCleanDayNow} trueLabel="Dia Perfeito" falseLabel="Pendente" />
               </div>
               <div>
-                <p className="mb-2.5 text-[11px] font-medium text-zinc-500">Peso do Acumulado</p>
+                <p className="crono-lab-text-faint mb-2.5 text-[11px] font-medium">Peso do Acumulado</p>
                 <span
                   className="inline-block rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest"
                   style={{ background: severityStyle.bg, borderColor: severityStyle.border, color: severityStyle.text }}
@@ -541,14 +546,14 @@ export default function CronoLab() {
     if (activeSection.id === 'missao') {
       return (
         <div className="space-y-6">
-          <div className="lab-card overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A12]/80 p-6 lg:p-8 backdrop-blur-xl shadow-xl">
+          <div className="crono-lab-surface-strong crono-lab-border-soft crono-lab-panel-shadow-strong lab-card overflow-hidden rounded-2xl border p-6 backdrop-blur-xl lg:p-8">
             <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
               Missão Diária
             </p>
             <h2 className="font-display text-2xl font-bold tracking-tight text-white">
               Abrir a disciplina certa e agir
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300">
+            <p className="crono-lab-text-soft mt-3 max-w-2xl text-sm leading-relaxed">
               Primeiro a frente prioritária. Depois o que existe dentro dela.
             </p>
           </div>
@@ -594,7 +599,7 @@ export default function CronoLab() {
 
   if (loadingState === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#05050A]">
+      <div className="crono-lab-loading flex min-h-screen items-center justify-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-500/20 border-t-pink-500" />
       </div>
     );
@@ -603,8 +608,8 @@ export default function CronoLab() {
   // ── Layout Shell ─
 
   return (
-    <div className="flex min-h-screen w-full bg-[#05050A] font-inter text-zinc-100 overflow-hidden">
-      
+    <div className="crono-lab-shell crono-lab-shell-breathable crono-lab-shell-open crono-lab-shell-calm crono-lab-shell-fixed flex min-h-screen w-full overflow-hidden font-inter text-zinc-100">
+
       {/* ── SIDEBAR ── */}
       {!isDisciplineInnerPage && (
         <DashboardSidebar
@@ -615,15 +620,17 @@ export default function CronoLab() {
       )}
 
       {/* ── MAIN AREA ── */}
-      <main className="relative flex min-h-screen flex-1 flex-col overflow-y-auto overflow-x-hidden">
-        
+      <main className="crono-lab-shell-layer relative flex min-h-screen flex-1 flex-col overflow-y-auto overflow-x-hidden">
+
         {/* Visual Background Pattern */}
-        <div 
-          className="pointer-events-none absolute inset-0 mix-blend-screen opacity-60" 
-          style={{ 
-            background: 'radial-gradient(circle at 10% 15%, rgba(255,62,165,0.08) 0%, transparent 40%), radial-gradient(circle at 85% 10%, rgba(0,232,255,0.06) 0%, transparent 40%), #05050A' 
-          }} 
-        />
+        <div className="crono-lab-atmosphere crono-lab-atmosphere-fixed crono-lab-atmosphere-subtle crono-lab-supportive-background crono-lab-page-glow pointer-events-none absolute inset-0" />
+        <div className="crono-lab-center-haze crono-lab-supportive-background pointer-events-none absolute inset-0" />
+        <div className="crono-lab-ambient-depth crono-lab-supportive-background pointer-events-none absolute inset-0" />
+        <div className="crono-lab-upper-bloom crono-lab-supportive-background pointer-events-none absolute inset-0" />
+        <div className="crono-lab-overlay-glow crono-lab-supportive-background pointer-events-none absolute inset-0" />
+
+        <div className="crono-lab-content-dominant relative z-10 flex min-h-screen flex-1 flex-col">
+
 
         {/* ── TOPBAR ── */}
         {!isDisciplineInnerPage && (
@@ -643,12 +650,13 @@ export default function CronoLab() {
           </div>
           
           {/* Footer brand */}
-          <div className="mt-16 lg:mt-24 mb-8 text-center opacity-60">
-             <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-zinc-600">
+          <div className="mt-16 mb-8 text-center opacity-60 lg:mt-24">
+             <p className="crono-lab-footer font-mono text-[9px] uppercase tracking-[0.25em]">
                PROJETO CRONO • SISTEMAS OPERACIONAIS DE ESTUDO
              </p>
           </div>
 
+        </div>
         </div>
       </main>
     </div>

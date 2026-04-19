@@ -24,7 +24,7 @@ export default function PrimaryProgressChartCard({ chart, onOpenPanel }) {
             className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 dark:hover:text-stone-950"
             aria-expanded="false"
           >
-            Detalhes
+            {chart.buttonLabel ?? 'Ver progresso'}
           </button>
         </div>
       </div>

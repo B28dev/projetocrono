@@ -263,8 +263,8 @@ function DisciplineCard({
     : null;
   const activeContent = activeItem ? contentMap[activeItem.contentItemId] : null;
   const cardTone = index === 0
-    ? 'border-fuchsia-400/22 bg-[linear-gradient(180deg,rgba(15,10,24,0.95),rgba(11,11,19,0.9))] shadow-[0_0_40px_rgba(217,70,239,0.08)]'
-    : 'border-white/[0.08] bg-[#0A0A12]/82';
+    ? 'border-fuchsia-400/20 bg-[linear-gradient(180deg,rgba(17,12,27,0.88),rgba(11,11,19,0.8))] shadow-[0_0_34px_rgba(217,70,239,0.06)]'
+    : 'border-white/[0.09] bg-[rgba(13,13,20,0.72)]';
 
   return (
     <div className={`overflow-hidden rounded-[30px] border backdrop-blur-xl transition-all duration-300 ${cardTone}`}>
@@ -293,7 +293,7 @@ function DisciplineCard({
             {bucket.statusLine}
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-zinc-300">
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-[rgba(192,199,227,0.82)]">
             <span>{bucket.previewCountLabel}</span>
             <span>{bucket.completedOfficialCount}/{bucket.totalOfficialCount} oficial</span>
           </div>
@@ -319,7 +319,7 @@ function DisciplineCard({
         <div className="border-t border-white/[0.08] px-5 py-5 lg:px-6 lg:py-6 animate-in fade-in duration-300">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
             <div className="space-y-4">
-              <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-4">
+              <div className="rounded-[26px] border border-white/[0.11] bg-white/[0.035] p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-300">
@@ -328,7 +328,7 @@ function DisciplineCard({
                     <p className="mt-2 text-base font-semibold leading-relaxed text-white">
                       {bucket.nextActionItem ? getMissionItemTitle(bucket.nextActionItem, contentMap) : 'Sem ação aberta'}
                     </p>
-                    <p className="mt-1 text-sm text-zinc-300">
+                    <p className="mt-1 text-sm text-[rgba(192,199,227,0.82)]">
                       {bucket.nextActionItem?.reason ?? 'Abra a frente mais útil e siga.'}
                     </p>
                   </div>
@@ -350,7 +350,7 @@ function DisciplineCard({
                     <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
                       Questões sugeridas
                     </p>
-                    <p className="mt-1 text-sm text-zinc-300">
+                    <p className="mt-1 text-sm text-[rgba(192,199,227,0.82)]">
                       Só o essencial para avançar nesta frente.
                     </p>
                   </div>
@@ -384,7 +384,7 @@ function DisciplineCard({
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-4">
+              <div className="rounded-[26px] border border-white/[0.11] bg-white/[0.035] p-4">
                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
                   Conteúdos relacionados
                 </p>
@@ -412,7 +412,7 @@ function DisciplineCard({
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm text-zinc-300">
+                  <p className="mt-3 text-sm text-[rgba(192,199,227,0.82)]">
                     Nada além do núcleo principal nesta frente.
                   </p>
                 )}
@@ -509,8 +509,8 @@ export default function CronoLabMissionPanel({
   };
 
   return (
-    <div className="lab-card flex-1 overflow-hidden rounded-[32px] border border-white/[0.08] bg-[#090912]/88 shadow-xl backdrop-blur-xl">
-      <div className={`border-b border-white/[0.06] ${embedded ? 'px-5 py-5 lg:px-6' : 'px-6 py-6 lg:px-8 lg:py-7'}`}>
+    <div className="lab-card flex-1 overflow-hidden rounded-[32px] border border-white/[0.09] bg-[rgba(11,11,18,0.76)] shadow-[0_18px_42px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+      <div className={`border-b border-white/[0.07] ${embedded ? 'px-5 py-5 lg:px-6' : 'px-6 py-6 lg:px-8 lg:py-7'}`}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
@@ -519,7 +519,7 @@ export default function CronoLabMissionPanel({
             <h2 className="mt-2 text-xl font-semibold tracking-tight text-white lg:text-[28px]">
               {embedded ? 'Launcher do dia' : 'Hub disciplinado do dia'}
             </h2>
-            <p className="mt-2 text-sm text-zinc-300">
+            <p className="mt-2 text-sm text-[rgba(205,211,234,0.84)]">
               {statusMeta.helper}
             </p>
           </div>
@@ -528,7 +528,7 @@ export default function CronoLabMissionPanel({
             <span className={`rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] ${statusMeta.badge}`}>
               {statusMeta.label}
             </span>
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-200">
+            <span className="rounded-full border border-white/[0.11] bg-white/[0.045] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-[rgba(205,211,234,0.84)]">
               {completedOfficialCount}/{officialCount} oficial
             </span>
           </div>
@@ -536,13 +536,13 @@ export default function CronoLabMissionPanel({
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
           <div>
-            <div className="mb-2 flex items-center justify-between text-[11px] text-zinc-300">
+            <div className="mb-2 flex items-center justify-between text-[11px] text-[rgba(192,199,227,0.82)]">
               <span>O que realmente move hoje</span>
               <span>{progressPercent}%</span>
             </div>
             <ProgressBar value={progressPercent} color="blue" />
           </div>
-          <p className="text-sm text-zinc-300 lg:text-right">
+          <p className="text-sm text-[rgba(192,199,227,0.82)] lg:text-right">
             {disciplineBuckets.length} frente{disciplineBuckets.length === 1 ? '' : 's'} prioritária{disciplineBuckets.length === 1 ? '' : 's'} para abrir.
           </p>
         </div>

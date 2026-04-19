@@ -25,10 +25,13 @@ export default function SecondaryStack({
 }) {
   return (
     <section className="space-y-3" aria-label="Secondary stack">
-      <div>
-        <h2 className="text-xl font-semibold text-white dark:text-stone-950">
-          Detalhe sob demanda
+      <div className="max-w-2xl">
+        <h2 className="text-lg font-semibold text-white dark:text-stone-950">
+          Apoios secundários
         </h2>
+        <p className="mt-1 text-sm text-zinc-400 dark:text-stone-600">
+          Só o que ajuda a decidir sem poluir o workspace.
+        </p>
       </div>
 
       <div className="space-y-3">

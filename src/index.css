@@ -30,28 +30,242 @@
 }
 
 .theme-cyberpunk {
-  --cp-bg: #08080f;
+  --cp-bg: #0b0b13;
   --cp-accent-pink: #ff3ea5;
   --cp-accent-cyan: #00e8ff;
-  --cp-surface-1: #0d0d1a;
-  --cp-surface-2: #12122b;
-  --cp-surface-3: rgba(18, 18, 43, 0.78);
-  --cp-surface-4: rgba(8, 8, 15, 0.92);
+  --cp-surface-1: #10101d;
+  --cp-surface-2: #17172f;
+  --cp-surface-3: rgba(22, 22, 46, 0.74);
+  --cp-surface-4: rgba(10, 10, 19, 0.88);
   --cp-border: rgba(255, 255, 255, 0.1);
   --cp-border-strong: rgba(0, 232, 255, 0.22);
   --cp-text: #f6f7ff;
-  --cp-muted: #99a0c7;
-  --cp-glass: linear-gradient(180deg, rgba(18, 18, 43, 0.78) 0%, rgba(8, 8, 15, 0.9) 100%);
-  --cp-glass-strong: linear-gradient(180deg, rgba(18, 18, 43, 0.9) 0%, rgba(8, 8, 15, 0.96) 100%);
+  --cp-muted: #a4abd0;
+  --cp-glass: linear-gradient(180deg, rgba(22, 22, 46, 0.72) 0%, rgba(10, 10, 19, 0.86) 100%);
+  --cp-glass-strong: linear-gradient(180deg, rgba(22, 22, 46, 0.84) 0%, rgba(10, 10, 19, 0.92) 100%);
   min-height: 100svh;
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(circle at 12% 18%, rgba(255, 62, 165, 0.18), transparent 24%),
-    radial-gradient(circle at 86% 10%, rgba(0, 232, 255, 0.18), transparent 22%),
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04), transparent 30%),
-    linear-gradient(180deg, #08080f 0%, #0b0b14 42%, #08080f 100%);
+    radial-gradient(circle at 14% 18%, rgba(255, 62, 165, 0.2), transparent 30%),
+    radial-gradient(circle at 84% 10%, rgba(0, 232, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 52% 12%, rgba(154, 167, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, #0d0d17 0%, #11111c 40%, #0c0c15 100%);
   color: var(--cp-text);
+}
+
+.theme-cyberpunk .crono-lab-shell {
+  background:
+    linear-gradient(180deg, rgba(14, 14, 24, 0.94) 0%, rgba(11, 11, 20, 0.92) 34%, rgba(10, 10, 18, 0.96) 100%),
+    radial-gradient(circle at 16% 18%, rgba(255, 62, 165, 0.09), transparent 34%),
+    radial-gradient(circle at 84% 10%, rgba(0, 232, 255, 0.08), transparent 32%),
+    radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.035), transparent 30%);
+}
+
+.theme-cyberpunk .crono-lab-atmosphere {
+  background:
+    radial-gradient(circle at 14% 16%, rgba(255, 62, 165, 0.14) 0%, transparent 42%),
+    radial-gradient(circle at 82% 10%, rgba(0, 232, 255, 0.12) 0%, transparent 40%),
+    radial-gradient(ellipse 68% 52% at 50% 4%, rgba(148, 163, 255, 0.08) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(20, 20, 34, 0.18) 0%, rgba(12, 12, 20, 0.06) 46%, rgba(8, 8, 14, 0) 100%);
+}
+
+.theme-cyberpunk .crono-lab-sidebar {
+  background:
+    linear-gradient(180deg, rgba(15, 15, 27, 0.82) 0%, rgba(10, 10, 18, 0.9) 100%),
+    radial-gradient(circle at 18% 10%, rgba(255, 62, 165, 0.05), transparent 34%),
+    radial-gradient(circle at 92% 0%, rgba(0, 232, 255, 0.045), transparent 28%);
+}
+
+.theme-cyberpunk .crono-lab-topbar {
+  background:
+    linear-gradient(180deg, rgba(18, 18, 31, 0.7) 0%, rgba(11, 11, 20, 0.64) 100%),
+    radial-gradient(circle at 82% 0%, rgba(0, 232, 255, 0.04), transparent 26%);
+}
+
+.theme-cyberpunk .crono-lab-brand-core {
+  background: linear-gradient(180deg, rgba(12, 12, 22, 0.96) 0%, rgba(9, 9, 17, 0.98) 100%);
+}
+
+.theme-cyberpunk .crono-lab-loading {
+  background: linear-gradient(180deg, #0d0d17 0%, #0b0b13 100%);
+}
+
+.theme-cyberpunk .crono-lab-footer {
+  color: rgba(161, 168, 200, 0.8);
+}
+
+.theme-cyberpunk .crono-lab-surface {
+  background: linear-gradient(180deg, rgba(17, 17, 29, 0.66) 0%, rgba(10, 10, 18, 0.76) 100%);
+}
+
+.theme-cyberpunk .crono-lab-surface-strong {
+  background: linear-gradient(180deg, rgba(17, 17, 29, 0.76) 0%, rgba(10, 10, 18, 0.84) 100%);
+}
+
+.theme-cyberpunk .crono-lab-border-soft {
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.theme-cyberpunk .crono-lab-border-subtle {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-cyberpunk .crono-lab-text-soft {
+  color: rgba(223, 228, 248, 0.82);
+}
+
+.theme-cyberpunk .crono-lab-text-muted {
+  color: rgba(173, 181, 214, 0.76);
+}
+
+.theme-cyberpunk .crono-lab-text-faint {
+  color: rgba(147, 155, 189, 0.78);
+}
+
+.theme-cyberpunk .crono-lab-shell-shadow {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+}
+
+.theme-cyberpunk .crono-lab-panel-shadow {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.theme-cyberpunk .crono-lab-panel-shadow-strong {
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+}
+
+.theme-cyberpunk .crono-lab-chip-soft {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-cyberpunk .crono-lab-chip-soft:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.theme-cyberpunk .crono-lab-divider-soft {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.theme-cyberpunk .crono-lab-card-mist {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.theme-cyberpunk .crono-lab-card-mist-strong {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.theme-cyberpunk .crono-lab-card-mist-hover:hover {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.theme-cyberpunk .crono-lab-border-mist {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-cyberpunk .crono-lab-border-mist-strong {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-cyberpunk .crono-lab-text-secondary {
+  color: rgba(205, 211, 234, 0.84);
+}
+
+.theme-cyberpunk .crono-lab-text-tertiary {
+  color: rgba(170, 178, 210, 0.8);
+}
+
+.theme-cyberpunk .crono-lab-status-rail {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.theme-cyberpunk .crono-lab-backdrop {
+  background: rgba(4, 4, 10, 0.58);
+}
+
+.theme-cyberpunk .crono-lab-page-glow {
+  opacity: 0.78;
+}
+
+.theme-cyberpunk .crono-lab-overlay-glow {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 62, 165, 0.08), transparent 30%),
+    radial-gradient(circle at 88% 6%, rgba(0, 232, 255, 0.08), transparent 28%);
+}
+
+.theme-cyberpunk .crono-lab-inline-faint {
+  color: rgba(145, 153, 188, 0.76);
+}
+
+.theme-cyberpunk .crono-lab-center-haze {
+  background: radial-gradient(ellipse 66% 46% at 50% 6%, rgba(173, 181, 255, 0.06), transparent 68%);
+}
+
+.theme-cyberpunk .crono-lab-upper-bloom {
+  background: linear-gradient(180deg, rgba(19, 19, 31, 0.18) 0%, rgba(19, 19, 31, 0.08) 46%, rgba(19, 19, 31, 0) 100%);
+}
+
+.theme-cyberpunk .crono-lab-ambient-depth {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(255, 62, 165, 0.06), transparent 36%),
+    radial-gradient(circle at 78% 14%, rgba(0, 232, 255, 0.06), transparent 34%);
+}
+
+.theme-cyberpunk .crono-lab-shell-fixed,
+.theme-cyberpunk .crono-lab-atmosphere-fixed {
+  background-attachment: fixed;
+}
+
+.theme-cyberpunk .crono-lab-atmosphere-subtle {
+  opacity: 0.72;
+}
+
+.theme-cyberpunk .crono-lab-supportive-background {
+  z-index: 0;
+}
+
+.theme-cyberpunk .crono-lab-content-dominant {
+  z-index: 10;
+}
+
+.theme-cyberpunk .crono-lab-shell-breathable {
+  background-image:
+    linear-gradient(180deg, rgba(14, 14, 24, 0.94) 0%, rgba(11, 11, 20, 0.92) 34%, rgba(10, 10, 18, 0.96) 100%),
+    radial-gradient(circle at 14% 18%, rgba(255, 62, 165, 0.08), transparent 34%),
+    radial-gradient(circle at 84% 10%, rgba(0, 232, 255, 0.07), transparent 32%),
+    radial-gradient(circle at 50% 2%, rgba(255, 255, 255, 0.03), transparent 26%);
+}
+
+.theme-cyberpunk .crono-lab-shell-layer {
+  position: relative;
+}
+
+.theme-cyberpunk .crono-lab-shell-layer > * {
+  position: relative;
+  z-index: 1;
+}
+
+.theme-cyberpunk .crono-lab-shell-layer::before,
+.theme-cyberpunk .crono-lab-shell-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.theme-cyberpunk .crono-lab-shell-layer::before {
+  background: radial-gradient(ellipse 70% 48% at 50% 8%, rgba(173, 181, 255, 0.05), transparent 70%);
+  opacity: 0.7;
+}
+
+.theme-cyberpunk .crono-lab-shell-layer::after {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 62, 165, 0.05), transparent 28%),
+    radial-gradient(circle at 88% 6%, rgba(0, 232, 255, 0.05), transparent 26%);
+  opacity: 0.55;
 }
 
 .theme-cyberpunk::before {
@@ -60,11 +274,11 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 40px 40px;
   mask-image: radial-gradient(circle at center, black, transparent 88%);
-  opacity: 0.35;
+  opacity: 0.26;
   z-index: -2;
 }
 
@@ -73,9 +287,9 @@
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 24px 24px;
-  opacity: 0.08;
+  opacity: 0.05;
   z-index: -1;
 }
 
@@ -110,8 +324,8 @@
 
   .theme-cyberpunk .cyber-shell {
     background:
-      radial-gradient(circle at top, rgba(255, 62, 165, 0.12), transparent 26%),
-      radial-gradient(circle at 85% 12%, rgba(0, 232, 255, 0.12), transparent 24%);
+      radial-gradient(circle at top, rgba(255, 62, 165, 0.12), transparent 30%),
+      radial-gradient(circle at 85% 12%, rgba(0, 232, 255, 0.12), transparent 28%);
   }
 
   .theme-cyberpunk .cyber-glass {
@@ -218,86 +432,5 @@
     color: transparent;
     -webkit-text-stroke: 1.6px rgba(244, 244, 245, 0.88);
     text-shadow: none;
-  }
-
-  .hero-title-outline::before {
-    content: none;
-  }
-
-  .dark .hero-title-outline {
-    -webkit-text-stroke: 1.6px rgba(28, 25, 23, 0.78);
-  }
-
-  .title-revealed {
-    overflow: visible !important;
-  }
-
-  .title-revealed .word-shell {
-    overflow: visible !important;
-  }
-
-  .theme-cyberpunk .hero-title-outline {
-    z-index: 0;
-    -webkit-text-stroke: 0 transparent !important;
-    text-shadow: none;
-  }
-
-  .theme-cyberpunk .hero-title-gradient {
-    color: transparent !important;
-    background-image: linear-gradient(90deg, #ff3ea5 0%, #ff66ba 34%, #7cecff 72%, #00e8ff 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent !important;
-    -webkit-text-stroke: 0 transparent !important;
-    text-shadow:
-      0 0 10px rgba(255, 62, 165, 0.22),
-      0 0 18px rgba(0, 232, 255, 0.16);
-  }
-
-  .theme-cyberpunk .hero-title-outline::before,
-  .theme-cyberpunk .hero-title-gradient::before {
-    content: none;
-  }
-
-  .theme-cyberpunk .hero-title-outline::after,
-  .theme-cyberpunk .hero-title-gradient::after {
-    content: none;
-  }
-
-  .theme-cyberpunk .hero-title:hover .hero-title-gradient,
-  .theme-cyberpunk .hero-title-gradient:hover {
-    text-shadow:
-      0 0 12px rgba(255, 62, 165, 0.28),
-      0 0 22px rgba(0, 232, 255, 0.22);
-  }
-
-  @keyframes neonPinkCyanBlink {
-    0%,
-    100% {
-      color: #ffe4f4;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 10px #f472b6,
-        0 0 20px #ec4899,
-        0 0 34px rgba(236, 72, 153, 0.95),
-        0 0 52px rgba(236, 72, 153, 0.88);
-      opacity: 0.95;
-    }
-
-    50% {
-      color: #ecfeff;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 10px #67e8f9,
-        0 0 20px #22d3ee,
-        0 0 34px rgba(6, 182, 212, 0.95),
-        0 0 52px rgba(6, 182, 212, 0.88);
-      opacity: 1;
-    }
-  }
-
-  .neon-pink-cyan-blink {
-    animation: neonPinkCyanBlink 3.6s ease-in-out infinite;
-    will-change: color, text-shadow, opacity;
   }
 }

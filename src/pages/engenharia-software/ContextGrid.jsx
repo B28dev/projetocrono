@@ -19,13 +19,16 @@ export default function ContextGrid({
 }) {
   return (
     <section className="space-y-3" aria-label={contextGrid.title}>
-      <div>
-        <h2 className="text-xl font-semibold text-white dark:text-stone-950">
+      <div className="max-w-2xl">
+        <h2 className="text-lg font-semibold text-white dark:text-stone-950">
           {contextGrid.title}
         </h2>
+        <p className="mt-1 text-sm text-zinc-400 dark:text-stone-600">
+          Leitura rápida do contexto. Apoio, não centro da página.
+        </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 lg:grid-cols-3">
         {contextGrid.blocks.map((block) => {
           const Component = CARD_COMPONENTS[block.type];
           return Component ? (

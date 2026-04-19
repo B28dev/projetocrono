@@ -20,11 +20,11 @@ export default function TimelineSection({
   const timeline = section.data;
 
   return (
-    <article className="rounded-lg border border-white/[0.08] bg-white/[0.018] p-5 backdrop-blur-xl dark:border-stone-300 dark:bg-white/80">
+    <article className="rounded-xl border border-white/[0.08] bg-white/[0.018] p-4 backdrop-blur-xl dark:border-stone-300 dark:bg-white/80">
       <div className="flex flex-col gap-4">
         <div className="max-w-3xl">
-          <p className="text-xs font-semibold text-cyan-300 dark:text-cyan-700">linha de evolução</p>
-          <h3 className="mt-1 text-xl font-bold text-white dark:text-stone-950">{timeline.title}</h3>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300 dark:text-cyan-700">linha do plano</p>
+          <h3 className="mt-1 text-lg font-semibold text-white dark:text-stone-950">{timeline.title}</h3>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -32,30 +32,30 @@ export default function TimelineSection({
           <button
             type="button"
             onClick={() => onOpenPanel?.('timeline')}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 dark:hover:text-stone-950"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-700 dark:hover:text-stone-950"
             aria-expanded="false"
           >
-            Detalhes
+            Ver janela
           </button>
         </div>
       </div>
 
-      <div className="mt-4 space-y-1">
+      <div className="mt-4 space-y-2">
         {timeline.items.map((item) => {
           const statusClass = STATUS_CLASS_MAP[item.status] ?? STATUS_CLASS_MAP.planned;
           const isExpanded = expandedTimelineEventId === item.id;
 
           return (
-            <article key={item.id} className="group border-b border-white/[0.08] py-3 last:border-0 dark:border-stone-200">
+            <article key={item.id} className="rounded-lg border border-white/[0.08] bg-white/[0.025] px-3.5 py-3 dark:border-stone-200 dark:bg-stone-50">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <h4 className="text-base font-semibold text-white dark:text-stone-950">{item.label}</h4>
+                    <h4 className="text-sm font-semibold text-white dark:text-stone-950">{item.label}</h4>
                     {item.isExamDay ? <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-300 dark:bg-amber-500/10 dark:text-amber-700">prova</span> : null}
                   </div>
-                  <p className="mt-1 text-sm font-medium text-zinc-400 dark:text-stone-600">{item.date}</p>
+                  <p className="mt-1 text-xs font-medium text-zinc-400 dark:text-stone-600">{item.date}</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <span className={`inline-flex min-h-7 items-center rounded-md border px-2.5 py-0.5 text-xs font-bold ${statusClass}`}>
                     {item.completion}
                   </span>
@@ -73,9 +73,9 @@ export default function TimelineSection({
                 </div>
               </div>
               {isExpanded ? (
-                <div id={`timeline-event-${item.id}`} className="mt-4 border-l-2 border-white/10 pl-4 dark:border-stone-200">
+                <div id={`timeline-event-${item.id}`} className="mt-3 border-t border-white/[0.08] pt-3 dark:border-stone-200">
                   <p className="text-sm font-medium leading-relaxed text-zinc-300 dark:text-stone-700">{item.summary}</p>
-                  <p className="mt-2 text-xs text-zinc-400 dark:text-stone-600">{item.detail.body}</p>
+                  <p className="mt-1 text-xs text-zinc-400 dark:text-stone-600">{item.detail.body}</p>
                 </div>
               ) : null}
             </article>

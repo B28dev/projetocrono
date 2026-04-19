@@ -3,30 +3,334 @@ import { getSoftwareEngineeringPilotData } from '../../gamification/pilots/softw
 const DETAILS_SECTION_META = {
   subjects: {
     id: 'subjects',
-    title: 'Blocos de estudo',
-    description: 'Base organizada por bloco.',
+    title: 'Conteúdos',
+    description: 'Blocos para abrir por assunto.',
   },
   topics: {
     id: 'topics',
-    title: 'Temas mais cobrados',
-    description: 'Assuntos que mais puxam a prova.',
+    title: 'Prioridades',
+    description: 'Temas que mais puxam a prova.',
   },
   resources: {
     id: 'resources',
-    title: 'Recursos de apoio',
-    description: 'Playlists e vídeos sob demanda.',
+    title: 'Apoios',
+    description: 'Playlists e vídeos úteis.',
   },
   summaries: {
     id: 'summaries',
-    title: 'Base de revisão',
+    title: 'Revisão',
     description: 'Resumos e leitura de prova.',
   },
   exercises: {
     id: 'exercises',
-    title: 'Exercícios preparados',
+    title: 'Questões e flashcards',
     description: 'Treino pronto por bloco.',
   },
 };
+
+const CONTEXT_BLOCK_ORDER = ['bottleneck', 'cadence', 'composition'];
+
+function sortContextBlocks(blocks) {
+  return [...blocks].sort((left, right) => CONTEXT_BLOCK_ORDER.indexOf(left.type) - CONTEXT_BLOCK_ORDER.indexOf(right.type));
+}
+
+function sortDetailSections(sections) {
+  const order = ['subjects', 'exercises', 'topics', 'summaries', 'resources'];
+  return [...sections].sort((left, right) => order.indexOf(left.type) - order.indexOf(right.type));
+}
+
+function limitTopKpis(items = []) {
+  return items.slice(0, 3);
+}
+
+function getHeaderCue({ pilot, pendingGroups }) {
+  const topGroup = pendingGroups[0];
+
+  if (topGroup) {
+    return `${topGroup.label} · ${topGroup.items.length} item${topGroup.items.length === 1 ? '' : 's'}`;
+  }
+
+  return pilot.overview.hero.metricLabel;
+}
+
+function getHeaderSupport({ pilot, nextAction }) {
+  return nextAction.items[0]?.topic ?? pilot.overview.currentTopicLabel;
+}
+
+function getPrimaryChartButtonLabel(chart) {
+  return chart.centerValue ? `Progresso ${chart.centerValue}` : 'Ver progresso';
+}
+
+function compressPendingFilterOptions(options) {
+  return options.map((option) => ({
+    ...option,
+    label: option.id === 'important' ? 'Hoje' : option.label,
+  }));
+}
+
+function getDetailDescription(pilot) {
+  return pilot.recovery.overdueCount > 0
+    ? 'Abra por prioridade e avance sem ruído.'
+    : 'Abra só o que ajuda a estudar agora.';
+}
+
+function getContextDescription() {
+  return 'Leitura rápida para orientar a disciplina sem tomar o topo.';
+}
+
+function getSecondaryTitle(sectionId) {
+  if (sectionId === 'pending') return 'Recuperação';
+  if (sectionId === 'timeline') return 'Linha do plano';
+  return 'Apoio';
+}
+
+function getSecondaryDescription(sectionId) {
+  if (sectionId === 'pending') return 'Pendências quando houver custo real.';
+  if (sectionId === 'timeline') return 'Janela curta do que está vivo.';
+  return 'Contexto útil, sem excesso.';
+}
+
+function compressSupportTitle() {
+  return 'Apoios úteis';
+}
+
+function compressSupportDescription() {
+  return 'Suporte rápido para destravar ou revisar.';
+}
+
+function getDetailsTitle() {
+  return 'Blocos de estudo';
+}
+
+function getFirstFoldTitle() {
+  return 'Workspace principal';
+}
+
+function getHeaderEyebrow() {
+  return 'Workspace da disciplina';
+}
+
+function getHeaderStatus({ pilot, pendingGroups }) {
+  const topGroup = pendingGroups[0];
+  if (!topGroup) return pilot.overview.hero.statusLabel;
+  return `${pilot.overview.hero.statusLabel} · ${topGroup.label}`;
+}
+
+function getHeaderCtaLabel() {
+  return 'Abrir blocos';
+}
+
+function getContextTitle() {
+  return 'Contexto rápido';
+}
+
+function getHeroSummaryLine(summary) {
+  return summary;
+}
+
+function getPendingSectionTitle() {
+  return 'Recuperação';
+}
+
+function getTimelineSectionTitle() {
+  return 'Linha do plano';
+}
+
+function getSupportSectionTitle() {
+  return 'Apoios úteis';
+}
+
+function getNextActionCtaLabel() {
+  return 'Abrir blocos';
+}
+
+function getNextActionDetailTitle() {
+  return 'Ordem sugerida';
+}
+
+function getProgressTitle() {
+  return 'Progresso';
+}
+
+function getProgressDescription() {
+  return 'Sinal rápido da disciplina.';
+}
+
+function getTimelineDescription() {
+  return 'Marcos visíveis sem ruído.';
+}
+
+function getPendingGroupDescription(label) {
+  if (label === 'Crítico') return 'Custo aberto no ritmo.';
+  if (label === 'Importante') return 'Fecha o dia atual.';
+  return 'Pode esperar.';
+}
+
+function getSupportModeLabel(modeLabel) {
+  return modeLabel;
+}
+
+function getDetailsSectionList(sections) {
+  return sortDetailSections(sections);
+}
+
+function getContextBlocksList(blocks) {
+  return sortContextBlocks(blocks);
+}
+
+function getTopKpiList(items) {
+  return limitTopKpis(items);
+}
+
+function getHeaderPeriodLabel(pilot, shiftLabel, cue) {
+  return `${pilot.overview.period} · ${shiftLabel} · ${cue}`;
+}
+
+function getHeaderMetaSupport(pilot, nextAction) {
+  return getHeaderSupport({ pilot, nextAction });
+}
+
+function getDetailsDescriptionValue(pilot) {
+  return getDetailDescription(pilot);
+}
+
+function getContextDescriptionValue() {
+  return getContextDescription();
+}
+
+function getCompressedPendingGroups(groups) {
+  return groups.map((group) => ({
+    ...group,
+    description: getPendingGroupDescription(group.label),
+  }));
+}
+
+function getCompressedSupportItems(items) {
+  return items.map((item) => ({
+    ...item,
+    body: item.body,
+  }));
+}
+
+function getCompactSummary(summary) {
+  return getHeroSummaryLine(summary);
+}
+
+function getCompactTopKpis(items) {
+  return getTopKpiList(items);
+}
+
+function getCompactDetailSections(sections) {
+  return getDetailsSectionList(sections);
+}
+
+function getCompactContextBlocks(blocks) {
+  return getContextBlocksList(blocks);
+}
+
+function getCompactFilterOptions(options) {
+  return compressPendingFilterOptions(options);
+}
+
+function getCompactHeaderStatus(args) {
+  return getHeaderStatus(args);
+}
+
+function getCompactHeaderCue(args) {
+  return getHeaderCue(args);
+}
+
+function getCompactHeaderSupport(args) {
+  return getHeaderMetaSupport(args);
+}
+
+function getCompactPrimaryChartButtonLabel(chart) {
+  return getPrimaryChartButtonLabel(chart);
+}
+
+function getCompactNextActionCtaLabel() {
+  return getNextActionCtaLabel();
+}
+
+function getCompactNextActionDetailTitle() {
+  return getNextActionDetailTitle();
+}
+
+function getCompactProgressTitle() {
+  return getProgressTitle();
+}
+
+function getCompactProgressDescription() {
+  return getProgressDescription();
+}
+
+function getCompactTimelineDescription() {
+  return getTimelineDescription();
+}
+
+function getCompactSupportTitle() {
+  return compressSupportTitle();
+}
+
+function getCompactSupportDescription() {
+  return compressSupportDescription();
+}
+
+function getCompactContextTitle() {
+  return getContextTitle();
+}
+
+function getCompactDetailsTitle() {
+  return getDetailsTitle();
+}
+
+function getCompactFirstFoldTitle() {
+  return getFirstFoldTitle();
+}
+
+function getCompactHeaderEyebrow() {
+  return getHeaderEyebrow();
+}
+
+function getCompactHeaderCtaLabel() {
+  return getHeaderCtaLabel();
+}
+
+function getCompactPendingSectionTitle() {
+  return getPendingSectionTitle();
+}
+
+function getCompactTimelineSectionTitle() {
+  return getTimelineSectionTitle();
+}
+
+function getCompactSupportSectionTitle() {
+  return getSupportSectionTitle();
+}
+
+function getCompactSupportModeLabel(modeLabel) {
+  return getSupportModeLabel(modeLabel);
+}
+
+function getCompactSecondaryTitle(sectionId) {
+  return getSecondaryTitle(sectionId);
+}
+
+function getCompactSecondaryDescription(sectionId) {
+  return getSecondaryDescription(sectionId);
+}
+
+function getCompactHeaderPeriodLabel(pilot, shiftLabel, cue) {
+  return getHeaderPeriodLabel(pilot, shiftLabel, cue);
+}
+
+function getCompactDetailsDescriptionValue(pilot) {
+  return getDetailsDescriptionValue(pilot);
+}
+
+function getCompactContextDescriptionValue() {
+  return getContextDescriptionValue();
+}
 
 const PERIOD_OPTIONS = [
   { id: '7d', label: '7 dias', days: 7 },
@@ -505,75 +809,112 @@ export function getSoftwareEngineeringDashboardViewModel({
   selectedPeriodKey = '14d',
 } = {}) {
   const pilot = getSoftwareEngineeringPilotData({ shift });
+  const pendingGroups = getCompressedPendingGroups(getPendingGroupsViewModel({ pilot }));
   const heroSummary = getHeroSummary({ pilot });
-  const kpiItems = getKpiItems({ pilot });
-  const pendingGroups = getPendingGroupsViewModel({ pilot });
   const bottlenecks = getBottlenecksViewModel({ pilot });
   const nextAction = getNextActionViewModel({ pilot, bottlenecksLead: bottlenecks.lead, pendingGroups });
   const progressChart = getProgressChartViewModel({ pilot });
   const composition = getCompositionViewModel({ pilot });
   const cadence = getCadenceViewModel({ pilot, periodKey: selectedPeriodKey });
   const timelineEvents = getTimelineEventsViewModel({ pilot, periodKey: selectedPeriodKey });
-  const supportItems = getSupportItemsViewModel({ pilot, bottlenecksLead: bottlenecks.lead });
+  const supportItems = {
+    ...getSupportItemsViewModel({ pilot, bottlenecksLead: bottlenecks.lead }),
+    title: getCompactSupportTitle(),
+    description: getCompactSupportDescription(),
+    modeLabel: getCompactSupportModeLabel(getSupportItemsViewModel({ pilot, bottlenecksLead: bottlenecks.lead }).modeLabel),
+    items: getCompressedSupportItems(getSupportItemsViewModel({ pilot, bottlenecksLead: bottlenecks.lead }).items),
+  };
+  const headerCue = getCompactHeaderCue({ pilot, pendingGroups });
 
   return {
     status: 'ready',
     periodOptions: PERIOD_OPTIONS,
     selectedPeriodKey,
-    priorityFilterOptions: [
+    priorityFilterOptions: getCompactFilterOptions([
       { id: 'all', label: 'Todas' },
       { id: 'critical', label: 'Crítico' },
       { id: 'important', label: 'Importante' },
       { id: 'complementary', label: 'Complementar' },
-    ],
+    ]),
     subject: pilot.subject,
     overview: pilot.overview,
     header: {
       ...pilot.dashboardData.header,
-      eyebrow: 'Painel da disciplina',
-      periodLabel: `${pilot.overview.period} · ${shiftLabel}`,
+      eyebrow: getCompactHeaderEyebrow(),
+      periodLabel: getCompactHeaderPeriodLabel(pilot, shiftLabel, headerCue),
+      status: getCompactHeaderStatus({ pilot, pendingGroups }),
+      support: getCompactHeaderSupport({ pilot, nextAction }),
       cta: {
         ...pilot.dashboardData.header.cta,
+        label: getCompactHeaderCtaLabel(),
         href: '#engenharia-software-detalhes',
       },
     },
     firstFold: {
       ...pilot.dashboardData.firstFold,
+      title: getCompactFirstFoldTitle(),
       hero: {
         ...pilot.dashboardData.firstFold.hero,
         disciplineName: heroSummary.disciplineName,
         status: heroSummary.status,
         statusTone: heroSummary.statusTone,
-        summary: heroSummary.summary,
+        summary: getCompactSummary(heroSummary.summary),
         progressLabel: heroSummary.progressLabel,
         progressValue: heroSummary.progressValue,
         supportLabel: heroSummary.supportLabel,
-        topKpis: kpiItems,
-        nextAction,
+        topKpis: getCompactTopKpis(getKpiItems({ pilot })),
+        nextAction: {
+          ...nextAction,
+          cta: {
+            label: getCompactNextActionCtaLabel(),
+            href: '#engenharia-software-detalhes',
+          },
+          detail: {
+            ...nextAction.detail,
+            title: getCompactNextActionDetailTitle(),
+          },
+        },
         cta: {
-          ...nextAction.cta,
+          label: getCompactNextActionCtaLabel(),
+          href: '#engenharia-software-detalhes',
         },
       },
-      primaryChart: progressChart,
+      primaryChart: {
+        ...progressChart,
+        title: getCompactProgressTitle(),
+        description: getCompactProgressDescription(),
+        buttonLabel: getCompactPrimaryChartButtonLabel(progressChart),
+      },
     },
-    contextGrid: getContextGrid({ pilot, composition, cadence, bottlenecks }),
+    contextGrid: {
+      ...getContextGrid({ pilot, composition, cadence, bottlenecks }),
+      title: getCompactContextTitle(),
+      description: getCompactContextDescriptionValue(),
+      blocks: getCompactContextBlocks(getContextGrid({ pilot, composition, cadence, bottlenecks }).blocks),
+    },
     secondarySections: [
       {
         id: 'pending',
         type: 'pending',
-        title: 'Pendências rebaixadas',
+        title: getCompactPendingSectionTitle(),
+        description: getCompactSecondaryDescription('pending'),
         data: pendingGroups,
       },
       {
         id: 'timeline',
         type: 'timeline',
-        title: 'Linha de evolução',
-        data: timelineEvents,
+        title: getCompactTimelineSectionTitle(),
+        description: getCompactSecondaryDescription('timeline'),
+        data: {
+          ...timelineEvents,
+          description: getCompactTimelineDescription(),
+        },
       },
       {
         id: 'support',
         type: 'support',
-        title: 'Suporte contextual',
+        title: getCompactSupportSectionTitle(),
+        description: getCompactSecondaryDescription('support'),
         data: supportItems,
       },
     ],
@@ -581,7 +922,10 @@ export function getSoftwareEngineeringDashboardViewModel({
       progress: progressChart.detail,
       cadence: cadence.detail,
       bottleneck: bottlenecks.detail,
-      nextAction: nextAction.detail,
+      nextAction: {
+        ...nextAction.detail,
+        title: getCompactNextActionDetailTitle(),
+      },
       timeline: {
         title: timelineEvents.title,
         subtitle: `Período selecionado: ${timelineEvents.periodLabel}.`,
@@ -599,9 +943,9 @@ export function getSoftwareEngineeringDashboardViewModel({
     },
     details: {
       id: 'engenharia-software-detalhes',
-      title: 'Área final de detalhes',
-      description: 'Tudo que aprofunda a disciplina fica aqui.',
-      sections: [
+      title: getCompactDetailsTitle(),
+      description: getCompactDetailsDescriptionValue(pilot),
+      sections: getCompactDetailSections([
         {
           ...DETAILS_SECTION_META.subjects,
           type: 'subjects',
@@ -627,7 +971,7 @@ export function getSoftwareEngineeringDashboardViewModel({
           type: 'exercises',
           data: pilot.exercises,
         },
-      ],
+      ]),
     },
   };
 }
